@@ -1,0 +1,11 @@
+# baudman conpty capture
+# cmd / listing
+# recorded 2026-09-04T19:14:11.7493912-07:00
+# columns: micros_since_start offset length
+30626 0 16
+42930 16 97
+52997 113 82
+# @498760 offset=195 scenario=listing start
+498981 195 5
+513895 200 733
+# eof after 933 bytes in 5 chunks

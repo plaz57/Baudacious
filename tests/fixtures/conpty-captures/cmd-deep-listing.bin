@@ -1,0 +1,1379 @@
+[?9001h[?1004h[?25l[2J[m[HMicrosoft Windows [Version 10.0.26200.9168]]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l
+(c) Microsoft Corporation. All rights reserved.[4;1HC:\dev\Baudman>[?25hdir /s
+[?25l Volume in drive C has no label.
+ Volume Serial Number is 74B0-5B51[8;1H Directory of C:\dev\Baudman[10;1H09/04/2026  07:07 PM    <DIR>          .
+09/04/2026  01:51 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          .claude
+09/04/2026  06:43 PM               612 Baudman.slnx
+09/04/2026  06:42 PM               788 Directory.Build.props
+09/04/2026  02:40 PM    <DIR>          openspec
+09/04/2026  07:10 PM               450 scratch-record.cmd
+09/04/2026  07:12 PM    <DIR>          spike
+09/04/2026  06:42 PM    <DIR>          src
+09/04/2026  06:43 PM    <DIR>          tests
+               3 File(s)          1,850 bytes[22;1H Directory of C:\dev\Baudman\.claude[24;1H09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  07:07 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          commands
+09/04/2026  02:40 PM    <DIR>          skills
+               0 File(s)              0 bytes[30;1H Directory of C:\dev\Baudman\.claude\commands]0;C:\WINDOWS\system32\cmd.exe - dir  /s[?25h
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          opsx
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\.claude\commands\opsx
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             7,165 apply.md
+09/04/2026  02:40 PM            10,782 archive.md
+09/04/2026  02:40 PM             8,001 explore.md
+09/04/2026  02:40 PM             7,827 propose.md
+09/04/2026  02:40 PM             9,491 sync.md
+09/04/2026  02:40 PM             6,065 update.md
+               6 File(s)         49,331 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          openspec-apply-change
+09/04/2026  02:40 PM    <DIR>          openspec-archive-change
+09/04/2026  02:40 PM    <DIR>          openspec-explore
+09/04/2026  02:40 PM    <DIR>          openspec-propose
+09/04/2026  02:40 PM    <DIR>          openspec-sync-specs
+09/04/2026  02:40 PM    <DIR>          openspec-update-change
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-apply-change
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             7,333 SKILL.md
+               1 File(s)          7,333 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-archive-change
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             9,959 SKILL.md
+               1 File(s)          9,959 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-explore
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM            11,969 SKILL.md
+               1 File(s)         11,969 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-propose
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             8,045 SKILL.md
+               1 File(s)          8,045 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-sync-specs
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             9,610 SKILL.md
+               1 File(s)          9,610 bytes
+
+ Directory of C:\dev\Baudman\.claude\skills\openspec-update-change
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM             6,231 SKILL.md
+               1 File(s)          6,231 bytes
+
+ Directory of C:\dev\Baudman\openspec
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  07:07 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          changes
+09/04/2026  02:40 PM             2,135 config.yaml
+09/04/2026  02:40 PM    <DIR>          specs
+               1 File(s)          2,135 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          archive
+09/04/2026  02:51 PM    <DIR>          baudman-v1
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\archive
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1
+
+09/04/2026  02:51 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+09/04/2026  02:40 PM                40 .openspec.yaml
+09/04/2026  02:50 PM            23,709 design.md
+09/04/2026  02:41 PM             6,963 proposal.md
+09/04/2026  02:42 PM    <DIR>          specs
+09/04/2026  07:06 PM            11,372 tasks.md
+               4 File(s)         42,084 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs
+
+09/04/2026  02:42 PM    <DIR>          .
+09/04/2026  02:51 PM    <DIR>          ..
+09/04/2026  02:48 PM    <DIR>          baud-governor
+09/04/2026  02:46 PM    <DIR>          configuration
+09/04/2026  02:44 PM    <DIR>          display-rendering
+09/04/2026  02:46 PM    <DIR>          input-and-local-commands
+09/04/2026  02:43 PM    <DIR>          shell-hosting
+09/04/2026  02:44 PM    <DIR>          terminal-emulation
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\baud-governor
+
+09/04/2026  02:48 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:48 PM             7,468 spec.md
+               1 File(s)          7,468 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\configuration
+
+09/04/2026  02:46 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:46 PM             3,684 spec.md
+               1 File(s)          3,684 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\display-rendering
+
+09/04/2026  02:44 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:44 PM             6,187 spec.md
+               1 File(s)          6,187 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\input-and-local-commands
+
+09/04/2026  02:46 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:46 PM             6,255 spec.md
+               1 File(s)          6,255 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\shell-hosting
+
+09/04/2026  02:43 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:43 PM             5,463 spec.md
+               1 File(s)          5,463 bytes
+
+ Directory of C:\dev\Baudman\openspec\changes\baudman-v1\specs\terminal-emulation
+
+09/04/2026  02:44 PM    <DIR>          .
+09/04/2026  02:42 PM    <DIR>          ..
+09/04/2026  02:44 PM             5,982 spec.md
+               1 File(s)          5,982 bytes
+
+ Directory of C:\dev\Baudman\openspec\specs
+
+09/04/2026  02:40 PM    <DIR>          .
+09/04/2026  02:40 PM    <DIR>          ..
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike
+
+09/04/2026  07:12 PM    <DIR>          .
+09/04/2026  07:07 PM    <DIR>          ..
+09/04/2026  07:09 PM    <DIR>          Baudman.ConPtySpike
+09/04/2026  07:14 PM    <DIR>          captures
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike
+
+09/04/2026  07:09 PM    <DIR>          .
+09/04/2026  07:12 PM    <DIR>          ..
+09/04/2026  06:52 PM             4,131 AutoResponder.cs
+09/04/2026  07:04 PM               271 Baudman.ConPtySpike.csproj
+09/04/2026  07:02 PM    <DIR>          bin
+09/04/2026  07:06 PM             4,223 CaptureRecorder.cs
+09/04/2026  07:04 PM             1,779 ConsoleAttachment.cs
+09/04/2026  06:50 PM             1,187 ConsoleSink.cs
+09/04/2026  06:48 PM               156 Dump.cs
+09/04/2026  07:02 PM    <DIR>          obj
+09/04/2026  07:04 PM             5,158 Program.cs
+09/04/2026  07:12 PM            12,644 Recording.cs
+09/04/2026  06:47 PM             2,959 ShellProfiles.cs
+09/04/2026  06:48 PM               157 Stats.cs
+09/04/2026  06:47 PM             4,050 Vt.cs
+              11 File(s)         36,715 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\bin
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:09 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  07:02 PM    <DIR>          Release
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:00 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Debug\net10.0
+
+09/04/2026  07:00 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               834 Baudman.ConPtySpike.deps.json
+09/04/2026  07:00 PM            22,528 Baudman.ConPtySpike.dll
+09/04/2026  07:00 PM           162,304 Baudman.ConPtySpike.exe
+09/04/2026  07:00 PM            15,960 Baudman.ConPtySpike.pdb
+09/04/2026  06:43 PM               377 Baudman.ConPtySpike.runtimeconfig.json
+09/04/2026  07:00 PM            22,016 Baudman.Pty.dll
+09/04/2026  07:00 PM            19,232 Baudman.Pty.pdb
+               7 File(s)        243,251 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Release
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:12 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Release\net10.0
+
+09/04/2026  07:12 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:07 PM               834 Baudman.ConPtySpike.deps.json
+09/04/2026  07:12 PM            37,888 Baudman.ConPtySpike.dll
+09/04/2026  07:12 PM           162,304 Baudman.ConPtySpike.exe
+09/04/2026  07:12 PM            19,240 Baudman.ConPtySpike.pdb
+09/04/2026  07:02 PM               449 Baudman.ConPtySpike.runtimeconfig.json
+09/04/2026  07:07 PM            23,040 Baudman.Pty.dll
+09/04/2026  07:07 PM            17,552 Baudman.Pty.pdb
+               7 File(s)        261,307 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:09 PM    <DIR>          ..
+09/04/2026  06:43 PM            43,942 Baudman.ConPtySpike.csproj.nuget.dgspec.json
+09/04/2026  06:42 PM             1,302 Baudman.ConPtySpike.csproj.nuget.g.props
+09/04/2026  06:42 PM               150 Baudman.ConPtySpike.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:43 PM            22,092 project.assets.json
+09/04/2026  06:43 PM               217 project.nuget.cache
+09/04/2026  07:02 PM    <DIR>          Release
+               5 File(s)         67,703 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:00 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0
+
+09/04/2026  07:00 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  07:00 PM           162,304 apphost.exe
+09/04/2026  07:00 PM                 0 Baudman..5958944E.Up2Date
+09/04/2026  06:43 PM               990 Baudman.ConPtySpike.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.ConPtySpike.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM               228 Baudman.ConPtySpike.assets.cache
+09/04/2026  07:00 PM               951 Baudman.ConPtySpike.csproj.AssemblyReference.cache
+09/04/2026  06:52 PM                66 Baudman.ConPtySpike.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM             1,674 Baudman.ConPtySpike.csproj.FileListAbsolute.txt
+09/04/2026  07:00 PM            22,528 Baudman.ConPtySpike.dll
+09/04/2026  06:43 PM               838 Baudman.ConPtySpike.GeneratedMSBuildEditorConfig.editorconfig[30;1H
+09/04/2026  06:43 PM                66 Baudman.ConPtySpike.genruntimeconfig.cache
+09/04/2026  06:43 PM               239 Baudman.ConPtySpike.GlobalUsings.g.cs
+09/04/2026  07:00 PM            15,960 Baudman.ConPtySpike.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              14 File(s)        206,110 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:00 PM    <DIR>          ..
+09/04/2026  06:57 PM             9,216 Baudman.ConPtySpike.dll
+               1 File(s)          9,216 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:00 PM    <DIR>          ..
+09/04/2026  07:00 PM             9,216 Baudman.ConPtySpike.dll
+               1 File(s)          9,216 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:12 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0
+
+09/04/2026  07:12 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:02 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  07:12 PM           162,304 apphost.exe
+09/04/2026  07:07 PM                 0 Baudman..5958944E.Up2Date
+09/04/2026  07:02 PM               992 Baudman.ConPtySpike.AssemblyInfo.cs
+09/04/2026  07:02 PM                66 Baudman.ConPtySpike.AssemblyInfoInputs.cache
+09/04/2026  07:02 PM               228 Baudman.ConPtySpike.assets.cache
+09/04/2026  07:07 PM               953 Baudman.ConPtySpike.csproj.AssemblyReference.cache
+09/04/2026  07:06 PM                66 Baudman.ConPtySpike.csproj.CoreCompileInputs.cache
+09/04/2026  07:03 PM             2,152 Baudman.ConPtySpike.csproj.FileListAbsolute.txt
+09/04/2026  07:12 PM            37,888 Baudman.ConPtySpike.dll
+09/04/2026  07:02 PM               838 Baudman.ConPtySpike.GeneratedMSBuildEditorConfig.editorconfig[30;1H
+09/04/2026  07:02 PM                66 Baudman.ConPtySpike.genruntimeconfig.cache
+09/04/2026  07:02 PM               239 Baudman.ConPtySpike.GlobalUsings.g.cs
+09/04/2026  07:12 PM            19,240 Baudman.ConPtySpike.pdb
+09/04/2026  07:02 PM    <DIR>          ref
+09/04/2026  07:02 PM    <DIR>          refint
+              14 File(s)        225,232 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0\ref
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:12 PM    <DIR>          ..
+09/04/2026  07:10 PM            12,800 Baudman.ConPtySpike.dll
+               1 File(s)         12,800 bytes
+
+ Directory of C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0\refint
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:12 PM    <DIR>          ..
+09/04/2026  07:12 PM            12,800 Baudman.ConPtySpike.dll
+               1 File(s)         12,800 bytes
+
+ Directory of C:\dev\Baudman\spike\captures
+
+09/04/2026  07:14 PM    <DIR>          .
+09/04/2026  07:12 PM    <DIR>          ..
+09/04/2026  07:14 PM               936 cmd-colour.bin
+09/04/2026  07:14 PM               275 cmd-colour.timing
+09/04/2026  07:14 PM                 0 cmd-deep-listing.bin
+09/04/2026  07:14 PM                 0 cmd-deep-listing.timing
+09/04/2026  07:13 PM               195 cmd-idle.bin
+09/04/2026  07:13 PM               243 cmd-idle.timing
+09/04/2026  07:14 PM               235 cmd-keystrokes.bin
+09/04/2026  07:14 PM               577 cmd-keystrokes.timing
+09/04/2026  07:14 PM               933 cmd-listing.bin
+09/04/2026  07:14 PM               277 cmd-listing.timing
+09/04/2026  07:14 PM               365 cmd-prompt.bin
+09/04/2026  07:14 PM               534 cmd-prompt.timing
+09/04/2026  07:13 PM             3,807 pwsh-default-altbuffer.bin
+09/04/2026  07:13 PM               639 pwsh-default-altbuffer.timing
+09/04/2026  07:13 PM               902 pwsh-default-colour.bin
+09/04/2026  07:13 PM               314 pwsh-default-colour.timing
+09/04/2026  07:13 PM            78,398 pwsh-default-deep-listing.bin
+09/04/2026  07:13 PM            22,798 pwsh-default-deep-listing.timing
+09/04/2026  07:13 PM               916 pwsh-default-git-status.bin
+09/04/2026  07:13 PM               325 pwsh-default-git-status.timing
+09/04/2026  07:12 PM               150 pwsh-default-idle.bin
+09/04/2026  07:12 PM               241 pwsh-default-idle.timing
+09/04/2026  07:12 PM             2,273 pwsh-default-keystrokes.bin
+09/04/2026  07:12 PM               926 pwsh-default-keystrokes.timing
+09/04/2026  07:13 PM               885 pwsh-default-listing.bin
+09/04/2026  07:13 PM               316 pwsh-default-listing.timing
+09/04/2026  07:12 PM               360 pwsh-default-prompt.bin
+09/04/2026  07:12 PM               534 pwsh-default-prompt.timing
+09/04/2026  07:13 PM             5,480 pwsh-tamed-altbuffer.bin
+09/04/2026  07:13 PM               818 pwsh-tamed-altbuffer.timing
+09/04/2026  07:13 PM             1,952 pwsh-tamed-colour.bin
+09/04/2026  07:13 PM               491 pwsh-tamed-colour.timing
+09/04/2026  07:13 PM            80,662 pwsh-tamed-deep-listing.bin
+09/04/2026  07:13 PM            23,428 pwsh-tamed-deep-listing.timing
+09/04/2026  07:13 PM             1,889 pwsh-tamed-git-status.bin
+09/04/2026  07:13 PM               499 pwsh-tamed-git-status.timing
+09/04/2026  07:13 PM             1,214 pwsh-tamed-idle.bin
+09/04/2026  07:13 PM               407 pwsh-tamed-idle.timing
+09/04/2026  07:13 PM             2,561 pwsh-tamed-keystrokes.bin
+09/04/2026  07:13 PM             1,112 pwsh-tamed-keystrokes.timing
+09/04/2026  07:13 PM             2,389 pwsh-tamed-listing.bin
+09/04/2026  07:13 PM               479 pwsh-tamed-listing.timing
+09/04/2026  07:13 PM             1,746 pwsh-tamed-prompt.bin
+09/04/2026  07:13 PM               714 pwsh-tamed-prompt.timing
+09/04/2026  07:12 PM                 0 record.log
+              45 File(s)        244,195 bytes
+
+ Directory of C:\dev\Baudman\src
+
+09/04/2026  06:42 PM    <DIR>          .
+09/04/2026  07:07 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Baudman.App
+09/04/2026  06:43 PM    <DIR>          Baudman.Core
+09/04/2026  07:00 PM    <DIR>          Baudman.Pty
+09/04/2026  06:43 PM    <DIR>          Baudman.Render
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:42 PM    <DIR>          ..
+09/04/2026  06:43 PM               362 Baudman.App.csproj
+09/04/2026  06:43 PM    <DIR>          bin
+09/04/2026  06:43 PM    <DIR>          obj
+09/04/2026  06:42 PM                40 Program.cs
+               2 File(s)            402 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\bin
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\bin\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             1,590 Baudman.App.deps.json
+09/04/2026  06:43 PM             4,608 Baudman.App.dll
+09/04/2026  06:43 PM           162,304 Baudman.App.exe
+09/04/2026  06:43 PM            10,940 Baudman.App.pdb
+09/04/2026  06:43 PM               377 Baudman.App.runtimeconfig.json
+09/04/2026  06:43 PM             3,584 Baudman.Core.dll
+09/04/2026  06:43 PM            10,572 Baudman.Core.pdb
+09/04/2026  06:43 PM             3,584 Baudman.Pty.dll
+09/04/2026  06:43 PM            10,568 Baudman.Pty.pdb
+09/04/2026  06:43 PM             3,584 Baudman.Render.dll
+09/04/2026  06:43 PM            10,624 Baudman.Render.pdb
+              11 File(s)        222,335 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\obj
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM            87,991 Baudman.App.csproj.nuget.dgspec.json
+09/04/2026  06:42 PM             1,302 Baudman.App.csproj.nuget.g.props
+09/04/2026  06:42 PM               150 Baudman.App.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:43 PM            23,482 project.assets.json
+09/04/2026  06:43 PM               199 project.nuget.cache
+               5 File(s)        113,124 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM           162,304 apphost.exe
+09/04/2026  06:43 PM                 0 Baudman..CD9B1B7F.Up2Date
+09/04/2026  06:43 PM               966 Baudman.App.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.App.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM               228 Baudman.App.assets.cache
+09/04/2026  06:43 PM             1,060 Baudman.App.csproj.AssemblyReference.cache
+09/04/2026  06:43 PM                66 Baudman.App.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM             1,646 Baudman.App.csproj.FileListAbsolute.txt
+09/04/2026  06:43 PM             4,608 Baudman.App.dll
+09/04/2026  06:43 PM               820 Baudman.App.GeneratedMSBuildEditorConfig.editorconfig        
+09/04/2026  06:43 PM                66 Baudman.App.genruntimeconfig.cache
+09/04/2026  06:43 PM               239 Baudman.App.GlobalUsings.g.cs
+09/04/2026  06:43 PM            10,940 Baudman.App.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              14 File(s)        183,209 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,120 Baudman.App.dll
+               1 File(s)          5,120 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,120 Baudman.App.dll
+               1 File(s)          5,120 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:42 PM    <DIR>          ..
+09/04/2026  06:43 PM                46 Baudman.Core.csproj
+09/04/2026  06:43 PM    <DIR>          bin
+09/04/2026  06:43 PM    <DIR>          obj
+               1 File(s)             46 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\bin
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\bin\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               430 Baudman.Core.deps.json
+09/04/2026  06:43 PM             3,584 Baudman.Core.dll
+09/04/2026  06:43 PM            10,572 Baudman.Core.pdb
+               3 File(s)         14,586 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\obj
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:42 PM            21,903 Baudman.Core.csproj.nuget.dgspec.json
+09/04/2026  06:42 PM             1,302 Baudman.Core.csproj.nuget.g.props
+09/04/2026  06:42 PM               150 Baudman.Core.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:42 PM            21,340 project.assets.json
+09/04/2026  06:42 PM               201 project.nuget.cache
+               5 File(s)         44,896 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM               969 Baudman.Core.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.Core.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM               228 Baudman.Core.assets.cache
+09/04/2026  06:43 PM                66 Baudman.Core.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM               863 Baudman.Core.csproj.FileListAbsolute.txt
+09/04/2026  06:43 PM             3,584 Baudman.Core.dll
+09/04/2026  06:43 PM               822 Baudman.Core.GeneratedMSBuildEditorConfig.editorconfig       
+09/04/2026  06:43 PM               239 Baudman.Core.GlobalUsings.g.cs
+09/04/2026  06:43 PM            10,572 Baudman.Core.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              10 File(s)         17,609 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             4,608 Baudman.Core.dll
+               1 File(s)          4,608 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             4,608 Baudman.Core.dll
+               1 File(s)          4,608 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty
+
+09/04/2026  07:00 PM    <DIR>          .
+09/04/2026  06:42 PM    <DIR>          ..
+09/04/2026  06:44 PM               132 Baudman.Pty.csproj
+09/04/2026  07:02 PM    <DIR>          bin
+09/04/2026  06:55 PM    <DIR>          Interop
+09/04/2026  06:45 PM             1,042 IPtyOutputSink.cs
+09/04/2026  07:02 PM    <DIR>          obj
+09/04/2026  07:02 PM            17,850 PtySession.cs
+09/04/2026  07:07 PM             1,157 PtyStartInfo.cs
+               4 File(s)         20,181 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\bin
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:00 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  07:02 PM    <DIR>          Release
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:00 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\bin\Debug\net10.0
+
+09/04/2026  07:00 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:46 PM               427 Baudman.Pty.deps.json
+09/04/2026  07:00 PM            22,016 Baudman.Pty.dll
+09/04/2026  07:00 PM            19,232 Baudman.Pty.pdb
+               3 File(s)         41,675 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\bin\Release
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:07 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\bin\Release\net10.0
+
+09/04/2026  07:07 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:02 PM               427 Baudman.Pty.deps.json
+09/04/2026  07:07 PM            23,040 Baudman.Pty.dll
+09/04/2026  07:07 PM            17,552 Baudman.Pty.pdb
+               3 File(s)         41,019 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\Interop
+
+09/04/2026  06:55 PM    <DIR>          .
+09/04/2026  07:00 PM    <DIR>          ..
+09/04/2026  06:59 PM             6,150 NativeMethods.cs
+09/04/2026  06:44 PM             2,473 Structs.cs
+               2 File(s)          8,623 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:00 PM    <DIR>          ..
+09/04/2026  06:42 PM            21,893 Baudman.Pty.csproj.nuget.dgspec.json
+09/04/2026  06:42 PM             1,302 Baudman.Pty.csproj.nuget.g.props
+09/04/2026  06:42 PM               150 Baudman.Pty.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:42 PM            21,334 project.assets.json
+09/04/2026  06:42 PM               199 project.nuget.cache
+09/04/2026  07:02 PM    <DIR>          Release
+               5 File(s)         44,878 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  06:46 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0
+
+09/04/2026  06:46 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM               966 Baudman.Pty.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.Pty.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM               228 Baudman.Pty.assets.cache
+09/04/2026  06:46 PM                66 Baudman.Pty.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM               841 Baudman.Pty.csproj.FileListAbsolute.txt
+09/04/2026  07:00 PM            22,016 Baudman.Pty.dll
+09/04/2026  06:43 PM               820 Baudman.Pty.GeneratedMSBuildEditorConfig.editorconfig        
+09/04/2026  06:43 PM               239 Baudman.Pty.GlobalUsings.g.cs
+09/04/2026  07:00 PM            19,232 Baudman.Pty.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              10 File(s)         44,674 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:46 PM    <DIR>          ..
+09/04/2026  06:59 PM             8,704 Baudman.Pty.dll
+               1 File(s)          8,704 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:46 PM    <DIR>          ..
+09/04/2026  07:00 PM             8,704 Baudman.Pty.dll
+               1 File(s)          8,704 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Release
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:06 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0
+
+09/04/2026  07:06 PM    <DIR>          .
+09/04/2026  07:02 PM    <DIR>          ..
+09/04/2026  07:02 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  07:03 PM           161,792 apphost.exe
+09/04/2026  07:02 PM               968 Baudman.Pty.AssemblyInfo.cs
+09/04/2026  07:02 PM                66 Baudman.Pty.AssemblyInfoInputs.cache
+09/04/2026  07:02 PM               228 Baudman.Pty.assets.cache
+09/04/2026  07:02 PM                66 Baudman.Pty.csproj.CoreCompileInputs.cache
+09/04/2026  07:06 PM             1,109 Baudman.Pty.csproj.FileListAbsolute.txt
+09/04/2026  07:07 PM            23,040 Baudman.Pty.dll
+09/04/2026  07:02 PM               820 Baudman.Pty.GeneratedMSBuildEditorConfig.editorconfig        
+09/04/2026  07:02 PM               239 Baudman.Pty.GlobalUsings.g.cs
+09/04/2026  07:07 PM            17,552 Baudman.Pty.pdb
+09/04/2026  07:02 PM    <DIR>          ref
+09/04/2026  07:02 PM    <DIR>          refint
+              11 File(s)        206,080 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0\ref
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:06 PM    <DIR>          ..
+09/04/2026  07:07 PM             8,704 Baudman.Pty.dll
+               1 File(s)          8,704 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0\refint
+
+09/04/2026  07:02 PM    <DIR>          .
+09/04/2026  07:06 PM    <DIR>          ..
+09/04/2026  07:07 PM             8,704 Baudman.Pty.dll
+               1 File(s)          8,704 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:42 PM    <DIR>          ..
+09/04/2026  06:43 PM               147 Baudman.Render.csproj
+09/04/2026  06:43 PM    <DIR>          bin
+09/04/2026  06:43 PM    <DIR>          obj
+               1 File(s)            147 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\bin
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\bin\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             3,584 Baudman.Core.dll
+09/04/2026  06:43 PM            10,572 Baudman.Core.pdb
+09/04/2026  06:43 PM               823 Baudman.Render.deps.json
+09/04/2026  06:43 PM             3,584 Baudman.Render.dll
+09/04/2026  06:43 PM            10,624 Baudman.Render.pdb
+               5 File(s)         29,187 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\obj
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM            43,894 Baudman.Render.csproj.nuget.dgspec.json
+09/04/2026  06:42 PM             1,302 Baudman.Render.csproj.nuget.g.props
+09/04/2026  06:42 PM               150 Baudman.Render.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:43 PM            22,055 project.assets.json
+09/04/2026  06:43 PM               205 project.nuget.cache
+               5 File(s)         67,606 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM                 0 Baudman..83FD1078.Up2Date
+09/04/2026  06:43 PM               975 Baudman.Render.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.Render.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM               228 Baudman.Render.assets.cache
+09/04/2026  06:43 PM               356 Baudman.Render.csproj.AssemblyReference.cache
+09/04/2026  06:43 PM                66 Baudman.Render.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM             1,225 Baudman.Render.csproj.FileListAbsolute.txt
+09/04/2026  06:43 PM             3,584 Baudman.Render.dll
+09/04/2026  06:43 PM               826 Baudman.Render.GeneratedMSBuildEditorConfig.editorconfig     
+09/04/2026  06:43 PM               239 Baudman.Render.GlobalUsings.g.cs
+09/04/2026  06:43 PM            10,624 Baudman.Render.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              12 File(s)         18,389 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             4,608 Baudman.Render.dll
+               1 File(s)          4,608 bytes
+
+ Directory of C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             4,608 Baudman.Render.dll
+               1 File(s)          4,608 bytes
+
+ Directory of C:\dev\Baudman\tests
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  07:07 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Baudman.Core.Tests
+09/04/2026  06:43 PM    <DIR>          Baudman.Pty.Tests
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               746 Baudman.Core.Tests.csproj
+09/04/2026  06:43 PM    <DIR>          bin
+09/04/2026  06:43 PM    <DIR>          obj
+09/04/2026  06:43 PM               119 UnitTest1.cs
+               2 File(s)            865 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               618 .msCoverageSourceRootsMapping_Baudman.Core.Tests
+09/04/2026  06:43 PM             3,584 Baudman.Core.dll
+09/04/2026  06:43 PM            10,572 Baudman.Core.pdb
+09/04/2026  06:43 PM            16,847 Baudman.Core.Tests.deps.json
+09/04/2026  06:43 PM             4,608 Baudman.Core.Tests.dll
+09/04/2026  06:43 PM            11,956 Baudman.Core.Tests.pdb
+09/04/2026  06:43 PM               425 Baudman.Core.Tests.runtimeconfig.json
+09/04/2026  06:43 PM               618 CoverletSourceRootsMapping_Baudman.Core.Tests
+09/04/2026  06:43 PM    <DIR>          cs
+09/04/2026  06:43 PM    <DIR>          de
+09/04/2026  06:43 PM    <DIR>          es
+09/04/2026  06:43 PM    <DIR>          fr
+09/04/2026  06:43 PM    <DIR>          it
+09/04/2026  06:43 PM    <DIR>          ja
+09/04/2026  06:43 PM    <DIR>          ko
+06/02/2025  05:00 AM           137,776 Microsoft.TestPlatform.CommunicationUtilities.dll
+06/02/2025  05:00 AM            98,336 Microsoft.TestPlatform.CoreUtilities.dll
+06/02/2025  05:00 AM           316,960 Microsoft.TestPlatform.CrossPlatEngine.dll
+06/02/2025  05:00 AM            51,232 Microsoft.TestPlatform.PlatformAbstractions.dll
+06/02/2025  05:00 AM            67,104 Microsoft.TestPlatform.Utilities.dll
+02/26/2025  09:16 AM            17,464 Microsoft.VisualStudio.CodeCoverage.Shim.dll
+06/02/2025  05:00 AM           248,352 Microsoft.VisualStudio.TestPlatform.Common.dll
+06/02/2025  05:00 AM           334,392 Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
+03/08/2023  12:09 AM           712,464 Newtonsoft.Json.dll
+09/04/2026  06:43 PM    <DIR>          pl
+09/04/2026  06:43 PM    <DIR>          pt-BR
+09/04/2026  06:43 PM    <DIR>          ru
+06/02/2025  05:00 AM            49,696 testhost.dll
+06/02/2025  05:00 AM           150,576 testhost.exe
+09/04/2026  06:43 PM    <DIR>          tr
+08/25/2018  12:54 PM            21,928 xunit.abstractions.dll
+01/08/2025  10:29 AM           187,088 xunit.assert.dll
+01/08/2025  10:29 AM            70,352 xunit.core.dll
+01/08/2025  10:30 AM           279,760 xunit.execution.dotnet.dll
+08/15/2025  07:35 PM         1,251,840 xunit.runner.visualstudio.testadapter.dll
+09/04/2026  06:43 PM    <DIR>          zh-Hans
+09/04/2026  06:43 PM    <DIR>          zh-Hant
+              24 File(s)      4,044,548 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\cs
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,440 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,520 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,624 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         98,568 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\de
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,064 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,136 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,128 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\es
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,032 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,072 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\fr
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,080 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\it
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,040 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ja
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            17,440 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            22,088 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,552 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,632 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        102,640 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ko
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,936 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,560 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,608 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\pl
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,936 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,536 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,136 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,584 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\pt-BR
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         99,560 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ru
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            17,440 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            17,464 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            23,072 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            23,096 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            26,168 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        107,240 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\tr
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,024 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,536 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,608 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         99,048 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\zh-Hans
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            20,008 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,072 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         96,464 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\zh-Hant
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            20,552 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,024 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         97,040 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\obj
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM            44,494 Baudman.Core.Tests.csproj.nuget.dgspec.json
+09/04/2026  06:43 PM             2,790 Baudman.Core.Tests.csproj.nuget.g.props
+09/04/2026  06:43 PM             1,415 Baudman.Core.Tests.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:43 PM            67,697 project.assets.json
+09/04/2026  06:43 PM             1,820 project.nuget.cache
+               5 File(s)        118,216 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM                 0 Baudman..A79D234F.Up2Date
+09/04/2026  06:43 PM               987 Baudman.Core.Tests.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.Core.Tests.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM            31,402 Baudman.Core.Tests.assets.cache
+09/04/2026  06:43 PM             8,572 Baudman.Core.Tests.csproj.AssemblyReference.cache
+09/04/2026  06:43 PM                66 Baudman.Core.Tests.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM            11,025 Baudman.Core.Tests.csproj.FileListAbsolute.txt
+09/04/2026  06:43 PM             4,608 Baudman.Core.Tests.dll
+09/04/2026  06:43 PM               836 Baudman.Core.Tests.GeneratedMSBuildEditorConfig.editorconfig [30;1H
+09/04/2026  06:43 PM                66 Baudman.Core.Tests.genruntimeconfig.cache
+09/04/2026  06:43 PM               260 Baudman.Core.Tests.GlobalUsings.g.cs
+09/04/2026  06:43 PM            11,956 Baudman.Core.Tests.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              13 File(s)         70,044 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,632 Baudman.Core.Tests.dll
+               1 File(s)          5,632 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,632 Baudman.Core.Tests.dll
+               1 File(s)          5,632 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               744 Baudman.Pty.Tests.csproj
+09/04/2026  06:43 PM    <DIR>          bin
+09/04/2026  06:43 PM    <DIR>          obj
+09/04/2026  06:43 PM               118 UnitTest1.cs
+               2 File(s)            862 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          Debug
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               610 .msCoverageSourceRootsMapping_Baudman.Pty.Tests
+09/04/2026  06:43 PM             3,584 Baudman.Pty.dll
+09/04/2026  06:43 PM            10,568 Baudman.Pty.pdb
+09/04/2026  06:43 PM            16,840 Baudman.Pty.Tests.deps.json
+09/04/2026  06:43 PM             4,608 Baudman.Pty.Tests.dll
+09/04/2026  06:43 PM            11,952 Baudman.Pty.Tests.pdb
+09/04/2026  06:43 PM               425 Baudman.Pty.Tests.runtimeconfig.json
+09/04/2026  06:43 PM               610 CoverletSourceRootsMapping_Baudman.Pty.Tests
+09/04/2026  06:43 PM    <DIR>          cs
+09/04/2026  06:43 PM    <DIR>          de
+09/04/2026  06:43 PM    <DIR>          es
+09/04/2026  06:43 PM    <DIR>          fr
+09/04/2026  06:43 PM    <DIR>          it
+09/04/2026  06:43 PM    <DIR>          ja
+09/04/2026  06:43 PM    <DIR>          ko
+06/02/2025  05:00 AM           137,776 Microsoft.TestPlatform.CommunicationUtilities.dll
+06/02/2025  05:00 AM            98,336 Microsoft.TestPlatform.CoreUtilities.dll
+06/02/2025  05:00 AM           316,960 Microsoft.TestPlatform.CrossPlatEngine.dll
+06/02/2025  05:00 AM            51,232 Microsoft.TestPlatform.PlatformAbstractions.dll
+06/02/2025  05:00 AM            67,104 Microsoft.TestPlatform.Utilities.dll
+02/26/2025  09:16 AM            17,464 Microsoft.VisualStudio.CodeCoverage.Shim.dll
+06/02/2025  05:00 AM           248,352 Microsoft.VisualStudio.TestPlatform.Common.dll
+06/02/2025  05:00 AM           334,392 Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
+03/08/2023  12:09 AM           712,464 Newtonsoft.Json.dll
+09/04/2026  06:43 PM    <DIR>          pl
+09/04/2026  06:43 PM    <DIR>          pt-BR
+09/04/2026  06:43 PM    <DIR>          ru
+06/02/2025  05:00 AM            49,696 testhost.dll
+06/02/2025  05:00 AM           150,576 testhost.exe
+09/04/2026  06:43 PM    <DIR>          tr
+08/25/2018  12:54 PM            21,928 xunit.abstractions.dll
+01/08/2025  10:29 AM           187,088 xunit.assert.dll
+01/08/2025  10:29 AM            70,352 xunit.core.dll
+01/08/2025  10:30 AM           279,760 xunit.execution.dotnet.dll
+08/15/2025  07:35 PM         1,251,840 xunit.runner.visualstudio.testadapter.dll
+09/04/2026  06:43 PM    <DIR>          zh-Hans
+09/04/2026  06:43 PM    <DIR>          zh-Hant
+              24 File(s)      4,044,517 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\cs
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,440 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,520 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,624 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         98,568 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\de
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,064 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,136 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,128 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\es
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,032 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,072 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\fr
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,080 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\it
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,040 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ja
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            17,440 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            22,088 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,552 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,632 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        102,640 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ko
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,944 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,936 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,560 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,608 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\pl
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,936 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,536 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,136 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        100,584 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\pt-BR
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            21,048 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            24,120 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         99,560 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ru
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            17,440 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            17,464 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            23,072 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            23,096 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            26,168 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)        107,240 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\tr
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            21,024 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,536 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,608 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         99,048 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\zh-Hans
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,928 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            20,008 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,040 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,072 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         96,464 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\zh-Hant
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+06/02/2025  05:00 AM            16,416 Microsoft.TestPlatform.CommunicationUtilities.resources.dll  
+06/02/2025  05:00 AM            16,952 Microsoft.TestPlatform.CoreUtilities.resources.dll
+06/02/2025  05:00 AM            20,552 Microsoft.TestPlatform.CrossPlatEngine.resources.dll
+06/02/2025  05:00 AM            20,024 Microsoft.VisualStudio.TestPlatform.Common.resources.dll     
+06/02/2025  05:00 AM            23,096 Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll[30;1H
+               5 File(s)         97,040 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\obj
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM            44,472 Baudman.Pty.Tests.csproj.nuget.dgspec.json
+09/04/2026  06:43 PM             2,790 Baudman.Pty.Tests.csproj.nuget.g.props
+09/04/2026  06:43 PM             1,415 Baudman.Pty.Tests.csproj.nuget.g.targets
+09/04/2026  06:43 PM    <DIR>          Debug
+09/04/2026  06:43 PM            67,678 project.assets.json
+09/04/2026  06:43 PM             1,818 project.nuget.cache
+               5 File(s)        118,173 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM    <DIR>          net10.0
+               0 File(s)              0 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM               200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+09/04/2026  06:43 PM                 0 Baudman..9471841C.Up2Date
+09/04/2026  06:43 PM               984 Baudman.Pty.Tests.AssemblyInfo.cs
+09/04/2026  06:43 PM                66 Baudman.Pty.Tests.AssemblyInfoInputs.cache
+09/04/2026  06:43 PM            31,402 Baudman.Pty.Tests.assets.cache
+09/04/2026  06:43 PM             8,568 Baudman.Pty.Tests.csproj.AssemblyReference.cache
+09/04/2026  06:43 PM                66 Baudman.Pty.Tests.csproj.CoreCompileInputs.cache
+09/04/2026  06:43 PM            10,907 Baudman.Pty.Tests.csproj.FileListAbsolute.txt
+09/04/2026  06:43 PM             4,608 Baudman.Pty.Tests.dll
+09/04/2026  06:43 PM               834 Baudman.Pty.Tests.GeneratedMSBuildEditorConfig.editorconfig  
+09/04/2026  06:43 PM                66 Baudman.Pty.Tests.genruntimeconfig.cache
+09/04/2026  06:43 PM               260 Baudman.Pty.Tests.GlobalUsings.g.cs
+09/04/2026  06:43 PM            11,952 Baudman.Pty.Tests.pdb
+09/04/2026  06:43 PM    <DIR>          ref
+09/04/2026  06:43 PM    <DIR>          refint
+              13 File(s)         69,913 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0\ref
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,632 Baudman.Pty.Tests.dll
+               1 File(s)          5,632 bytes
+
+ Directory of C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0\refint
+
+09/04/2026  06:43 PM    <DIR>          .
+09/04/2026  06:43 PM    <DIR>          ..
+09/04/2026  06:43 PM             5,632 Baudman.Pty.Tests.dll
+               1 File(s)          5,632 bytes
+
+     Total Files Listed:
+             477 File(s)     13,788,095 bytes
+             386 Dir(s)  140,555,132,928 bytes free
+]0;C:\WINDOWS\system32\cmd.exe
+C:\dev\Baudman>

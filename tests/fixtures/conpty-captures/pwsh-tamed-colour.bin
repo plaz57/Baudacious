@@ -1,0 +1,17 @@
+[?9001h[?1004h[?25l[2J[m[HPS C:\dev\Baudman>[1C]0;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.5.0_x64__8wekyb3d8bbwe\pwsh.exe[?25h[?25l[93mSet-PSReadLineOption [90m-PredictionSource [37mNone[K[m
+                                                                                                                                                                                                        
+[9X[2;1H[?25hPS C:\dev\Baudman> [?25l[93mS[?25h[m[?25l[2;18H> [93mSet-PSReadLineOption [90m-Colors [37m@{ Default[90m=[36m'$([char]27)[0m'[37m; Command[90m=[36m'$([char]27)[0m'[37m; Parameter[90m=[36m'$([char]27)[0m'[37m; Operator[90m=[36m'$([char]27)[0m'[37m; Variable[90m=[36m'$([char]27)[0m'[37m; String[90m=[36m'$([char]27)[0m'[37m; Number[90m=[36m'$([char]27)[0m'[37m; Member[90m=[36m'$([char]27)[0m'[37m; Type[90m=[36m'$([char]27)[0m'[37m; Comment[90m=[36m'$([char]27)[0m' [37m}
+[?25h[mSet-PSReadLineOption: '$([char]27)[0m' is not a valid color value.  It must be a ConsoleColor, ANSI escape sequence, or RGB value with optional leading '#'.
+PS C:\dev\Baudman> [?25l[8;18H> [92mfunction [37mprompt { [36m'PS> ' [37m}[m
+PS> [?25h[?25l[93mGet-ChildItem [37m| [93mFormat-Table
+[?25h[m
+[?25l    Directory: C:\dev\Baudman[13;1HMode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                .claude
+d----            9/4/2026  2:40 PM                openspec
+d----            9/4/2026  7:12 PM                spike
+d----            9/4/2026  6:42 PM                src
+d----            9/4/2026  6:43 PM                tests
+[?25h[?25l-a---            9/4/2026  6:43 PM            612 Baudman.slnx
+-a---            9/4/2026  6:42 PM            788 Directory.Build.props
+-a---            9/4/2026  7:10 PM            450 scratch-record.cmd[24;1HPS> [?25h

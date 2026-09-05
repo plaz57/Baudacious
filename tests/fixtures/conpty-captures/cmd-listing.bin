@@ -1,0 +1,15 @@
+[?9001h[?1004h[?25l[2J[m[HMicrosoft Windows [Version 10.0.26200.9168]]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l
+(c) Microsoft Corporation. All rights reserved.[4;1HC:\dev\Baudman>[?25hdir
+[?25l Volume in drive C has no label.
+ Volume Serial Number is 74B0-5B51[8;1H Directory of C:\dev\Baudman[10;1H09/04/2026  07:07 PM    <DIR>          .
+09/04/2026  01:51 PM    <DIR>          ..
+09/04/2026  02:40 PM    <DIR>          .claude
+09/04/2026  06:43 PM               612 Baudman.slnx
+09/04/2026  06:42 PM               788 Directory.Build.props
+09/04/2026  02:40 PM    <DIR>          openspec
+09/04/2026  07:10 PM               450 scratch-record.cmd
+09/04/2026  07:12 PM    <DIR>          spike
+09/04/2026  06:42 PM    <DIR>          src
+09/04/2026  06:43 PM    <DIR>          tests
+               3 File(s)          1,850 bytes
+               7 Dir(s)  140,557,287,424 bytes free[23;1HC:\dev\Baudman>[?25h

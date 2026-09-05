@@ -1,0 +1,9 @@
+# baudman conpty capture
+# cmd / idle
+# recorded 2026-09-04T19:13:51.3423988-07:00
+# columns: micros_since_start offset length
+30300 0 16
+42441 16 97
+52343 113 82
+# @501179 offset=195 scenario=idle start
+# eof after 195 bytes in 3 chunks

@@ -1,0 +1,13 @@
+# baudman conpty capture
+# cmd / git-status
+# recorded 2026-09-04T19:14:14.7323321-07:00
+# columns: micros_since_start offset length
+31694 0 16
+44200 16 97
+54677 113 82
+# @504501 offset=195 scenario=git-status start
+506323 195 174
+520333 369 208
+563950 577 1
+581147 578 488
+# eof after 1066 bytes in 7 chunks

@@ -1,0 +1,1371 @@
+[?9001h[?1004h[?25l[2J[m[HPS C:\dev\Baudman>[1C]0;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.5.0_x64__8wekyb3d8bbwe\pwsh.exe[?25h[?25l[93mSet-PSReadLineOption [90m-PredictionSource [37mNone[K[m
+                                                                                                                                                                                                        
+[9X[2;1H[?25hPS C:\dev\Baudman> [?25l[93mS[?25h[m[?25l[2;18H> [93mSet-PSReadLineOption [90m-Colors [37m@{ Default[90m=[36m'$([char]27)[0m'[37m; Command[90m=[36m'$([char]27)[0m'[37m; Parameter[90m=[36m'$([char]27)[0m'[37m; Operator[90m=[36m'$([char]27)[0m'[37m; Variable[90m=[36m'$([char]27)[0m'[37m; String[90m=[36m'$([char]27)[0m'[37m; Number[90m=[36m'$([char]27)[0m'[37m; Member[90m=[36m'$([char]27)[0m'[37m; Type[90m=[36m'$([char]27)[0m'[37m; Comment[90m=[36m'$([char]27)[0m' [37m}
+[?25h[mSet-PSReadLineOption: '$([char]27)[0m' is not a valid color value.  It must be a ConsoleColor, ANSI escape sequence, or RGB value with optional leading '#'.
+PS C:\dev\Baudman> [?25l[8;18H> [92mfunction [37mprompt { [36m'PS> ' [37m}[m
+PS> [?25h[?25l[93mGet-ChildItem [90m-Recurse -Force -ErrorAction [37mSilentlyContinue
+[?25h[m
+[?25l    Directory: C:\dev\Baudman[13;1HMode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                .claude
+d----            9/4/2026  2:40 PM                openspec
+d----            9/4/2026  7:12 PM                spike
+d----            9/4/2026  6:42 PM                src
+d----            9/4/2026  6:43 PM                tests
+-a---            9/4/2026  6:43 PM            612 Baudman.slnx
+-a---            9/4/2026  6:42 PM            788 Directory.Build.props
+-a---            9/4/2026  7:10 PM            450 scratch-record.cmd[24;1H    Directory: C:\dev\Baudman\.claude[26;1HMode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                commands
+d----            9/4/2026  2:40 PM                skills
+[?25h
+    Directory: C:\dev\Baudman\.claude\commands
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                opsx
+
+    Directory: C:\dev\Baudman\.claude\commands\opsx
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           7165 apply.md
+-a---            9/4/2026  2:40 PM          10782 archive.md
+-a---            9/4/2026  2:40 PM           8001 explore.md
+-a---            9/4/2026  2:40 PM           7827 propose.md
+-a---            9/4/2026  2:40 PM           9491 sync.md
+-a---            9/4/2026  2:40 PM           6065 update.md
+
+    Directory: C:\dev\Baudman\.claude\skills
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                openspec-apply-change
+d----            9/4/2026  2:40 PM                openspec-archive-change
+d----            9/4/2026  2:40 PM                openspec-explore
+d----            9/4/2026  2:40 PM                openspec-propose
+d----            9/4/2026  2:40 PM                openspec-sync-specs
+d----            9/4/2026  2:40 PM                openspec-update-change
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-apply-change
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           7333 SKILL.md
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-archive-change
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           9959 SKILL.md
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-explore
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM          11969 SKILL.md
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-propose
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           8045 SKILL.md
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-sync-specs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           9610 SKILL.md
+
+    Directory: C:\dev\Baudman\.claude\skills\openspec-update-change
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:40 PM           6231 SKILL.md
+
+    Directory: C:\dev\Baudman\openspec
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                changes
+d----            9/4/2026  2:40 PM                specs
+-a---            9/4/2026  2:40 PM           2135 config.yaml
+
+    Directory: C:\dev\Baudman\openspec\changes
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                archive
+d----            9/4/2026  2:51 PM                baudman-v1
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:42 PM                specs
+-a---            9/4/2026  2:40 PM             40 .openspec.yaml
+-a---            9/4/2026  2:50 PM          23709 design.md
+-a---            9/4/2026  2:41 PM           6963 proposal.md
+-a---            9/4/2026  7:06 PM          11372 tasks.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:48 PM                baud-governor
+d----            9/4/2026  2:46 PM                configuration
+d----            9/4/2026  2:44 PM                display-rendering
+d----            9/4/2026  2:46 PM                input-and-local-commands
+d----            9/4/2026  2:43 PM                shell-hosting
+d----            9/4/2026  2:44 PM                terminal-emulation
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\baud-governor
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:48 PM           7468 spec.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\configuration
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:46 PM           3684 spec.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\display-rendering
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:44 PM           6187 spec.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\input-and-local-commands
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:46 PM           6255 spec.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\shell-hosting
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:43 PM           5463 spec.md
+
+    Directory: C:\dev\Baudman\openspec\changes\baudman-v1\specs\terminal-emulation
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  2:44 PM           5982 spec.md
+
+    Directory: C:\dev\Baudman\spike
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:09 PM                Baudman.ConPtySpike
+d----            9/4/2026  7:13 PM                captures
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:02 PM                bin
+d----            9/4/2026  7:02 PM                obj
+-a---            9/4/2026  6:52 PM           4131 AutoResponder.cs
+-a---            9/4/2026  7:04 PM            271 Baudman.ConPtySpike.csproj
+-a---            9/4/2026  7:06 PM           4223 CaptureRecorder.cs
+-a---            9/4/2026  7:04 PM           1779 ConsoleAttachment.cs
+-a---            9/4/2026  6:50 PM           1187 ConsoleSink.cs
+-a---            9/4/2026  6:48 PM            156 Dump.cs
+-a---            9/4/2026  7:04 PM           5158 Program.cs
+-a---            9/4/2026  7:12 PM          12644 Recording.cs
+-a---            9/4/2026  6:47 PM           2959 ShellProfiles.cs
+-a---            9/4/2026  6:48 PM            157 Stats.cs
+-a---            9/4/2026  6:47 PM           4050 Vt.cs
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+d----            9/4/2026  7:02 PM                Release
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:00 PM                net10.0
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM            834 Baudman.ConPtySpike.deps.json
+-a---            9/4/2026  7:00 PM          22528 Baudman.ConPtySpike.dll
+-a---            9/4/2026  7:00 PM         162304 Baudman.ConPtySpike.exe
+-a---            9/4/2026  7:00 PM          15960 Baudman.ConPtySpike.pdb
+-a---            9/4/2026  6:43 PM            377 Baudman.ConPtySpike.runtimeconfig.json
+-a---            9/4/2026  7:00 PM          22016 Baudman.Pty.dll
+-a---            9/4/2026  7:00 PM          19232 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Release
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:12 PM                net10.0
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\bin\Release\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:07 PM            834 Baudman.ConPtySpike.deps.json
+-a---            9/4/2026  7:12 PM          37888 Baudman.ConPtySpike.dll
+-a---            9/4/2026  7:12 PM         162304 Baudman.ConPtySpike.exe
+-a---            9/4/2026  7:12 PM          19240 Baudman.ConPtySpike.pdb
+-a---            9/4/2026  7:02 PM            449 Baudman.ConPtySpike.runtimeconfig.json
+-a---            9/4/2026  7:07 PM          23040 Baudman.Pty.dll
+-a---            9/4/2026  7:07 PM          17552 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+d----            9/4/2026  7:02 PM                Release
+-a---            9/4/2026  6:43 PM          43942 Baudman.ConPtySpike.csproj.nuget.dgspec.json      
+-a---            9/4/2026  6:42 PM           1302 Baudman.ConPtySpike.csproj.nuget.g.props
+-a---            9/4/2026  6:42 PM            150 Baudman.ConPtySpike.csproj.nuget.g.targets        
+-a---            9/4/2026  6:43 PM          22092 project.assets.json
+-a---            9/4/2026  6:43 PM            217 project.nuget.cache
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:00 PM                net10.0
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  7:00 PM         162304 apphost.exe
+-a---            9/4/2026  7:00 PM              0 Baudman..5958944E.Up2Date
+-a---            9/4/2026  6:43 PM            990 Baudman.ConPtySpike.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.ConPtySpike.AssemblyInfoInputs.cache      
+-a---            9/4/2026  6:43 PM            228 Baudman.ConPtySpike.assets.cache
+-a---            9/4/2026  7:00 PM            951 Baudman.ConPtySpike.csproj.AssemblyReference.cach [30;1H
+                                                  e
+-a---            9/4/2026  6:52 PM             66 Baudman.ConPtySpike.csproj.CoreCompileInputs.cach [30;1H
+                                                  e
+-a---            9/4/2026  6:43 PM           1674 Baudman.ConPtySpike.csproj.FileListAbsolute.txt   
+-a---            9/4/2026  7:00 PM          22528 Baudman.ConPtySpike.dll
+-a---            9/4/2026  6:43 PM            838 Baudman.ConPtySpike.GeneratedMSBuildEditorConfig. [30;1H
+                                                  editorconfig
+-a---            9/4/2026  6:43 PM             66 Baudman.ConPtySpike.genruntimeconfig.cache        
+-a---            9/4/2026  6:43 PM            239 Baudman.ConPtySpike.GlobalUsings.g.cs
+-a---            9/4/2026  7:00 PM          15960 Baudman.ConPtySpike.pdb
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:57 PM           9216 Baudman.ConPtySpike.dll
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:00 PM           9216 Baudman.ConPtySpike.dll
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:12 PM                net10.0
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:02 PM                ref
+d----            9/4/2026  7:02 PM                refint
+-a---            9/4/2026  7:02 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  7:12 PM         162304 apphost.exe
+-a---            9/4/2026  7:07 PM              0 Baudman..5958944E.Up2Date
+-a---            9/4/2026  7:02 PM            992 Baudman.ConPtySpike.AssemblyInfo.cs
+-a---            9/4/2026  7:02 PM             66 Baudman.ConPtySpike.AssemblyInfoInputs.cache      
+-a---            9/4/2026  7:02 PM            228 Baudman.ConPtySpike.assets.cache
+-a---            9/4/2026  7:07 PM            953 Baudman.ConPtySpike.csproj.AssemblyReference.cach [30;1H
+                                                  e
+-a---            9/4/2026  7:06 PM             66 Baudman.ConPtySpike.csproj.CoreCompileInputs.cach[30;1H
+                                                  e
+-a---            9/4/2026  7:03 PM           2152 Baudman.ConPtySpike.csproj.FileListAbsolute.txt   
+-a---            9/4/2026  7:12 PM          37888 Baudman.ConPtySpike.dll
+-a---            9/4/2026  7:02 PM            838 Baudman.ConPtySpike.GeneratedMSBuildEditorConfig. [30;1H
+                                                  editorconfig
+-a---            9/4/2026  7:02 PM             66 Baudman.ConPtySpike.genruntimeconfig.cache        
+-a---            9/4/2026  7:02 PM            239 Baudman.ConPtySpike.GlobalUsings.g.cs
+-a---            9/4/2026  7:12 PM          19240 Baudman.ConPtySpike.pdb
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:10 PM          12800 Baudman.ConPtySpike.dll
+
+    Directory: C:\dev\Baudman\spike\Baudman.ConPtySpike\obj\Release\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:12 PM          12800 Baudman.ConPtySpike.dll
+
+    Directory: C:\dev\Baudman\spike\captures
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:13 PM           3807 pwsh-default-altbuffer.bin
+-a---            9/4/2026  7:13 PM            639 pwsh-default-altbuffer.timing
+-a---            9/4/2026  7:13 PM            902 pwsh-default-colour.bin
+-a---            9/4/2026  7:13 PM            314 pwsh-default-colour.timing
+-a---            9/4/2026  7:13 PM          78398 pwsh-default-deep-listing.bin
+-a---            9/4/2026  7:13 PM          22798 pwsh-default-deep-listing.timing
+-a---            9/4/2026  7:13 PM            916 pwsh-default-git-status.bin
+-a---            9/4/2026  7:13 PM            325 pwsh-default-git-status.timing
+-a---            9/4/2026  7:12 PM            150 pwsh-default-idle.bin
+-a---            9/4/2026  7:12 PM            241 pwsh-default-idle.timing
+-a---            9/4/2026  7:12 PM           2273 pwsh-default-keystrokes.bin
+-a---            9/4/2026  7:12 PM            926 pwsh-default-keystrokes.timing
+-a---            9/4/2026  7:13 PM            885 pwsh-default-listing.bin
+-a---            9/4/2026  7:13 PM            316 pwsh-default-listing.timing
+-a---            9/4/2026  7:12 PM            360 pwsh-default-prompt.bin
+-a---            9/4/2026  7:12 PM            534 pwsh-default-prompt.timing
+-a---            9/4/2026  7:13 PM           1952 pwsh-tamed-colour.bin
+-a---            9/4/2026  7:13 PM            491 pwsh-tamed-colour.timing
+-a---            9/4/2026  7:13 PM              0 pwsh-tamed-deep-listing.bin
+-a---            9/4/2026  7:13 PM              0 pwsh-tamed-deep-listing.timing
+-a---            9/4/2026  7:13 PM           1214 pwsh-tamed-idle.bin
+-a---            9/4/2026  7:13 PM            407 pwsh-tamed-idle.timing
+-a---            9/4/2026  7:13 PM           2561 pwsh-tamed-keystrokes.bin
+-a---            9/4/2026  7:13 PM           1112 pwsh-tamed-keystrokes.timing
+-a---            9/4/2026  7:13 PM           2389 pwsh-tamed-listing.bin
+-a---            9/4/2026  7:13 PM            479 pwsh-tamed-listing.timing
+-a---            9/4/2026  7:13 PM           1746 pwsh-tamed-prompt.bin
+-a---            9/4/2026  7:13 PM            714 pwsh-tamed-prompt.timing
+-a---            9/4/2026  7:12 PM              0 record.log
+
+    Directory: C:\dev\Baudman\src
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Baudman.App
+d----            9/4/2026  6:43 PM                Baudman.Core
+d----            9/4/2026  7:00 PM                Baudman.Pty
+d----            9/4/2026  6:43 PM                Baudman.Render
+
+    Directory: C:\dev\Baudman\src\Baudman.App
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                bin
+d----            9/4/2026  6:43 PM                obj
+-a---            9/4/2026  6:43 PM            362 Baudman.App.csproj
+-a---            9/4/2026  6:42 PM             40 Program.cs
+
+    Directory: C:\dev\Baudman\src\Baudman.App\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+
+    Directory: C:\dev\Baudman\src\Baudman.App\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.App\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           1590 Baudman.App.deps.json
+-a---            9/4/2026  6:43 PM           4608 Baudman.App.dll
+-a---            9/4/2026  6:43 PM         162304 Baudman.App.exe
+-a---            9/4/2026  6:43 PM          10940 Baudman.App.pdb
+-a---            9/4/2026  6:43 PM            377 Baudman.App.runtimeconfig.json
+-a---            9/4/2026  6:43 PM           3584 Baudman.Core.dll
+-a---            9/4/2026  6:43 PM          10572 Baudman.Core.pdb
+-a---            9/4/2026  6:43 PM           3584 Baudman.Pty.dll
+-a---            9/4/2026  6:43 PM          10568 Baudman.Pty.pdb
+-a---            9/4/2026  6:43 PM           3584 Baudman.Render.dll
+-a---            9/4/2026  6:43 PM          10624 Baudman.Render.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.App\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+-a---            9/4/2026  6:43 PM          87991 Baudman.App.csproj.nuget.dgspec.json
+-a---            9/4/2026  6:42 PM           1302 Baudman.App.csproj.nuget.g.props
+-a---            9/4/2026  6:42 PM            150 Baudman.App.csproj.nuget.g.targets
+-a---            9/4/2026  6:43 PM          23482 project.assets.json
+-a---            9/4/2026  6:43 PM            199 project.nuget.cache
+
+    Directory: C:\dev\Baudman\src\Baudman.App\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM         162304 apphost.exe
+-a---            9/4/2026  6:43 PM              0 Baudman..CD9B1B7F.Up2Date
+-a---            9/4/2026  6:43 PM            966 Baudman.App.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.App.AssemblyInfoInputs.cache
+-a---            9/4/2026  6:43 PM            228 Baudman.App.assets.cache
+-a---            9/4/2026  6:43 PM           1060 Baudman.App.csproj.AssemblyReference.cache        
+-a---            9/4/2026  6:43 PM             66 Baudman.App.csproj.CoreCompileInputs.cache        
+-a---            9/4/2026  6:43 PM           1646 Baudman.App.csproj.FileListAbsolute.txt
+-a---            9/4/2026  6:43 PM           4608 Baudman.App.dll
+-a---            9/4/2026  6:43 PM            820 Baudman.App.GeneratedMSBuildEditorConfig.editorco [30;1H
+                                                  nfig
+-a---            9/4/2026  6:43 PM             66 Baudman.App.genruntimeconfig.cache
+-a---            9/4/2026  6:43 PM            239 Baudman.App.GlobalUsings.g.cs
+-a---            9/4/2026  6:43 PM          10940 Baudman.App.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5120 Baudman.App.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.App\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5120 Baudman.App.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Core
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                bin
+d----            9/4/2026  6:43 PM                obj
+-a---            9/4/2026  6:43 PM             46 Baudman.Core.csproj
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM            430 Baudman.Core.deps.json
+-a---            9/4/2026  6:43 PM           3584 Baudman.Core.dll
+-a---            9/4/2026  6:43 PM          10572 Baudman.Core.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+-a---            9/4/2026  6:42 PM          21903 Baudman.Core.csproj.nuget.dgspec.json
+-a---            9/4/2026  6:42 PM           1302 Baudman.Core.csproj.nuget.g.props
+-a---            9/4/2026  6:42 PM            150 Baudman.Core.csproj.nuget.g.targets
+-a---            9/4/2026  6:42 PM          21340 project.assets.json
+-a---            9/4/2026  6:42 PM            201 project.nuget.cache
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM            969 Baudman.Core.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.Core.AssemblyInfoInputs.cache
+-a---            9/4/2026  6:43 PM            228 Baudman.Core.assets.cache
+-a---            9/4/2026  6:43 PM             66 Baudman.Core.csproj.CoreCompileInputs.cache       
+-a---            9/4/2026  6:43 PM            863 Baudman.Core.csproj.FileListAbsolute.txt
+-a---            9/4/2026  6:43 PM           3584 Baudman.Core.dll
+-a---            9/4/2026  6:43 PM            822 Baudman.Core.GeneratedMSBuildEditorConfig.editorc [30;1H
+                                                  onfig
+-a---            9/4/2026  6:43 PM            239 Baudman.Core.GlobalUsings.g.cs
+-a---            9/4/2026  6:43 PM          10572 Baudman.Core.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           4608 Baudman.Core.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Core\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           4608 Baudman.Core.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:02 PM                bin
+d----            9/4/2026  6:55 PM                Interop
+d----            9/4/2026  7:02 PM                obj
+-a---            9/4/2026  6:44 PM            132 Baudman.Pty.csproj
+-a---            9/4/2026  6:45 PM           1042 IPtyOutputSink.cs
+-a---            9/4/2026  7:02 PM          17850 PtySession.cs
+-a---            9/4/2026  7:07 PM           1157 PtyStartInfo.cs
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+d----            9/4/2026  7:02 PM                Release
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:00 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:46 PM            427 Baudman.Pty.deps.json
+-a---            9/4/2026  7:00 PM          22016 Baudman.Pty.dll
+-a---            9/4/2026  7:00 PM          19232 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\bin\Release
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:07 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\bin\Release\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:02 PM            427 Baudman.Pty.deps.json
+-a---            9/4/2026  7:07 PM          23040 Baudman.Pty.dll
+-a---            9/4/2026  7:07 PM          17552 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\Interop
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:59 PM           6150 NativeMethods.cs
+-a---            9/4/2026  6:44 PM           2473 Structs.cs
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+d----            9/4/2026  7:02 PM                Release
+-a---            9/4/2026  6:42 PM          21893 Baudman.Pty.csproj.nuget.dgspec.json
+-a---            9/4/2026  6:42 PM           1302 Baudman.Pty.csproj.nuget.g.props
+-a---            9/4/2026  6:42 PM            150 Baudman.Pty.csproj.nuget.g.targets
+-a---            9/4/2026  6:42 PM          21334 project.assets.json
+-a---            9/4/2026  6:42 PM            199 project.nuget.cache
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:46 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM            966 Baudman.Pty.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.Pty.AssemblyInfoInputs.cache
+-a---            9/4/2026  6:43 PM            228 Baudman.Pty.assets.cache
+-a---            9/4/2026  6:46 PM             66 Baudman.Pty.csproj.CoreCompileInputs.cache        
+-a---            9/4/2026  6:43 PM            841 Baudman.Pty.csproj.FileListAbsolute.txt
+-a---            9/4/2026  7:00 PM          22016 Baudman.Pty.dll
+-a---            9/4/2026  6:43 PM            820 Baudman.Pty.GeneratedMSBuildEditorConfig.editorco [30;1H
+                                                  nfig
+-a---            9/4/2026  6:43 PM            239 Baudman.Pty.GlobalUsings.g.cs
+-a---            9/4/2026  7:00 PM          19232 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:59 PM           8704 Baudman.Pty.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:00 PM           8704 Baudman.Pty.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Release
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:06 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  7:02 PM                ref
+d----            9/4/2026  7:02 PM                refint
+-a---            9/4/2026  7:02 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  7:03 PM         161792 apphost.exe
+-a---            9/4/2026  7:02 PM            968 Baudman.Pty.AssemblyInfo.cs
+-a---            9/4/2026  7:02 PM             66 Baudman.Pty.AssemblyInfoInputs.cache
+-a---            9/4/2026  7:02 PM            228 Baudman.Pty.assets.cache
+-a---            9/4/2026  7:02 PM             66 Baudman.Pty.csproj.CoreCompileInputs.cache        
+-a---            9/4/2026  7:06 PM           1109 Baudman.Pty.csproj.FileListAbsolute.txt
+-a---            9/4/2026  7:07 PM          23040 Baudman.Pty.dll
+-a---            9/4/2026  7:02 PM            820 Baudman.Pty.GeneratedMSBuildEditorConfig.editorco [30;1H
+                                                  nfig
+-a---            9/4/2026  7:02 PM            239 Baudman.Pty.GlobalUsings.g.cs
+-a---            9/4/2026  7:07 PM          17552 Baudman.Pty.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:07 PM           8704 Baudman.Pty.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Pty\obj\Release\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  7:07 PM           8704 Baudman.Pty.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Render
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                bin
+d----            9/4/2026  6:43 PM                obj
+-a---            9/4/2026  6:43 PM            147 Baudman.Render.csproj
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           3584 Baudman.Core.dll
+-a---            9/4/2026  6:43 PM          10572 Baudman.Core.pdb
+-a---            9/4/2026  6:43 PM            823 Baudman.Render.deps.json
+-a---            9/4/2026  6:43 PM           3584 Baudman.Render.dll
+-a---            9/4/2026  6:43 PM          10624 Baudman.Render.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+-a---            9/4/2026  6:43 PM          43894 Baudman.Render.csproj.nuget.dgspec.json
+-a---            9/4/2026  6:42 PM           1302 Baudman.Render.csproj.nuget.g.props
+-a---            9/4/2026  6:42 PM            150 Baudman.Render.csproj.nuget.g.targets
+-a---            9/4/2026  6:43 PM          22055 project.assets.json
+-a---            9/4/2026  6:43 PM            205 project.nuget.cache
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM              0 Baudman..83FD1078.Up2Date
+-a---            9/4/2026  6:43 PM            975 Baudman.Render.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.Render.AssemblyInfoInputs.cache
+-a---            9/4/2026  6:43 PM            228 Baudman.Render.assets.cache
+-a---            9/4/2026  6:43 PM            356 Baudman.Render.csproj.AssemblyReference.cache     
+-a---            9/4/2026  6:43 PM             66 Baudman.Render.csproj.CoreCompileInputs.cache     
+-a---            9/4/2026  6:43 PM           1225 Baudman.Render.csproj.FileListAbsolute.txt        
+-a---            9/4/2026  6:43 PM           3584 Baudman.Render.dll
+-a---            9/4/2026  6:43 PM            826 Baudman.Render.GeneratedMSBuildEditorConfig.edito [30;1H
+                                                  rconfig
+-a---            9/4/2026  6:43 PM            239 Baudman.Render.GlobalUsings.g.cs
+-a---            9/4/2026  6:43 PM          10624 Baudman.Render.pdb
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           4608 Baudman.Render.dll
+
+    Directory: C:\dev\Baudman\src\Baudman.Render\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           4608 Baudman.Render.dll
+
+    Directory: C:\dev\Baudman\tests
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Baudman.Core.Tests
+d----            9/4/2026  6:43 PM                Baudman.Pty.Tests
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                bin
+d----            9/4/2026  6:43 PM                obj
+-a---            9/4/2026  6:43 PM            746 Baudman.Core.Tests.csproj
+-a---            9/4/2026  6:43 PM            119 UnitTest1.cs
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                cs
+d----            9/4/2026  6:43 PM                de
+d----            9/4/2026  6:43 PM                es
+d----            9/4/2026  6:43 PM                fr
+d----            9/4/2026  6:43 PM                it
+d----            9/4/2026  6:43 PM                ja
+d----            9/4/2026  6:43 PM                ko
+d----            9/4/2026  6:43 PM                pl
+d----            9/4/2026  6:43 PM                pt-BR
+d----            9/4/2026  6:43 PM                ru
+d----            9/4/2026  6:43 PM                tr
+d----            9/4/2026  6:43 PM                zh-Hans
+d----            9/4/2026  6:43 PM                zh-Hant
+-a---            9/4/2026  6:43 PM            618 .msCoverageSourceRootsMapping_Baudman.Core.Tests  
+-a---            9/4/2026  6:43 PM           3584 Baudman.Core.dll
+-a---            9/4/2026  6:43 PM          10572 Baudman.Core.pdb
+-a---            9/4/2026  6:43 PM          16847 Baudman.Core.Tests.deps.json
+-a---            9/4/2026  6:43 PM           4608 Baudman.Core.Tests.dll
+-a---            9/4/2026  6:43 PM          11956 Baudman.Core.Tests.pdb
+-a---            9/4/2026  6:43 PM            425 Baudman.Core.Tests.runtimeconfig.json
+-a---            9/4/2026  6:43 PM            618 CoverletSourceRootsMapping_Baudman.Core.Tests     
+-a---            6/2/2025  5:00 AM         137776 Microsoft.TestPlatform.CommunicationUtilities.dll [30;1H
+-a---            6/2/2025  5:00 AM          98336 Microsoft.TestPlatform.CoreUtilities.dll
+-a---            6/2/2025  5:00 AM         316960 Microsoft.TestPlatform.CrossPlatEngine.dll        
+-a---            6/2/2025  5:00 AM          51232 Microsoft.TestPlatform.PlatformAbstractions.dll   
+-a---            6/2/2025  5:00 AM          67104 Microsoft.TestPlatform.Utilities.dll
+-a---           2/26/2025  8:16 AM          17464 Microsoft.VisualStudio.CodeCoverage.Shim.dll      
+-a---            6/2/2025  5:00 AM         248352 Microsoft.VisualStudio.TestPlatform.Common.dll    
+-a---            6/2/2025  5:00 AM         334392 Microsoft.VisualStudio.TestPlatform.ObjectModel.d [30;1H
+                                                  ll
+-a---            3/7/2023 11:09 PM         712464 Newtonsoft.Json.dll
+-a---            6/2/2025  5:00 AM          49696 testhost.dll
+-a---            6/2/2025  5:00 AM         150576 testhost.exe
+-a---           8/25/2018 12:54 PM          21928 xunit.abstractions.dll
+-a---            1/8/2025  9:29 AM         187088 xunit.assert.dll
+-a---            1/8/2025  9:29 AM          70352 xunit.core.dll
+-a---            1/8/2025  9:30 AM         279760 xunit.execution.dotnet.dll
+-a---           8/15/2025  7:35 PM        1251840 xunit.runner.visualstudio.testadapter.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\cs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16440 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21040 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20520 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23624 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\de
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21064 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24136 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\es
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl[30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21032 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\fr
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21040 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\it
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ja
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          17440 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          22088 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21552 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24632 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ko
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16936 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21560 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\pl
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16936 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21536 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24136 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\pt-BR
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\ru
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          17440 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          17464 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          23072 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          23096 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          26168 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\tr
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21024 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20536 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23608 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\zh-Hans
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          20008 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23072 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\bin\Debug\net10.0\zh-Hant
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          20552 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20024 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+-a---            9/4/2026  6:43 PM          44494 Baudman.Core.Tests.csproj.nuget.dgspec.json       
+-a---            9/4/2026  6:43 PM           2790 Baudman.Core.Tests.csproj.nuget.g.props
+-a---            9/4/2026  6:43 PM           1415 Baudman.Core.Tests.csproj.nuget.g.targets
+-a---            9/4/2026  6:43 PM          67697 project.assets.json
+-a---            9/4/2026  6:43 PM           1820 project.nuget.cache
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM              0 Baudman..A79D234F.Up2Date
+-a---            9/4/2026  6:43 PM            987 Baudman.Core.Tests.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.Core.Tests.AssemblyInfoInputs.cache
+-a---            9/4/2026  6:43 PM          31402 Baudman.Core.Tests.assets.cache
+-a---            9/4/2026  6:43 PM           8572 Baudman.Core.Tests.csproj.AssemblyReference.cache [30;1H
+-a---            9/4/2026  6:43 PM             66 Baudman.Core.Tests.csproj.CoreCompileInputs.cache [30;1H
+-a---            9/4/2026  6:43 PM          11025 Baudman.Core.Tests.csproj.FileListAbsolute.txt    
+-a---            9/4/2026  6:43 PM           4608 Baudman.Core.Tests.dll
+-a---            9/4/2026  6:43 PM            836 Baudman.Core.Tests.GeneratedMSBuildEditorConfig.e [30;1H
+                                                  ditorconfig
+-a---            9/4/2026  6:43 PM             66 Baudman.Core.Tests.genruntimeconfig.cache
+-a---            9/4/2026  6:43 PM            260 Baudman.Core.Tests.GlobalUsings.g.cs
+-a---            9/4/2026  6:43 PM          11956 Baudman.Core.Tests.pdb
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5632 Baudman.Core.Tests.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Core.Tests\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5632 Baudman.Core.Tests.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                bin
+d----            9/4/2026  6:43 PM                obj
+-a---            9/4/2026  6:43 PM            744 Baudman.Pty.Tests.csproj
+-a---            9/4/2026  6:43 PM            118 UnitTest1.cs
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                cs
+d----            9/4/2026  6:43 PM                de
+d----            9/4/2026  6:43 PM                es
+d----            9/4/2026  6:43 PM                fr
+d----            9/4/2026  6:43 PM                it
+d----            9/4/2026  6:43 PM                ja
+d----            9/4/2026  6:43 PM                ko
+d----            9/4/2026  6:43 PM                pl
+d----            9/4/2026  6:43 PM                pt-BR
+d----            9/4/2026  6:43 PM                ru
+d----            9/4/2026  6:43 PM                tr
+d----            9/4/2026  6:43 PM                zh-Hans
+d----            9/4/2026  6:43 PM                zh-Hant
+-a---            9/4/2026  6:43 PM            610 .msCoverageSourceRootsMapping_Baudman.Pty.Tests   
+-a---            9/4/2026  6:43 PM           3584 Baudman.Pty.dll
+-a---            9/4/2026  6:43 PM          10568 Baudman.Pty.pdb
+-a---            9/4/2026  6:43 PM          16840 Baudman.Pty.Tests.deps.json
+-a---            9/4/2026  6:43 PM           4608 Baudman.Pty.Tests.dll
+-a---            9/4/2026  6:43 PM          11952 Baudman.Pty.Tests.pdb
+-a---            9/4/2026  6:43 PM            425 Baudman.Pty.Tests.runtimeconfig.json
+-a---            9/4/2026  6:43 PM            610 CoverletSourceRootsMapping_Baudman.Pty.Tests      
+-a---            6/2/2025  5:00 AM         137776 Microsoft.TestPlatform.CommunicationUtilities.dll [30;1H
+-a---            6/2/2025  5:00 AM          98336 Microsoft.TestPlatform.CoreUtilities.dll
+-a---            6/2/2025  5:00 AM         316960 Microsoft.TestPlatform.CrossPlatEngine.dll        
+-a---            6/2/2025  5:00 AM          51232 Microsoft.TestPlatform.PlatformAbstractions.dll   
+-a---            6/2/2025  5:00 AM          67104 Microsoft.TestPlatform.Utilities.dll
+-a---           2/26/2025  8:16 AM          17464 Microsoft.VisualStudio.CodeCoverage.Shim.dll      
+-a---            6/2/2025  5:00 AM         248352 Microsoft.VisualStudio.TestPlatform.Common.dll    
+-a---            6/2/2025  5:00 AM         334392 Microsoft.VisualStudio.TestPlatform.ObjectModel.d [30;1H
+                                                  ll
+-a---            3/7/2023 11:09 PM         712464 Newtonsoft.Json.dll
+-a---            6/2/2025  5:00 AM          49696 testhost.dll
+-a---            6/2/2025  5:00 AM         150576 testhost.exe
+-a---           8/25/2018 12:54 PM          21928 xunit.abstractions.dll
+-a---            1/8/2025  9:29 AM         187088 xunit.assert.dll
+-a---            1/8/2025  9:29 AM          70352 xunit.core.dll
+-a---            1/8/2025  9:30 AM         279760 xunit.execution.dotnet.dll
+-a---           8/15/2025  7:35 PM        1251840 xunit.runner.visualstudio.testadapter.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\cs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16440 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21040 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20520 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23624 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\de
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21064 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24136 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\es
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21032 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\fr
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21040 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\it
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ja
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          17440 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          22088 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21552 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24632 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ko
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16944 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16936 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21560 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\pl
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16936 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21536 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24136 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\pt-BR
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21048 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          21048 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          24120 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\ru
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          17440 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          17464 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          23072 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          23096 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          26168 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\tr
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          21024 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20536 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23608 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\zh-Hans
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16928 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          20008 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20040 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23072 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\bin\Debug\net10.0\zh-Hant
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            6/2/2025  5:00 AM          16416 Microsoft.TestPlatform.CommunicationUtilities.res [30;1H
+                                                  ources.dll
+-a---            6/2/2025  5:00 AM          16952 Microsoft.TestPlatform.CoreUtilities.resources.dl [30;1H
+                                                  l
+-a---            6/2/2025  5:00 AM          20552 Microsoft.TestPlatform.CrossPlatEngine.resources. [30;1H
+                                                  dll
+-a---            6/2/2025  5:00 AM          20024 Microsoft.VisualStudio.TestPlatform.Common.resour [30;1H
+                                                  ces.dll
+-a---            6/2/2025  5:00 AM          23096 Microsoft.VisualStudio.TestPlatform.ObjectModel.r [30;1H
+                                                  esources.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\obj
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                Debug
+-a---            9/4/2026  6:43 PM          44472 Baudman.Pty.Tests.csproj.nuget.dgspec.json        
+-a---            9/4/2026  6:43 PM           2790 Baudman.Pty.Tests.csproj.nuget.g.props
+-a---            9/4/2026  6:43 PM           1415 Baudman.Pty.Tests.csproj.nuget.g.targets
+-a---            9/4/2026  6:43 PM          67678 project.assets.json
+-a---            9/4/2026  6:43 PM           1818 project.nuget.cache
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                net10.0
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  6:43 PM                ref
+d----            9/4/2026  6:43 PM                refint
+-a---            9/4/2026  6:43 PM            200 .NETCoreApp,Version=v10.0.AssemblyAttributes.cs   
+-a---            9/4/2026  6:43 PM              0 Baudman..9471841C.Up2Date
+-a---            9/4/2026  6:43 PM            984 Baudman.Pty.Tests.AssemblyInfo.cs
+-a---            9/4/2026  6:43 PM             66 Baudman.Pty.Tests.AssemblyInfoInputs.cache        
+-a---            9/4/2026  6:43 PM          31402 Baudman.Pty.Tests.assets.cache
+-a---            9/4/2026  6:43 PM           8568 Baudman.Pty.Tests.csproj.AssemblyReference.cache  
+-a---            9/4/2026  6:43 PM             66 Baudman.Pty.Tests.csproj.CoreCompileInputs.cache  
+-a---            9/4/2026  6:43 PM          10907 Baudman.Pty.Tests.csproj.FileListAbsolute.txt     
+-a---            9/4/2026  6:43 PM           4608 Baudman.Pty.Tests.dll
+-a---            9/4/2026  6:43 PM            834 Baudman.Pty.Tests.GeneratedMSBuildEditorConfig.ed [30;1H
+                                                  itorconfig
+-a---            9/4/2026  6:43 PM             66 Baudman.Pty.Tests.genruntimeconfig.cache
+-a---            9/4/2026  6:43 PM            260 Baudman.Pty.Tests.GlobalUsings.g.cs
+-a---            9/4/2026  6:43 PM          11952 Baudman.Pty.Tests.pdb
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0\ref
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5632 Baudman.Pty.Tests.dll
+
+    Directory: C:\dev\Baudman\tests\Baudman.Pty.Tests\obj\Debug\net10.0\refint
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---            9/4/2026  6:43 PM           5632 Baudman.Pty.Tests.dll
+
+PS>[1C

@@ -1,0 +1,13 @@
+# baudman conpty capture
+# pwsh-default / git-status
+# recorded 2026-09-04T19:13:03.1334100-07:00
+# columns: micros_since_start offset length
+54785 0 16
+448236 16 134
+# @902111 offset=150 scenario=git-status start
+912938 150 6
+932878 156 90
+948061 246 213
+1008366 459 4
+1025118 463 453
+# eof after 916 bytes in 7 chunks

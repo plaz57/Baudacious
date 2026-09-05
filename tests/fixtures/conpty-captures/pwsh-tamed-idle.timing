@@ -1,0 +1,19 @@
+# baudman conpty capture
+# pwsh-tamed / idle
+# recorded 2026-09-04T19:13:08.4665272-07:00
+# columns: micros_since_start offset length
+51078 0 16
+387228 16 134
+848134 150 6
+868249 156 284
+884140 440 19
+1333053 459 6
+1348073 465 12
+1367136 477 9
+1378276 486 472
+1468439 958 161
+1486657 1119 19
+1891551 1138 6
+1906159 1144 70
+# @2323110 offset=1214 scenario=idle start
+# eof after 1214 bytes in 13 chunks

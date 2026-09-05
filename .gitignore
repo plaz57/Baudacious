@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+.vs/
+.idea/
+
+# Phase 0 spike output. The promoted fixtures under tests/fixtures/ are tracked;
+# ad-hoc capture runs are not.
+spike/captures/
+*.log

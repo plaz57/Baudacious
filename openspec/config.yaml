@@ -1,0 +1,44 @@
+schema: spec-driven
+
+context: |
+  Baudacious - a terminal emulator whose defining feature is an authentic,
+  user-selectable baud rate (300/1200/2400/9600/19200/38400/115200). Output
+  from the hosted shell is metered onto the screen at exactly that rate so
+  text crawls in the way it did over a real serial line. Aesthetic target is
+  a phosphor-green CRT.
+
+  Tech stack (decided 2026-09-04):
+  - C# / .NET 9, single self-contained Windows executable
+  - Own OS window (NOT console-hosted): Silk.NET.Windowing (GLFW) +
+    Silk.NET.OpenGL, OpenGL 3.3 core profile
+  - Text rendered from a bitmap glyph atlas (CP437 / IBM VGA 8x16) as an
+    instanced quad batch, so a CRT post-process shader can be layered on
+    without touching the text pipeline
+  - Shells hosted via Windows ConPTY (CreatePseudoConsole P/Invoke).
+    v1 backends: pwsh and cmd.exe
+  - In-house VT/xterm parser (DEC/Paul Williams state machine) feeding an
+    in-house screen buffer + scrollback
+
+  Key architectural invariant: the baud governor sits on the BYTE stream
+  between ConPTY and the VT parser. Escape sequences cost wire time exactly
+  like printable characters do, because that is what a real serial line did.
+
+  Local (client-side) commands live on Alt+<letter>, following ProComm Plus
+  and Telix convention, because Alt combos are not ASCII and therefore never
+  collide with bytes the shell needs. Ctrl+] escapes to a local command
+  prompt. Do not consume plain Ctrl+<letter> chords other than Ctrl+C.
+
+  Conventions:
+  - Timing is derived from a monotonic Stopwatch against wall-clock elapsed
+    time, never from frame counts, so a dropped frame does not slow the baud
+    rate. Fractional character budgets carry over between frames.
+  - Never use Thread.Sleep for pacing.
+  - Prefer allocation-free hot paths in the governor, parser, and renderer.
+
+rules:
+  design:
+    - Always state the measured/target numbers for anything timing-related
+    - Call out explicitly which decisions are reversible and which are load-bearing
+  tasks:
+    - Break tasks into chunks of max 4 hours
+    - Each phase must end in something runnable and demonstrable

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Baudacious.Core\Baudacious.Core.csproj" />
+  </ItemGroup>
+
+</Project>

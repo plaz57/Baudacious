@@ -1,0 +1,7 @@
+[?9001h[?1004h[?25l[2J[m[HMicrosoft Windows [Version 10.0.26200.9168]]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l
+(c) Microsoft Corporation. All rights reserved.[4;1HC:\dev\Baudman>[?25hgit -C "C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" -c color.status=always -c color.ui=always status
+]0;C:\WINDOWS\system32\cmd.exe - git  -C "C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" -c color.status=always -c color.ui=always statusO[?25ln branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)[31m[10;9Hmodified:   a.txt[11;9Hdeleted:    b.txt[m[13;1HUntracked files:
+  (use "git add <file>..." to include in what will be committed)[31m[15;9Hc.txt[m[17;1Hno changes added to commit (use "git add" and/or "git commit -a")[19;1HC:\dev\Baudman>]0;C:\WINDOWS\system32\cmd.exe[?25h

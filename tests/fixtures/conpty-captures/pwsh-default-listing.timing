@@ -1,0 +1,13 @@
+# baudman conpty capture
+# pwsh-default / listing
+# recorded 2026-09-04T19:12:58.7045258-07:00
+# columns: micros_since_start offset length
+45691 0 16
+415218 16 134
+# @828992 offset=150 scenario=listing start
+839250 150 6
+860411 156 37
+882941 193 2
+891070 195 47
+906689 242 643
+# eof after 885 bytes in 7 chunks

@@ -1,0 +1,12 @@
+[?9001h[?1004h[?25l[2J[m[HPS C:\dev\Baudman>[1C]0;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.5.0_x64__8wekyb3d8bbwe\pwsh.exe[?25h[?25l[93mGet-ChildItem [37m| [93mFormat-Table
+[?25h[m
+[?25l    Directory: C:\dev\Baudman[5;1H[?25h[?25lMode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----            9/4/2026  2:40 PM                .claude
+d----            9/4/2026  2:40 PM                openspec
+d----            9/4/2026  7:12 PM                spike
+d----            9/4/2026  6:42 PM                src
+d----            9/4/2026  6:43 PM                tests
+-a---            9/4/2026  6:43 PM            612 Baudman.slnx
+-a---            9/4/2026  6:42 PM            788 Directory.Build.props
+-a---            9/4/2026  7:10 PM            450 scratch-record.cmd[16;1HPS C:\dev\Baudman> [?25h

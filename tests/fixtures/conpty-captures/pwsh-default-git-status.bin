@@ -1,0 +1,7 @@
+[?9001h[?1004h[?25l[2J[m[HPS C:\dev\Baudman>[1C]0;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.5.0_x64__8wekyb3d8bbwe\pwsh.exe[?25h[?25l[93mg[97m[2m[3met-ChildItem -Recurse -Force -ErrorAction SilentlyContinue[1;21H[?25h[m[93mgit [90m-C [36m"C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" [90m-c [37mcolor.status=always [90m-c [37mcolor.ui=always status
+[mO[?25ln branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)[31m[7;9Hmodified:   a.txt[8;9Hdeleted:    b.txt[m[10;1HUntracked files:
+  (use "git add <file>..." to include in what will be committed)[31m[12;9Hc.txt[m[14;1Hno changes added to commit (use "git add" and/or "git commit -a")
+PS C:\dev\Baudman> [?25h

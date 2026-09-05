@@ -1,0 +1,13 @@
+# Normalise text to LF in the repository; working copies get platform endings.
+* text=auto
+
+# Visual Studio wants CRLF in solution files.
+*.slnx text eol=crlf
+
+# The ConPTY captures are byte-exact recordings, and the .timing files index into
+# them by byte offset. Any end-of-line conversion rewrites every 0x0A in a .bin,
+# which both corrupts the recording and desynchronises its index — and it would
+# happen silently on clone, on a machine with core.autocrlf=true. Nothing in this
+# directory is text as far as Git is concerned.
+tests/fixtures/conpty-captures/** -text
+*.bin binary

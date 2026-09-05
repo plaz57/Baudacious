@@ -1,0 +1,25 @@
+profile	scenario	events	bytes	bytes_per_event	chunks	wall_ms	notes
+pwsh-default	idle	1	0	0.0	2	5000	silent at rest
+pwsh-default	keystrokes	21	2034	96.9	46	9547	min=49 max=209 over 21 keys
+pwsh-default	prompt	10	210	21.0	22	4328	21.0 bytes/redraw
+pwsh-default	listing	1	735	735.0	7	500	Get-ChildItem
+pwsh-default	colour	1	752	752.0	7	500	Get-ChildItem | Format-Table
+pwsh-default	deep-listing	1	78248	78248.0	1348	813	Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue
+pwsh-default	git-status	1	766	766.0	7	562	git -C "C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" -c color.status=always -c color.ui=always status
+pwsh-default	altbuffer	1	3657	3657.0	29	3000	vim -u NONE
+pwsh-tamed	idle	1	0	0.0	13	5015	silent at rest
+pwsh-tamed	keystrokes	21	803	38.2	57	9531	min=18 max=57 over 21 keys
+pwsh-tamed	prompt	10	60	6.0	33	4329	6.0 bytes/redraw
+pwsh-tamed	listing	1	701	701.0	17	485	Get-ChildItem
+pwsh-tamed	colour	1	738	738.0	18	484	Get-ChildItem | Format-Table
+pwsh-tamed	deep-listing	1	79448	79448.0	1381	796	Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue
+pwsh-tamed	git-status	1	675	675.0	18	563	git -C "C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" -c color.status=always -c color.ui=always status
+pwsh-tamed	altbuffer	1	4266	4266.0	39	3000	vim -u NONE
+cmd	idle	1	0	0.0	3	5000	silent at rest
+cmd	keystrokes	21	21	1.0	26	9516	min=1 max=1 over 21 keys
+cmd	prompt	10	170	17.0	23	4328	17.0 bytes/redraw
+cmd	listing	1	738	738.0	5	421	dir
+cmd	colour	1	741	741.0	5	437	dir /a
+cmd	deep-listing	1	68504	68504.0	1243	563	dir /s
+cmd	git-status	1	871	871.0	7	500	git -C "C:\Users\plazm\AppData\Local\Temp\claude\C--dev-Baudman\0db686ec-680b-4167-8fee-cc767e820157\scratchpad\gitfixture" -c color.status=always -c color.ui=always status
+cmd	altbuffer	1	3663	3663.0	30	2984	vim -u NONE

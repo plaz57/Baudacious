@@ -1,0 +1,8 @@
+# baudman conpty capture
+# pwsh-default / idle
+# recorded 2026-09-04T19:12:37.1250911-07:00
+# columns: micros_since_start offset length
+84880 0 16
+478527 16 134
+# @870664 offset=150 scenario=idle start
+# eof after 150 bytes in 2 chunks

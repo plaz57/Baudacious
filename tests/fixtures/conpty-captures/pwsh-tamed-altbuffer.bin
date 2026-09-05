@@ -1,0 +1,62 @@
+[?9001h[?1004h[?25l[2J[m[HPS C:\dev\Baudman>[1C]0;C:\Program Files\WindowsApps\Microsoft.PowerShell_7.6.5.0_x64__8wekyb3d8bbwe\pwsh.exe[?25h[?25l[93mSet-PSReadLineOption [90m-PredictionSource [37mNone[K[m
+                                                                                                                                                                                                        
+[9X[2;1H[?25hPS C:\dev\Baudman> [?25l[93mS[?25h[m[?25l[2;18H> [93mSet-PSReadLineOption [90m-Colors [37m@{ Default[90m=[36m'$([char]27)[0m'[37m; Command[90m=[36m'$([char]27)[0m'[37m; Parameter[90m=[36m'$([char]27)[0m'[37m; Operator[90m=[36m'$([char]27)[0m'[37m; Variable[90m=[36m'$([char]27)[0m'[37m; String[90m=[36m'$([char]27)[0m'[37m; Number[90m=[36m'$([char]27)[0m'[37m; Member[90m=[36m'$([char]27)[0m'[37m; Type[90m=[36m'$([char]27)[0m'[37m; Comment[90m=[36m'$([char]27)[0m' [37m}
+[?25h[mSet-PSReadLineOption: '$([char]27)[0m' is not a valid color value.  It must be a ConsoleColor, ANSI escape sequence, or RGB value with optional leading '#'.
+PS C:\dev\Baudman> [?25l[8;18H> [92mfunction [37mprompt { [36m'PS> ' [37m}[m
+PS> [?25h[?25l[9;3H> [37m& [36m"C:\Program Files\Git\usr\bin\vim.exe" [90m-u [37mNONE .
+[?25h[m[?1049h[?25l[H[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[10;1H[?25h[22;0;0t[?1h=[?2004h[?12h[?12l[22;2t[22;1t[2J[?4m[?25l[H[K[94m
+~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   ~                                                                                                   [m"." is a directory[K[H[?25h[?25l[?2004l[23;2t[23;1t[?2004l[?1l>[30;1H[K[100C[?1049l[23;0;0t[HPS C:\dev\Baudman> [93mSet-PSReadLineOption [90m-PredictionSource [37mNone[K[m
+PS C:\dev\Baudman> [93mSet-PSReadLineOption [90m-Colors [37m@{ Default[90m=[36m'$([char]27)[0m'[37m; Command[90m=[36m'$([char]27)[0m'[37m; Parameter[90m=[36m'$([char]27)[0m'[37m; Operator[90m=[36m'$([char]27)[0m'[37m; Variable[90m=[36m'$([char]27)[0m'[37m; String[90m=[36m'$([char]27)[0m'[37m; Number[90m=[36m'$([char]27)[0m'[37m; Member[90m=[36m'$([char]27)[0m'[37m; Type[90m=[36m'$([char]27)[0m'[37m; Comment[90m=[36m'$([char]27)[0m' [37m}[K[m
+Set-PSReadLineOption: '$([char]27)[0m' is not a valid color value.  It must be a ConsoleColor, ANSI escape sequence, or RGB value with optional leading '#'.[K
+PS C:\dev\Baudman> [92mfunction [37mprompt { [36m'PS> ' [37m}[K[m
+PS> [37m& [36m"C:\Program Files\Git\usr\bin\vim.exe" [90m-u [37mNONE .[K[m
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K
+[K[10;1H[?25hPS> 

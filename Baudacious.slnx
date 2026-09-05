@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/spike/">
+    <Project Path="spike/Baudacious.ConPtySpike/Baudacious.ConPtySpike.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Baudacious.App/Baudacious.App.csproj" />
+    <Project Path="src/Baudacious.Core/Baudacious.Core.csproj" />
+    <Project Path="src/Baudacious.Pty/Baudacious.Pty.csproj" />
+    <Project Path="src/Baudacious.Render/Baudacious.Render.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Baudacious.Core.Tests/Baudacious.Core.Tests.csproj" />
+    <Project Path="tests/Baudacious.Pty.Tests/Baudacious.Pty.Tests.csproj" />
+  </Folder>
+</Solution>

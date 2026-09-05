@@ -1,0 +1,13 @@
+# baudman conpty capture
+# pwsh-default / colour
+# recorded 2026-09-04T19:13:00.0517205-07:00
+# columns: micros_since_start offset length
+47018 0 16
+426348 16 134
+# @826505 offset=150 scenario=colour start
+837024 150 6
+857923 156 51
+874914 207 5
+887922 212 47
+904015 259 643
+# eof after 902 bytes in 7 chunks
