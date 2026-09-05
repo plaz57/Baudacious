@@ -58,23 +58,23 @@ indicator (7.9).
 
 ## 4. Phase 3 — First light
 
-- [ ] 4.1 Add Silk.NET.Windowing, Silk.NET.OpenGL, Silk.NET.Input; open a window with a GL 3.3 core context and clear it
-- [ ] 4.2 Build the CP437 8x16 glyph atlas as a 128x256 R8 texture and its loader, from whichever source Open Question 1 resolves to
-- [ ] 4.3 Implement the instanced text shader and per-frame instance buffer: one instance per cell carrying position, glyph index, fg, bg, and flags
-- [ ] 4.4 Render the grid to an FBO at native cell resolution and blit it to the screen with nearest sampling and integer scaling
-- [ ] 4.5 Implement attribute rendering: bold, faint, underline, reverse, invisible, strikethrough, and blink
-- [ ] 4.6 Derive grid dimensions from the drawable area and the scaled cell size; fill the leftover margin with the background colour
-- [ ] 4.7 Implement the frame loop with vsync, wall-clock governor ticks, and the idle drop to 10 Hz when nothing is pending or changing
-- [ ] 4.8 Implement the PTY reader and writer threads and wire ConPTY → ring → governor → parser → grid → renderer
-- [ ] 4.9 Propagate grid size to ConPTY via `ResizePseudoConsole` on launch and on resize, without disturbing queued bytes
-- [ ] 4.10 Implement shell profiles, the pwsh and cmd defaults, and the pwsh readline taming with its per-profile opt-out
-- [ ] 4.10a Implement fast echo: `Remove-Module PSReadLine` for pwsh, default below the 4800 baud threshold, toggleable on a live session, no-op for cmd
+- [x] 4.1 Add Silk.NET.Windowing, Silk.NET.OpenGL, Silk.NET.Input; open a window with a GL 3.3 core context and clear it
+- [x] 4.2 Build the CP437 8x16 glyph atlas as a 128x256 R8 texture and its loader, from whichever source Open Question 1 resolves to
+- [x] 4.3 Implement the instanced text shader and per-frame instance buffer: one instance per cell carrying position, glyph index, fg, bg, and flags
+- [x] 4.4 Render the grid to an FBO at native cell resolution and blit it to the screen with nearest sampling and integer scaling
+- [x] 4.5 Implement attribute rendering: bold, faint, underline, reverse, invisible, strikethrough, and blink
+- [x] 4.6 Derive grid dimensions from the drawable area and the scaled cell size; fill the leftover margin with the background colour
+- [x] 4.7 Implement the frame loop with vsync, wall-clock governor ticks, and the idle drop to 10 Hz when nothing is pending or changing
+- [x] 4.8 Implement the PTY reader and writer threads and wire ConPTY → ring → governor → parser → grid → renderer
+- [x] 4.9 Propagate grid size to ConPTY via `ResizePseudoConsole` on launch and on resize, without disturbing queued bytes
+- [x] 4.10 Implement shell profiles, the pwsh and cmd defaults, and the pwsh readline taming with its per-profile opt-out
+- [x] 4.10a Implement fast echo: `Remove-Module PSReadLine` for pwsh, default below the 4800 baud threshold, toggleable on a live session, no-op for cmd
 - [ ] 4.10b Verify by hand whether tab completion survives fast echo, and record the answer in phase-0-findings.md §4a (the Phase 0 probe was faulty)
 - [ ] 4.10c Implement the usable-rate-floor warning, once per session, explaining that echo cost accumulates rather than being a fixed delay
 - [ ] 4.11 Handle shell exit: drain the remaining backlog at rate, then show the exit status and offer a restart
-- [ ] 4.12 Implement session and process cleanup on close, verified with no orphaned processes
-- [ ] 4.13 Implement cursor rendering: block, underline, and bar shapes, configurable blink, hidden when DECTCEM says so
-- [ ] 4.14 Implement font scale changes at integer multiples with grid recalculation and shell notification
+- [x] 4.12 Implement session and process cleanup on close, verified with no orphaned processes
+- [x] 4.13 Implement cursor rendering: block, underline, and bar shapes, configurable blink, hidden when DECTCEM says so
+- [x] 4.14 Implement font scale changes at integer multiples with grid recalculation and shell notification
 - [ ] 4.15 Verify frame time stays under the refresh interval for a fully populated 200x60 grid at 115200 baud
 - [ ] 4.16 Manual acceptance: run a real pwsh session at 1200 baud and confirm the cadence is even, with no clumping or stutter
 

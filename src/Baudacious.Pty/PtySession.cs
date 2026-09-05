@@ -42,6 +42,8 @@ public sealed class PtySession : IDisposable
     private readonly IPtyOutputSink _sink;
     private readonly int _readBufferSize;
     private readonly Thread _readerThread;
+    private readonly Thread _writerThread;
+    private readonly System.Collections.Concurrent.BlockingCollection<byte[]> _outbound = new();
     private readonly Lock _resizeLock = new();
 
     private nint _pseudoConsole;
@@ -64,6 +66,12 @@ public sealed class PtySession : IDisposable
         _readerThread = new Thread(ReaderLoop)
         {
             Name = "baudacious-pty-reader",
+            IsBackground = true,
+        };
+
+        _writerThread = new Thread(WriterLoop)
+        {
+            Name = "baudacious-pty-writer",
             IsBackground = true,
         };
     }
@@ -104,6 +112,7 @@ public sealed class PtySession : IDisposable
         }
 
         session._readerThread.Start();
+        session._writerThread.Start();
         return session;
     }
 
@@ -307,30 +316,24 @@ public sealed class PtySession : IDisposable
     }
 
     /// <summary>
-    /// Sends bytes to the shell's standard input. Never metered: input travels at full
+    /// Queues bytes for the shell's standard input. Never metered: input travels at full
     /// speed, and it is the echo coming back that the baud governor slows down.
     /// </summary>
+    /// <remarks>
+    /// Returns as soon as the bytes are queued. A writer thread performs the actual
+    /// WriteFile, because writing to a pseudoconsole input handle can block when the child
+    /// is not reading — and doing that on the render thread would stall the frame loop,
+    /// which would stall the governor, which would corrupt the one thing this application
+    /// exists to get right.
+    /// </remarks>
     public void Write(ReadOnlySpan<byte> bytes)
     {
-        if (Volatile.Read(ref _disposed) != 0)
+        if (Volatile.Read(ref _disposed) != 0 || bytes.IsEmpty)
         {
             return;
         }
 
-        unsafe
-        {
-            fixed (byte* p = bytes)
-            {
-                if (!NativeMethods.WriteFile(_inputWriteRaw, p, (uint)bytes.Length, out var written, 0))
-                {
-                    LastWriteError = Marshal.GetLastWin32Error();
-                    return;
-                }
-
-                LastWriteError = 0;
-                BytesWritten += written;
-            }
-        }
+        _outbound.Add(bytes.ToArray());
     }
 
     /// <summary>Tells ConPTY the grid changed. ConPTY's width, not ours, decides where the shell wraps.</summary>
@@ -378,6 +381,37 @@ public sealed class PtySession : IDisposable
 
     private int GetExitCode() =>
         NativeMethods.GetExitCodeProcess(_processHandle, out var code) ? unchecked((int)code) : -1;
+
+    private unsafe void WriterLoop()
+    {
+        try
+        {
+            foreach (var chunk in _outbound.GetConsumingEnumerable())
+            {
+                if (Volatile.Read(ref _disposed) != 0)
+                {
+                    return;
+                }
+
+                fixed (byte* p = chunk)
+                {
+                    if (!NativeMethods.WriteFile(_inputWriteRaw, p, (uint)chunk.Length, out var written, 0))
+                    {
+                        LastWriteError = Marshal.GetLastWin32Error();
+                        return;
+                    }
+
+                    LastWriteError = 0;
+                    BytesWritten += written;
+                }
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // The queue was completed, or the handle closed, while we were waiting on it.
+            // Both are normal shutdown. (ObjectDisposedException derives from this.)
+        }
+    }
 
     private void ReaderLoop()
     {
@@ -427,6 +461,15 @@ public sealed class PtySession : IDisposable
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
             return;
+        }
+
+        // 0. Stop accepting input and let the writer drain out.
+        _outbound.CompleteAdding();
+        if (_writerThread.IsAlive)
+        {
+            // Guarded: a failed Launch disposes before the threads were ever started, and
+            // joining an unstarted thread throws.
+            _writerThread.Join(TimeSpan.FromSeconds(1));
         }
 
         // 1. Close stdin. pwsh and cmd both exit on end-of-input, which lets the shell

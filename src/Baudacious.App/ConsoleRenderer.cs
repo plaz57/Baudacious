@@ -1,16 +1,9 @@
 using System.Globalization;
 using System.Text;
 using Baudacious.Core.Terminal;
+using Baudacious.Render;
 
 namespace Baudacious.App;
-
-public enum Phosphor
-{
-    Colour,
-    Green,
-    Amber,
-    White,
-}
 
 /// <summary>
 /// Paints a <see cref="Screen"/> onto the host console, repainting only rows that changed.
@@ -122,56 +115,7 @@ internal sealed class ConsoleRenderer
         return builder.ToString();
     }
 
-    /// <summary>
-    /// Resolves a cell's colours, applying the phosphor transform.
-    /// </summary>
-    private (uint Foreground, uint Background) Map(Cell cell)
-    {
-        var foreground = cell.Foreground;
-        var background = cell.Background;
+    private (uint Foreground, uint Background) Map(Cell cell) =>
+        PhosphorMap.Resolve(cell, Phosphor);
 
-        if (cell.Flags.HasFlag(CellFlags.Reverse))
-        {
-            (foreground, background) = (background, foreground);
-        }
-
-        if (cell.Flags.HasFlag(CellFlags.Invisible))
-        {
-            foreground = background;
-        }
-
-        if (Phosphor == Phosphor.Colour)
-        {
-            return (foreground, background);
-        }
-
-        var tint = Phosphor switch
-        {
-            Phosphor.Green => (0x33u, 0xFFu, 0x66u),
-            Phosphor.Amber => (0xFFu, 0xB0u, 0x00u),
-            _ => (0xF0u, 0xF0u, 0xFFu),
-        };
-
-        var intensity = Palette.Luminance(foreground);
-        if (cell.Flags.HasFlag(CellFlags.Bold))
-        {
-            intensity = Math.Min(1.0, intensity * 1.4);
-        }
-
-        if (cell.Flags.HasFlag(CellFlags.Faint))
-        {
-            intensity *= 0.6;
-        }
-
-        return (Tint(tint, intensity), Tint(tint, Palette.Luminance(background) * 0.35));
-    }
-
-    private static uint Tint((uint R, uint G, uint B) colour, double intensity)
-    {
-        intensity = Math.Clamp(intensity, 0.0, 1.0);
-        return Palette.Rgb(
-            (int)(colour.R * intensity),
-            (int)(colour.G * intensity),
-            (int)(colour.B * intensity));
-    }
 }

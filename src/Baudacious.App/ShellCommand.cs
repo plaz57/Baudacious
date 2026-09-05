@@ -4,6 +4,7 @@ using Baudacious.Core.Baud;
 using Baudacious.Core.Terminal;
 using Baudacious.Core.Timing;
 using Baudacious.Pty;
+using Baudacious.Render;
 
 namespace Baudacious.App;
 
@@ -408,58 +409,8 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
 
     // ---- Profiles -------------------------------------------------------------
 
-    private static (PtyStartInfo Start, string[] Setup) BuildProfile(string profile, bool fastEcho)
-    {
-        if (profile is "cmd")
-        {
-            // cmd already echoes one byte per keystroke; nothing to tame.
-            return (
-                new PtyStartInfo
-                {
-                    Executable = Path.Combine(Environment.SystemDirectory, "cmd.exe"),
-                },
-                []);
-        }
-
-        var pwsh = ResolvePwsh();
-        var start = new PtyStartInfo { Executable = pwsh, Arguments = "-NoLogo -NoProfile" };
-
-        // Fast echo: dropping PSReadLine puts pwsh at 1.0 bytes per keystroke, the same as
-        // cmd, instead of 96.9. Measured in Phase 0; without it, typing at 1200 baud falls
-        // progressively further behind the longer you type.
-        return fastEcho
-            ? (start, ["Remove-Module PSReadLine -ErrorAction SilentlyContinue", "function prompt { 'PS> ' }"])
-            : (start, ["Set-PSReadLineOption -PredictionSource None", "function prompt { 'PS> ' }"]);
-    }
-
-    private static string ResolvePwsh()
-    {
-        var candidates = new List<string>();
-        foreach (var directory in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
-                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
-        {
-            candidates.Add(Path.Combine(directory.Trim(), "pwsh.exe"));
-        }
-
-        candidates.Add(@"C:\Program Files\PowerShell\7\pwsh.exe");
-
-        foreach (var candidate in candidates)
-        {
-            try
-            {
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-            catch (ArgumentException)
-            {
-            }
-        }
-
-        throw new FileNotFoundException(
-            $"Could not find pwsh.exe (looked in {candidates.Count} places). Try --shell cmd.");
-    }
+    private static (PtyStartInfo Start, string[] Setup) BuildProfile(string profile, bool fastEcho) =>
+        ShellProfiles.Build(profile, fastEcho);
 
     private static void Usage() =>
         Console.Error.WriteLine("""

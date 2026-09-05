@@ -8,3 +8,6 @@ obj/
 # ad-hoc capture runs are not.
 spike/captures/
 *.log
+
+# Local render dumps from the shot/atlas diagnostics.
+scratch/
