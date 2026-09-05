@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- unscii-16 by Viznut, public domain. See assets/README.md. -->
+    <EmbeddedResource Include="..\..\assets\unscii-16.hex" LogicalName="Baudacious.Render.unscii-16.hex" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Baudacious.Core\Baudacious.Core.csproj" />
   </ItemGroup>
 

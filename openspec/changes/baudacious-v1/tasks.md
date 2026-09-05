@@ -59,7 +59,7 @@ indicator (7.9).
 ## 4. Phase 3 — First light
 
 - [x] 4.1 Add Silk.NET.Windowing, Silk.NET.OpenGL, Silk.NET.Input; open a window with a GL 3.3 core context and clear it
-- [x] 4.2 Build the CP437 8x16 glyph atlas as a 128x256 R8 texture and its loader, from whichever source Open Question 1 resolves to
+- [x] 4.2 Build the CP437 8x16 glyph atlas as a 128x256 R8 texture and its loader — Open Question 1 resolved to unscii-16 (public domain), embedded as a `.hex` resource
 - [x] 4.3 Implement the instanced text shader and per-frame instance buffer: one instance per cell carrying position, glyph index, fg, bg, and flags
 - [x] 4.4 Render the grid to an FBO at native cell resolution and blit it to the screen with nearest sampling and integer scaling
 - [x] 4.5 Implement attribute rendering: bold, faint, underline, reverse, invisible, strikethrough, and blink

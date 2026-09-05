@@ -456,8 +456,8 @@ terminal worse to use has failed.
 in the row model from the first commit, plus property tests that resize narrow →
 wide → narrow and assert the content round-trips.
 
-**Font licensing** → Does not block development; the atlas sits behind one
-loader. Resolved before any public release. See Open Questions.
+**~~Font licensing~~ — RESOLVED in Phase 3.** unscii-16, public domain, embedded. No
+obligations to carry.
 
 **Six capabilities is a lot for a v1** → Addressed by the phasing below, in
 which each phase ends in something demonstrable rather than in a layer. The
@@ -509,11 +509,15 @@ if it does not meet the legibility bar in time.
 
 ## Open Questions
 
-- **Font asset provenance.** Ship VileR's CC BY-SA 4.0 pack with attribution, or
-  generate the atlas at build time from a public-domain ROM-derived 8x16 bitmap?
-  The share-alike obligation on an embedded derived atlas needs a proper read.
-  One loader, one asset, no architectural consequence — resolvable any time
-  before release.
+- ~~**Font asset provenance.**~~ **RESOLVED (Phase 3).** unscii-16 by Viznut, an 8x16
+  bitmap face in the **public domain**, embedded as a `.hex` resource. It covers 250 of
+  the 256 CP437 slots; two of the rest are derived from glyphs it does have and two fall
+  back to a thresholded system face. No attribution obligation, no share-alike, nothing to
+  reconcile if Baudacious is licensed permissively later. Note the trap: the `unscii-16-full`
+  variant pulls in GNU Unifont and is GPL — only the plain variant is public domain.
+  VileR's CC BY-SA pack was the alternative and was passed over to keep the asset licence
+  clean. See `assets/README.md`.
+
 - **Exact CRT parameter values.** Bloom radius, scanline duty cycle and depth,
   vignette falloff. These are tuned by eye against reference photographs in
   Phase 5, not decided now.

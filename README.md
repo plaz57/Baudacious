@@ -13,11 +13,10 @@ accurately enough that a stopwatch agrees with it.
 
 ## Try it
 
-Needs .NET 10 and Windows 10 1809 or later. Run it from a **real terminal
-window** — piping its output confuses the hosted shell's console attachment.
+Needs .NET 10, Windows 10 1809 or later, and a GPU with OpenGL 3.3.
 
 ```
-dotnet run -c Release --project src/Baudacious.App -- shell --baud 1200 --shell cmd
+dotnet run -c Release --project src/Baudacious.App -- --baud 1200 --shell cmd
 ```
 
 | Key | |
@@ -25,15 +24,20 @@ dotnet run -c Release --project src/Baudacious.App -- shell --baud 1200 --shell 
 | `Alt+B` | step through 110 → 300 → 1200 → … → 115200 |
 | `Alt+F` | fast-forward the queued backlog |
 | `Alt+P` | cycle phosphor: green, amber, white, full colour |
+| `Alt+-` / `Alt+=` | font scale |
 | `Alt+X` | quit |
 | `Ctrl+C` | interrupt the shell **and** drop the backlog |
 
-Try `dir /s` at 1200 baud, then `Alt+F` when you have seen enough.
+Try `dir /s` at 1200 baud, then `Alt+F` when you have seen enough. Add
+`--phosphor amber` for the other kind of monitor.
 
-You can also replay a recorded session without a shell:
+There are three diagnostics, all of which want a **real terminal window** —
+piping their output confuses the hosted shell's console attachment:
 
 ```
-dotnet run -c Release --project src/Baudacious.App -- meter tests/fixtures/conpty-captures/cmd-listing.bin --baud 300
+... console --baud 1200 --shell cmd        the same thing, painted into the host console
+... meter tests/fixtures/conpty-captures/cmd-listing.bin --baud 300
+... shot --out frame.png                   render one frame through the real GL pipeline
 ```
 
 ## How it works
@@ -65,16 +69,19 @@ is the authentic behaviour of a fast host on a slow line.
 
 ## Status
 
-Phases 0–2 of [the v1 plan](openspec/changes/baudacious-v1/tasks.md) are done:
-ConPTY hosting, the governor, and terminal emulation, with a console renderer
-standing in for the real one. **The GPU window and the CRT shader are still
-ahead** — Baudacious currently paints into a host console.
+Phases 0–3 of [the v1 plan](openspec/changes/baudacious-v1/tasks.md) are done:
+ConPTY hosting, the governor, terminal emulation, and the GPU window. **The CRT
+pass is still ahead** — bloom, scanlines and vignette are Phase 5, so text is
+currently crisp rather than glowing.
 
 - `src/Baudacious.Core` — governor, VT parser, cell grid, scrollback, reflow.
   No I/O, no graphics, no clock of its own; fully unit-testable.
 - `src/Baudacious.Pty` — ConPTY interop. Hand-written, because the hard part of
   ConPTY is handle lifetime and wrapping it hides the thing that has to be right.
-- `src/Baudacious.App` — composition root and the console harness.
+- `src/Baudacious.Render` — OpenGL 3.3. Text goes into an offscreen target at
+  native cell resolution, then blits out at whole-number magnification; the CRT
+  pass will slot in between those two steps.
+- `src/Baudacious.App` — composition root, the window, and the diagnostics.
 - `spike/` — the Phase 0 measurement spike. Throwaway, kept for the record.
 
 185 tests. The one that matters most replays every recorded ConPTY session twice
@@ -104,6 +111,15 @@ Recorded in [phase-0-findings.md](openspec/changes/baudacious-v1/phase-0-finding
   end-of-input and exits with status 0 about 100 ms in — after printing a banner
   and a prompt, so it looks like it worked.
 
+## Fonts
+
+Text is drawn from **unscii-16** by Viznut, an 8x16 bitmap face in the **public domain**,
+embedded as a `.hex` resource. A bitmap font rather than an outline one because an outline
+typeface rasterised to eight pixels wide has no room to make good decisions and comes out
+mushy — and because a face designed for this cell draws box-drawing characters that
+actually join. See [assets/README.md](assets/README.md).
+
 ## Licence
 
-Not yet chosen.
+Not yet chosen for the project itself. The one bundled asset is public domain, so it
+places no constraint on that choice.

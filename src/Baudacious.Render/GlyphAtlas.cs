@@ -10,16 +10,17 @@ namespace Baudacious.Render;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Letters and punctuation are rasterised from a system monospace face. Box drawing,
-/// block elements and shading are <b>synthesised geometrically instead</b>, because a
-/// typeface rendered at eight pixels wide will not make <c>┌</c> and <c>─</c> meet
-/// exactly, and a table with visible seams at every join looks broken. Drawing the runs
-/// ourselves guarantees they line up.
+/// Glyphs come from <b>unscii-16</b>, a hand-drawn 8x16 bitmap face in the public domain
+/// (see <see cref="HexFont"/>). A bitmap font is the right tool here: an outline typeface
+/// rasterised to eight pixels wide has no room to make good decisions and comes out
+/// mushy, whereas a bitmap face has every stem placed deliberately — and its box drawing
+/// is built to join, so tables have no seams.
 /// </para>
 /// <para>
-/// This is the pragmatic stand-in for the authentic IBM VGA ROM face, which is Open
-/// Question 1 in design.md. Nothing above this class knows where the pixels came from, so
-/// resolving that question means replacing this one file's raster source.
+/// unscii covers 250 of the 256 CP437 slots. The handful it lacks are filled by
+/// rasterising a system monospace face and collapsing that to 1-bit, so they sit beside
+/// the bitmap glyphs without looking blurred. Nothing above this class knows or cares
+/// where the pixels came from.
 /// </para>
 /// </remarks>
 [SupportedOSPlatform("windows")]
@@ -50,7 +51,11 @@ public sealed class GlyphAtlas
 
     /// <summary>Builds the atlas. 8x16 is the VGA text cell and the default everywhere.</summary>
     public static GlyphAtlas Build(
-        int cellWidth = 8, int cellHeight = 16, string? fontFamily = null, double threshold = 0)
+        int cellWidth = 8,
+        int cellHeight = 16,
+        string? fontFamily = null,
+        double threshold = 0,
+        HexFont? font = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(cellWidth, 4);
         ArgumentOutOfRangeException.ThrowIfLessThan(cellHeight, 6);
@@ -58,21 +63,34 @@ public sealed class GlyphAtlas
         var pixels = new byte[cellWidth * Columns * cellHeight * Columns];
         var atlas = new GlyphAtlas(cellWidth, cellHeight, pixels);
 
+        // Order matters. The outline face is rasterised first to fill every slot, then the
+        // bitmap font is blitted over the slots it covers. Whatever is left came from the
+        // outline face, and gets thresholded to 1-bit so it does not sit next to crisp
+        // bitmap glyphs looking blurry.
         atlas.RasterizeFromFont(fontFamily);
 
-        // A hard threshold turns the grey antialiasing into 1-bit coverage, which is how a
-        // real ROM font is stored. Whether it reads as crisper or just broken depends
-        // entirely on the face, so it is an experiment rather than a default.
+        var gaps = new List<int>();
+        if (cellWidth == 8 && cellHeight == 16 && (font ?? HexFont.LoadEmbedded()) is { } bitmap)
+        {
+            gaps = atlas.BlitFrom(bitmap);
+            gaps = atlas.DeriveMissing(bitmap, gaps);
+        }
+
+        foreach (var slot in gaps)
+        {
+            atlas.Threshold(slot, 0.45);
+        }
+
+        // A hard threshold everywhere turns the antialiasing into 1-bit coverage. Rarely
+        // wanted now that the bitmap face covers almost everything, so it stays opt-in.
         if (threshold > 0)
         {
-            var cut = (byte)(threshold * 255);
-            for (var i = 0; i < atlas.Pixels.Length; i++)
+            for (var slot = 0; slot < 256; slot++)
             {
-                atlas.Pixels[i] = atlas.Pixels[i] >= cut ? (byte)0xFF : (byte)0x00;
+                atlas.Threshold(slot, threshold);
             }
         }
-        atlas.SynthesizeBlocks();
-        atlas.SynthesizeBoxDrawing();
+
         atlas.Clear(0x00);   // NUL draws nothing
         atlas.Clear(0x20);   // and neither does space
         atlas.Clear(0xFF);   // nor non-breaking space
@@ -101,17 +119,6 @@ public sealed class GlyphAtlas
 
         var (originX, originY) = Origin(slot);
         Pixels[((originY + y) * Width) + originX + x] = value;
-    }
-
-    private void FillRect(int slot, int x0, int y0, int x1, int y1, byte value = 0xFF)
-    {
-        for (var y = y0; y <= y1; y++)
-        {
-            for (var x = x0; x <= x1; x++)
-            {
-                Set(slot, x, y, value);
-            }
-        }
     }
 
     // ---- Rasterisation from a system face ------------------------------------
@@ -239,144 +246,91 @@ public sealed class GlyphAtlas
         }
     }
 
-    // ---- Synthesised block elements ------------------------------------------
-
-    private void SynthesizeBlocks()
+    /// <summary>
+    /// Copies every glyph the bitmap font provides into its CP437 slot. Returns the slots
+    /// it could not fill, which stay as the outline face rasterised them.
+    /// </summary>
+    /// <remarks>
+    /// No geometric synthesis of box drawing or block elements any more. A font designed
+    /// for an 8x16 cell already draws them so they join, and substituting our own would be
+    /// a downgrade — the earlier synthesis never got double-line junctions quite right.
+    /// </remarks>
+    private List<int> BlitFrom(HexFont font)
     {
-        var right = CellWidth - 1;
-        var bottom = CellHeight - 1;
-        var midX = (CellWidth / 2) - 1;
-        var midY = (CellHeight / 2) - 1;
+        var gaps = new List<int>();
 
-        Clear(0xDB);
-        FillRect(0xDB, 0, 0, right, bottom);                    // █ full
+        for (var slot = 0; slot < 256; slot++)
+        {
+            if (font.Rows(Cp437.ToUnicode[slot]) is not { } rows)
+            {
+                gaps.Add(slot);
+                continue;
+            }
 
-        Clear(0xDC);
-        FillRect(0xDC, 0, midY + 1, right, bottom);             // ▄ lower half
+            // Most significant bit is the leftmost pixel.
+            Blit(slot, rows, mirror: false);
+        }
 
-        Clear(0xDD);
-        FillRect(0xDD, 0, 0, midX, bottom);                     // ▌ left half
-
-        Clear(0xDE);
-        FillRect(0xDE, midX + 1, 0, right, bottom);             // ▐ right half
-
-        Clear(0xDF);
-        FillRect(0xDF, 0, 0, right, midY);                      // ▀ upper half
-
-        // The shades are dither patterns rather than flat greys, which is what the ROM
-        // font did and what makes them read as texture at 1x.
-        Dither(0xB0, (x, y) => (x % 2 == 0) && (y % 2 == 0));                   // ░ 25%
-        Dither(0xB1, (x, y) => (x + y) % 2 == 0);                               // ▒ 50%
-        Dither(0xB2, (x, y) => !((x % 2 == 1) && (y % 2 == 1)));                // ▓ 75%
-
-        // ■ and ∙ and · are small centred blocks; the font's versions are inconsistent.
-        Clear(0xFE);
-        FillRect(0xFE, 1, 3, CellWidth - 2, CellHeight - 5);                     // ■
+        return gaps;
     }
 
-    private void Dither(int slot, Func<int, int, bool> on)
+    /// <summary>
+    /// Fills what gaps it can from glyphs the font does have, rather than falling back to
+    /// the outline face. Returns the slots still unfilled.
+    /// </summary>
+    private List<int> DeriveMissing(HexFont font, List<int> gaps)
     {
-        Clear(slot);
-        for (var y = 0; y < CellHeight; y++)
+        var remaining = new List<int>();
+
+        foreach (var slot in gaps)
         {
+            switch (Cp437.ToUnicode[slot])
+            {
+                // BULLET OPERATOR is the same mark as BULLET at this size.
+                case '∙' when font.Rows('•') is { } bullet:
+                    Blit(slot, bullet, mirror: false);
+                    break;
+
+                // REVERSED NOT SIGN is NOT SIGN flipped left-to-right, so deriving it keeps
+                // the two consistent instead of pairing a bitmap glyph with an outline one.
+                case '⌐' when font.Rows('¬') is { } notSign:
+                    Blit(slot, notSign, mirror: true);
+                    break;
+
+                default:
+                    remaining.Add(slot);
+                    break;
+            }
+        }
+
+        return remaining;
+    }
+
+    private void Blit(int slot, byte[] rows, bool mirror)
+    {
+        for (var y = 0; y < CellHeight && y < rows.Length; y++)
+        {
+            var bits = rows[y];
             for (var x = 0; x < CellWidth; x++)
             {
-                if (on(x, y))
-                {
-                    Set(slot, x, y, 0xFF);
-                }
+                var source = mirror ? CellWidth - 1 - x : x;
+                Set(slot, x, y, (bits & (0x80 >> source)) != 0 ? (byte)0xFF : (byte)0x00);
             }
         }
     }
 
-    // ---- Synthesised box drawing ----------------------------------------------
-
-    /// <summary>Line weight on each side of a box-drawing glyph: 0 none, 1 single, 2 double.</summary>
-    private readonly record struct Box(int Up, int Down, int Left, int Right);
-
-    private static readonly Dictionary<int, Box> BoxTable = new()
+    /// <summary>Collapses one slot's antialiasing to 1-bit coverage.</summary>
+    private void Threshold(int slot, double level)
     {
-        [0xB3] = new(1, 1, 0, 0), [0xB4] = new(1, 1, 1, 0), [0xB5] = new(1, 1, 2, 0),
-        [0xB6] = new(2, 2, 1, 0), [0xB7] = new(0, 2, 1, 0), [0xB8] = new(0, 1, 2, 0),
-        [0xB9] = new(2, 2, 2, 0), [0xBA] = new(2, 2, 0, 0), [0xBB] = new(0, 2, 2, 0),
-        [0xBC] = new(2, 0, 2, 0), [0xBD] = new(2, 0, 1, 0), [0xBE] = new(1, 0, 2, 0),
-        [0xBF] = new(0, 1, 1, 0), [0xC0] = new(1, 0, 0, 1), [0xC1] = new(1, 0, 1, 1),
-        [0xC2] = new(0, 1, 1, 1), [0xC3] = new(1, 1, 0, 1), [0xC4] = new(0, 0, 1, 1),
-        [0xC5] = new(1, 1, 1, 1), [0xC6] = new(1, 1, 0, 2), [0xC7] = new(2, 2, 0, 1),
-        [0xC8] = new(2, 0, 0, 2), [0xC9] = new(0, 2, 0, 2), [0xCA] = new(2, 0, 2, 2),
-        [0xCB] = new(0, 2, 2, 2), [0xCC] = new(2, 2, 0, 2), [0xCD] = new(0, 0, 2, 2),
-        [0xCE] = new(2, 2, 2, 2), [0xCF] = new(1, 0, 2, 2), [0xD0] = new(2, 0, 1, 1),
-        [0xD1] = new(0, 1, 2, 2), [0xD2] = new(0, 2, 1, 1), [0xD3] = new(2, 0, 0, 1),
-        [0xD4] = new(1, 0, 0, 2), [0xD5] = new(0, 1, 0, 2), [0xD6] = new(0, 2, 0, 1),
-        [0xD7] = new(2, 2, 1, 1), [0xD8] = new(1, 1, 2, 2), [0xD9] = new(1, 0, 1, 0),
-        [0xDA] = new(0, 1, 0, 1),
-    };
+        var cut = (byte)(Math.Clamp(level, 0, 1) * 255);
+        var (originX, originY) = Origin(slot);
 
-    private void SynthesizeBoxDrawing()
-    {
-        // Single lines sit on the centre row and column; double lines straddle them. Every
-        // glyph is built from the same four coordinates, which is what makes the joins land
-        // exactly no matter which pair of characters end up side by side.
-        var cx = (CellWidth - 1) / 2;
-        var cy = (CellHeight - 1) / 2;
-        var stroke = Math.Max(1, CellHeight / 16);
-        var cxA = cx - stroke;
-        var cxB = cx + stroke;
-        var cyA = cy - stroke;
-        var cyB = cy + stroke;
-        var right = CellWidth - 1;
-        var bottom = CellHeight - 1;
-
-        foreach (var (slot, box) in BoxTable)
+        for (var y = 0; y < CellHeight; y++)
         {
-            Clear(slot);
-
-            // How far an arm runs is decided by the member it meets, not by its own weight:
-            // a horizontal arm stops where the vertical stroke begins. With no perpendicular
-            // member at all it crosses the whole cell, which is what makes a bare - or |
-            // continuous with its neighbours.
-            var vertical = Math.Max(box.Up, box.Down);
-            var horizontal = Math.Max(box.Left, box.Right);
-
-            var leftStop = vertical == 0 ? right : vertical == 1 ? cx + stroke - 1 : cxA + stroke - 1;
-            var rightStart = vertical == 0 ? 0 : vertical == 1 ? cx : cxB;
-            var upStop = horizontal == 0 ? bottom : horizontal == 1 ? cy + stroke - 1 : cyA + stroke - 1;
-            var downStart = horizontal == 0 ? 0 : horizontal == 1 ? cy : cyB;
-
-            DrawArm(slot, box.Left, horizontal: true, from: 0, to: leftStop, cyA, cy, cyB);
-            DrawArm(slot, box.Right, horizontal: true, from: rightStart, to: right, cyA, cy, cyB);
-            DrawArm(slot, box.Up, horizontal: false, from: 0, to: upStop, cxA, cx, cxB);
-            DrawArm(slot, box.Down, horizontal: false, from: downStart, to: bottom, cxA, cx, cxB);
-        }
-    }
-
-    private void DrawArm(int slot, int weight, bool horizontal, int from, int to, int lowLane, int midLane, int highLane)
-    {
-        if (weight == 0 || to < from)
-        {
-            return;
-        }
-
-        // Stroke width tracks the cell so a larger atlas is not drawn in hairlines. The
-        // 8x16 VGA cell gives 1, which is what the ROM font used.
-        var stroke = Math.Max(1, CellHeight / 16);
-        Span<int> lanes = weight == 1 ? [midLane] : [lowLane, highLane];
-
-        foreach (var lane in lanes)
-        {
-            for (var t = 0; t < stroke; t++)
+            for (var x = 0; x < CellWidth; x++)
             {
-                for (var i = from; i <= to; i++)
-                {
-                    if (horizontal)
-                    {
-                        Set(slot, i, lane + t, 0xFF);
-                    }
-                    else
-                    {
-                        Set(slot, lane + t, i, 0xFF);
-                    }
-                }
+                var index = ((originY + y) * Width) + originX + x;
+                Pixels[index] = Pixels[index] >= cut ? (byte)0xFF : (byte)0x00;
             }
         }
     }
