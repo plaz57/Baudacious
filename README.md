@@ -121,5 +121,8 @@ actually join. See [assets/README.md](assets/README.md).
 
 ## Licence
 
-Not yet chosen for the project itself. The one bundled asset is public domain, so it
-places no constraint on that choice.
+[MIT](LICENSE). Do what you like with it.
+
+Everything Baudacious depends on is permissive too — Silk.NET and System.Drawing.Common
+are MIT, xunit is Apache-2.0 and test-only, and the bundled font is public domain. Nothing
+in the tree is copyleft. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
