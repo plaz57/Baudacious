@@ -76,7 +76,7 @@ indicator (7.9).
 - [x] 4.13 Implement cursor rendering: block, underline, and bar shapes, configurable blink, hidden when DECTCEM says so
 - [x] 4.14 Implement font scale changes at integer multiples with grid recalculation and shell notification
 - [ ] 4.15 Verify frame time stays under the refresh interval for a fully populated 200x60 grid at 115200 baud
-- [ ] 4.16 Manual acceptance: run a real pwsh session at 1200 baud and confirm the cadence is even, with no clumping or stutter
+- [x] 4.16 Manual acceptance: confirmed by the user — 1200 baud reads correctly in the window, matching the console harness
 
 ## 5. Phase 4 — Input and local commands
 

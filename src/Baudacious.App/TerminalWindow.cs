@@ -47,6 +47,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private string _notice = string.Empty;
     private long _noticeUntil;
     private bool _needsPresent = true;
+
+    // Silk.NET raises KeyDown once per physical press and never for the OS repeat, so
+    // printable characters repeat (they arrive as KeyChar, which does repeat) while
+    // Backspace, Delete and the arrows do not. These drive our own repeat for that second
+    // group only, so nothing ends up repeating twice.
+    private Key _repeatKey = Key.Unknown;
+    private byte[] _repeatBytes = [];
+    private long _repeatNextAt;
+    private bool _repeatStarted;
     private double _idleSeconds;
     private int? _exitCode;
 
@@ -109,6 +118,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         foreach (var keyboard in _input.Keyboards)
         {
             keyboard.KeyDown += OnKeyDown;
+            keyboard.KeyUp += OnKeyUp;
             keyboard.KeyChar += OnKeyChar;
         }
 
@@ -167,7 +177,10 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     {
         var scale = Math.Max(1, _settings.FontScale);
         var columns = Math.Max(20, framebuffer.X / (_atlas.CellWidth * scale));
-        var rows = Math.Max(5, (framebuffer.Y - (16 * scale)) / (_atlas.CellHeight * scale));
+
+        // One row is reserved for the status bar, which lives below the grid rather than
+        // inside it.
+        var rows = Math.Max(5, (framebuffer.Y / (_atlas.CellHeight * scale)) - 1);
         return (columns, rows);
     }
 
@@ -175,6 +188,8 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void OnRender(double delta)
     {
+        PumpKeyRepeat();
+
         var released = _governor.Tick(_parser);
         if (released > 0)
         {
@@ -205,7 +220,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         if (_needsPresent)
         {
-            _renderer.RenderToTarget(_screen, _settings, _clock.Elapsed);
+            _renderer.RenderToTarget(_screen, _settings, _clock.Elapsed, StatusLine());
             _renderer.Present(_window.FramebufferSize.X, _window.FramebufferSize.Y, _settings);
             _window.Title = BuildTitle();
             _needsPresent = false;
@@ -217,6 +232,30 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             Thread.Sleep(90);
         }
+    }
+
+    /// <summary>
+    /// The bottom bar: line rate, what is still on the wire, and the local key bindings.
+    /// specs/display-rendering wants the pending backlog visible; having the bindings
+    /// there too means nobody has to remember them.
+    /// </summary>
+    private string StatusLine()
+    {
+        var pending = _governor.PendingBytes;
+        var backlog = pending == 0
+            ? "idle"
+            : string.Create(
+                CultureInfo.InvariantCulture,
+                $"{pending} pending, {_governor.EstimatedDrain.TotalSeconds:F1}s");
+
+        if (Environment.TickCount64 < _noticeUntil)
+        {
+            return string.Create(CultureInfo.InvariantCulture, $" {_governor.Rate}  [{backlog}]  {_notice}");
+        }
+
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $" {_governor.Rate}  [{backlog}]  alt+B baud  alt+F flush  alt+P phosphor  alt+X quit");
     }
 
     private string BuildTitle()
@@ -260,8 +299,17 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void OnClosing()
     {
+        // GL resources have to go here, not in Dispose. Closing fires with the context
+        // still current; by the time Run() returns and Dispose is reached, GLFW has torn
+        // the context down and every glDelete* throws NoContext.
         _session?.Dispose();
         _session = null;
+
+        _renderer?.Dispose();
+        _renderer = null!;
+
+        _input?.Dispose();
+        _input = null!;
     }
 
     // ---- Input ------------------------------------------------------------------
@@ -304,7 +352,47 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         if (!bytes.IsEmpty)
         {
             _session?.Write(bytes.Span);
+            BeginRepeat(key, bytes);
         }
+    }
+
+    private void OnKeyUp(IKeyboard keyboard, Key key, int _)
+    {
+        if (key == _repeatKey)
+        {
+            _repeatKey = Key.Unknown;
+        }
+    }
+
+    /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
+    private static readonly long RepeatDelayMs = 450;
+    private static readonly long RepeatIntervalMs = 33;
+
+    private void BeginRepeat(Key key, ReadOnlyMemory<byte> bytes)
+    {
+        _repeatKey = key;
+        _repeatBytes = bytes.ToArray();
+        _repeatNextAt = Environment.TickCount64 + RepeatDelayMs;
+        _repeatStarted = false;
+    }
+
+    private void PumpKeyRepeat()
+    {
+        if (_repeatKey == Key.Unknown || _session is null)
+        {
+            return;
+        }
+
+        var now = Environment.TickCount64;
+        if (now < _repeatNextAt)
+        {
+            return;
+        }
+
+        _session.Write(_repeatBytes);
+        _repeatNextAt = now + RepeatIntervalMs;
+        _repeatStarted = true;
+        _ = _repeatStarted;
     }
 
     private bool HandleLocalCommand(Key key)
@@ -384,9 +472,10 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     public void Dispose()
     {
+        // Everything GL-shaped was already released in OnClosing, while the context was
+        // still current. Only the window itself is left.
         _session?.Dispose();
-        _renderer?.Dispose();
-        _input?.Dispose();
+        _session = null;
         _window?.Dispose();
     }
 }

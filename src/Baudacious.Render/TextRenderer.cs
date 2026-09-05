@@ -321,6 +321,7 @@ public sealed class TextRenderer : IDisposable
     /// <summary>Sizes the offscreen target to the grid, at one texel per glyph pixel.</summary>
     public unsafe void ResizeTarget(int columns, int rows)
     {
+        // `rows` here already includes the status line when one is shown.
         var width = columns * _atlas.CellWidth;
         var height = rows * _atlas.CellHeight;
 
@@ -377,13 +378,15 @@ public sealed class TextRenderer : IDisposable
     // ---- Drawing --------------------------------------------------------------
 
     /// <summary>Draws the grid into the offscreen target.</summary>
-    public unsafe void RenderToTarget(Screen screen, DisplaySettings settings, TimeSpan elapsed)
+    public unsafe void RenderToTarget(
+        Screen screen, DisplaySettings settings, TimeSpan elapsed, string? status = null)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
 
-        ResizeTarget(screen.Columns, screen.RowCount);
-        BuildInstances(screen, settings, elapsed);
+        var totalRows = screen.RowCount + (status is null ? 0 : 1);
+        ResizeTarget(screen.Columns, totalRows);
+        BuildInstances(screen, settings, elapsed, status);
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, _framebuffer);
         _gl.Viewport(0, 0, (uint)_targetWidth, (uint)_targetHeight);
@@ -414,7 +417,7 @@ public sealed class TextRenderer : IDisposable
         _gl.ActiveTexture(TextureUnit.Texture0);
         _gl.BindTexture(TextureTarget.Texture2D, _glyphTexture);
         _gl.Uniform1(_gl.GetUniformLocation(_program, "uGlyphs"), 0);
-        _gl.Uniform2(_gl.GetUniformLocation(_program, "uGridSize"), (float)screen.Columns, (float)screen.RowCount);
+        _gl.Uniform2(_gl.GetUniformLocation(_program, "uGridSize"), (float)screen.Columns, (float)totalRows);
         _gl.Uniform2(_gl.GetUniformLocation(_program, "uCellSize"), (float)_atlas.CellWidth, (float)_atlas.CellHeight);
         _gl.Uniform2(_gl.GetUniformLocation(_program, "uAtlasSize"), (float)_atlas.Width, (float)_atlas.Height);
 
@@ -478,9 +481,9 @@ public sealed class TextRenderer : IDisposable
         return ((float)(r * 0.02), (float)(g * 0.02), (float)(b * 0.02));
     }
 
-    private void BuildInstances(Screen screen, DisplaySettings settings, TimeSpan elapsed)
+    private void BuildInstances(Screen screen, DisplaySettings settings, TimeSpan elapsed, string? status)
     {
-        var needed = screen.Columns * screen.RowCount;
+        var needed = screen.Columns * (screen.RowCount + 1);
         if (_instances.Length < needed)
         {
             _instances = new Instance[needed];
@@ -538,7 +541,46 @@ public sealed class TextRenderer : IDisposable
             }
         }
 
+        if (status is not null)
+        {
+            count = AppendStatusRow(status, screen.Columns, screen.RowCount, settings, count);
+        }
+
         _instanceCount = count;
+    }
+
+    /// <summary>
+    /// Draws the status bar as one extra row below the grid, in reverse video.
+    /// </summary>
+    /// <remarks>
+    /// It is deliberately not part of the terminal grid: the shell must never be able to
+    /// scroll it away, overwrite it, or be told the screen is a row taller than it is.
+    /// </remarks>
+    private int AppendStatusRow(
+        string status, int columns, int row, DisplaySettings settings, int count)
+    {
+        var lit = PhosphorMap.Resolve(
+            new Cell(' ', Palette.DefaultForeground, Palette.DefaultBackground, CellFlags.None),
+            settings.Phosphor);
+
+        // Reverse video: the bar reads as chrome rather than as output.
+        var foreground = lit.Background;
+        var background = lit.Foreground;
+
+        for (var column = 0; column < columns; column++)
+        {
+            var character = column < status.Length ? status[column] : ' ';
+
+            _instances[count++] = new Instance
+            {
+                Position = ((uint)column << 16) | (uint)row,
+                Foreground = foreground,
+                Background = background,
+                GlyphAndFlags = (uint)Cp437.IndexOf(character) << 16,
+            };
+        }
+
+        return count;
     }
 
     /// <summary>Reads the offscreen target back as RGBA, top row first. For screenshots.</summary>

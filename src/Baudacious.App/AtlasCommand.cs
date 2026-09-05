@@ -28,7 +28,8 @@ internal static class AtlasCommand
 
         // Always build the real 8x16 cell; `scale` only magnifies the inspection image,
         // so what is looked at is exactly what the renderer will sample.
-        var atlas = GlyphAtlas.Build();
+        var threshold = args.Length > 2 && double.TryParse(args[2], CultureInfo.InvariantCulture, out var t) ? t : 0;
+        var atlas = GlyphAtlas.Build(threshold: threshold);
         atlas.SaveDebugImage(path, scale);
 
         Console.Error.WriteLine(string.Create(

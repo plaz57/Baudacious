@@ -49,7 +49,8 @@ public sealed class GlyphAtlas
     public byte[] Pixels { get; }
 
     /// <summary>Builds the atlas. 8x16 is the VGA text cell and the default everywhere.</summary>
-    public static GlyphAtlas Build(int cellWidth = 8, int cellHeight = 16, string? fontFamily = null)
+    public static GlyphAtlas Build(
+        int cellWidth = 8, int cellHeight = 16, string? fontFamily = null, double threshold = 0)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(cellWidth, 4);
         ArgumentOutOfRangeException.ThrowIfLessThan(cellHeight, 6);
@@ -58,6 +59,18 @@ public sealed class GlyphAtlas
         var atlas = new GlyphAtlas(cellWidth, cellHeight, pixels);
 
         atlas.RasterizeFromFont(fontFamily);
+
+        // A hard threshold turns the grey antialiasing into 1-bit coverage, which is how a
+        // real ROM font is stored. Whether it reads as crisper or just broken depends
+        // entirely on the face, so it is an experiment rather than a default.
+        if (threshold > 0)
+        {
+            var cut = (byte)(threshold * 255);
+            for (var i = 0; i < atlas.Pixels.Length; i++)
+            {
+                atlas.Pixels[i] = atlas.Pixels[i] >= cut ? (byte)0xFF : (byte)0x00;
+            }
+        }
         atlas.SynthesizeBlocks();
         atlas.SynthesizeBoxDrawing();
         atlas.Clear(0x00);   // NUL draws nothing
