@@ -70,6 +70,34 @@ from the window size divided by the scaled cell size.
 - **THEN** the grid is 53 columns by 16 rows and the leftover margin is filled
   with the background colour
 
+### Requirement: The typeface is selectable
+
+A single bitmap face cannot suit everyone: stroke weight at 8x16 is a matter of taste, and
+a face that reads as crisp to one person reads as heavy to another. The system SHALL ship
+more than one typeface, SHALL let the user choose between them, and SHALL apply a change
+without restarting the session or disturbing the hosted shell.
+
+Every bundled face SHALL be a bitmap font drawn for the cell size in use, not an outline
+typeface rasterised down to it, and SHALL cover the CP437 repertoire. Faces SHALL differ
+in weight, so that the choice is a real one.
+
+#### Scenario: Choosing a lighter face
+
+- **WHEN** the user selects a typeface with a lighter stroke weight
+- **THEN** the display redraws in that face, the grid dimensions are unchanged because the
+  cell size is unchanged, and the hosted shell is not signalled
+
+#### Scenario: The choice persists
+
+- **WHEN** the user selects a typeface and later restarts the application
+- **THEN** the same typeface is in use
+
+#### Scenario: A face that cannot be loaded
+
+- **WHEN** a configured typeface is missing or unreadable
+- **THEN** the system reports which one and falls back to a bundled default rather than
+  starting with no glyphs
+
 ### Requirement: Phosphor palette
 
 The system SHALL provide selectable monochrome phosphor palettes — at minimum

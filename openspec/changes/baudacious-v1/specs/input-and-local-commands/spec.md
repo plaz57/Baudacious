@@ -97,6 +97,30 @@ overlay, Alt+X quit.
 - **THEN** an overlay lists every binding and its effect, and dismissing it
   returns to the session unchanged
 
+### Requirement: Quitting is confirmed
+
+Quitting kills a live shell and everything running in it, and the quit binding sits one key
+away from bindings that are pressed casually. The system SHALL therefore NOT quit on a
+single press: the first press SHALL arm the quit and say so, and only a second press within
+a short window SHALL actually close. The armed state SHALL lapse on its own.
+
+#### Scenario: One press does not quit
+
+- **WHEN** the user presses the quit chord once
+- **THEN** the application stays open, the hosted shell is untouched, and the status bar
+  says a second press will quit
+
+#### Scenario: Two presses quit
+
+- **WHEN** the user presses the quit chord twice inside the confirmation window
+- **THEN** the application closes and the hosted shell is terminated cleanly
+
+#### Scenario: The arming lapses
+
+- **WHEN** the user presses the quit chord once and then waits past the window
+- **THEN** the armed state is dropped, the status bar returns to normal, and a later single
+  press does not quit
+
 ### Requirement: A local command prompt
 
 Ctrl+] SHALL open a local command prompt, distinct from the shell's own input

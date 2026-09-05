@@ -87,6 +87,7 @@ indicator (7.9).
 - [ ] 5.5 Verify no plain Ctrl+letter chord other than Ctrl+C is consumed locally, with a test over the full alphabet
 - [ ] 5.6 Implement the Alt chord dispatcher, with unbound chords falling through to the shell as ESC + key
 - [ ] 5.7 Implement the v1 Alt bindings: B, F, Shift+F, P, G, N, S, C, Z, X
+- [x] 5.7a Require two presses of the quit chord within a short window, since one press kills a live shell and Alt+X sits beside bindings pressed casually (done early in the window; the console harness still quits on one press)
 - [ ] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette
 - [ ] 5.9 Implement the Alt+Z help overlay listing every binding, its effect, and the config file path
 - [ ] 5.10 Implement the Ctrl+] local command prompt with history and completion
@@ -123,6 +124,7 @@ indicator (7.9).
 - [ ] 7.6 Implement hot reload with debounce, applying changes within one second and leaving running shells undisturbed
 - [ ] 7.7 Implement broken-edit handling: keep the last good settings in effect and report the error
 - [ ] 7.8 Make the local key bindings configurable
+- [ ] 7.8a Bundle more than one bitmap typeface and make the choice a setting, applied live and persisted. unscii-16 reads as too heavy at 8x16 — its capitals have 2px stems. There is **no lighter face inside unscii**: the thin/alt/tall styles exist only at 8x8, and `unscii-8-tall` is the 8x8 with every row doubled, so it is bolder still. Candidates to evaluate, lightest first: Spleen 8x16 (BSD-2), Terminus `ter-u16n` (OFL 1.1), Tamsyn 8x16 (permissive custom), and VileR's Px437 IBM VGA 8x16 (CC BY-SA 4.0 — the authentic 1px-stem VGA look, but the only candidate that puts a share-alike asset in the tree). `HexFont`/`GlyphAtlas` already abstract the source, so the plumbing is a parameter, not a rewrite
 - [ ] 7.9 Implement the backlog indicator, resolving Open Question 4 by how the drain estimate reads at low rates
 - [ ] 7.10 Implement window geometry persistence and fullscreen toggling with grid recalculation
 - [ ] 7.11 Resolve Open Question 1 and record the font attribution in the about text

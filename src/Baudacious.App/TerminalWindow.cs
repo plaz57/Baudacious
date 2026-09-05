@@ -56,6 +56,13 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private byte[] _repeatBytes = [];
     private long _repeatNextAt;
     private bool _repeatStarted;
+    /// <summary>
+    /// When the quit chord is armed until. Quitting kills a live shell and everything in
+    /// it, and Alt+X sits one key away from bindings pressed casually, so a single press
+    /// only arms it.
+    /// </summary>
+    private long _quitArmedUntil;
+
     private double _idleSeconds;
     private int? _exitCode;
 
@@ -334,6 +341,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         var alt = keyboard.IsKeyPressed(Key.AltLeft) || keyboard.IsKeyPressed(Key.AltRight);
         var control = keyboard.IsKeyPressed(Key.ControlLeft) || keyboard.IsKeyPressed(Key.ControlRight);
 
+        if (_quitArmedUntil != 0 && !(alt && key == Key.X))
+        {
+            // Any other key means they did not mean to quit.
+            _quitArmedUntil = 0;
+        }
+
         if (alt && HandleLocalCommand(key))
         {
             return;
@@ -365,6 +378,10 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     }
 
     /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
+    /// <summary>How long a first Alt+X stays armed. Long enough to be deliberate, short
+    /// enough that it lapses before you have forgotten pressing it.</summary>
+    private const long QuitConfirmMs = 3000;
+
     private static readonly long RepeatDelayMs = 450;
     private static readonly long RepeatIntervalMs = 33;
 
@@ -426,7 +443,16 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 return true;
 
             case Key.X:
-                _window.Close();
+                if (Environment.TickCount64 < _quitArmedUntil)
+                {
+                    _window.Close();
+                }
+                else
+                {
+                    _quitArmedUntil = Environment.TickCount64 + QuitConfirmMs;
+                    Notify("press Alt+X again to quit");
+                }
+
                 return true;
 
             default:
