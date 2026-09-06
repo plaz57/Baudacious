@@ -26,6 +26,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
     private Screen _screen = null!;
     private VtParser _parser = null!;
     private BaudGovernor _governor = null!;
+    private TerminalEmulator _emulator = null!;
     private string _title = string.Empty;
     private volatile bool _running = true;
     private volatile bool _dirty = true;
@@ -143,6 +144,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
 
         _screen = new Screen(columns, rows);
         var emulator = new TerminalEmulator(_screen, this);
+        _emulator = emulator;
         _parser = new VtParser(emulator);
         _governor = new BaudGovernor(_ring, SystemTimeSource.Instance, rate);
 
@@ -235,6 +237,8 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
             CultureInfo.InvariantCulture,
             $"# rate {_governor.Rate}, released {_governor.TotalReleased} bytes in {clock.Elapsed.TotalSeconds:F2}s"));
         report.AppendLine($"# title: {_title}");
+        report.AppendLine(
+            $"# mouse: tracking {_emulator.MouseTracking}, encoding {_emulator.MouseEncoding}");
         report.AppendLine("# ---- screen ----");
         report.AppendLine(_screen.ToText());
         report.AppendLine("# ---- scrollback ----");

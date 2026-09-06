@@ -28,8 +28,14 @@ public sealed class TerminalEmulator : IVtHandler
     /// <summary>Set by mode 2004. Paste is framed in markers when on.</summary>
     public bool BracketedPaste { get; private set; }
 
-    /// <summary>Any of the mouse reporting modes.</summary>
-    public bool MouseReporting { get; private set; }
+    /// <summary>Which mouse events, if any, the program wants reported.</summary>
+    public MouseTracking MouseTracking { get; private set; }
+
+    /// <summary>How those reports are framed.</summary>
+    public MouseEncoding MouseEncoding { get; private set; }
+
+    /// <summary>Whether the program wants any mouse reporting at all.</summary>
+    public bool MouseReporting => MouseTracking != MouseTracking.Off;
 
     // ---- IVtHandler ---------------------------------------------------------
 
@@ -273,8 +279,28 @@ public sealed class TerminalEmulator : IVtHandler
                     Screen.CursorVisible = enabled;
                     break;
 
-                case 1000 or 1002 or 1003 or 1006 or 1015:
-                    MouseReporting = enabled;
+                // Tracking level and report encoding are independent: a program turns on
+                // one of 1000/1002/1003 to say which events it wants, and separately
+                // 1006 to ask for the form that is not limited to 223 columns.
+                case 1000:
+                    MouseTracking = enabled ? MouseTracking.Click : MouseTracking.Off;
+                    break;
+
+                case 1002:
+                    MouseTracking = enabled ? MouseTracking.Drag : MouseTracking.Off;
+                    break;
+
+                case 1003:
+                    MouseTracking = enabled ? MouseTracking.Motion : MouseTracking.Off;
+                    break;
+
+                case 1006:
+                    MouseEncoding = enabled ? MouseEncoding.Sgr : MouseEncoding.Legacy;
+                    break;
+
+                case 1005 or 1015:
+                    // Other extended encodings. Recognized so they are not mistaken for
+                    // something else, but the SGR form covers what asks for them.
                     break;
 
                 case 1047:
@@ -346,7 +372,8 @@ public sealed class TerminalEmulator : IVtHandler
         Screen.Pen = Cell.Blank(Palette.DefaultForeground, Palette.DefaultBackground);
         ApplicationCursorKeys = false;
         BracketedPaste = false;
-        MouseReporting = false;
+        MouseTracking = MouseTracking.Off;
+        MouseEncoding = MouseEncoding.Legacy;
     }
 
     private void BackTab()

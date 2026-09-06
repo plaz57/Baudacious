@@ -4,6 +4,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using Baudacious.Core.Baud;
 using Baudacious.Core.Terminal;
+using TerminalButton = Baudacious.Core.Terminal.MouseButton;
 using Baudacious.Core.Timing;
 using Baudacious.Pty;
 using Baudacious.Render;
@@ -65,6 +66,8 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private Selection? _selection;
     private bool _dragging;
+    private bool _mouseButtonDown;
+    private (int Row, int Column) _lastReported = (-1, -1);
     private int _clickCount;
     private long _lastClickAt;
     private GridPoint _lastClickPoint;
@@ -306,6 +309,58 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     // ---- Mouse, selection and scrollback ----------------------------------------
 
+    /// <summary>Window pixel to the grid cell under it, as a screen row and column.</summary>
+    private (int Row, int Column)? CellAt(System.Numerics.Vector2 position)
+    {
+        var scale = Math.Max(1, Math.Min(
+            _window.FramebufferSize.X / Math.Max(1, _renderer.TargetWidth),
+            _window.FramebufferSize.Y / Math.Max(1, _renderer.TargetHeight)));
+
+        var originX = (_window.FramebufferSize.X - (_renderer.TargetWidth * scale)) / 2;
+        var originY = (_window.FramebufferSize.Y - (_renderer.TargetHeight * scale)) / 2;
+
+        var column = (int)((position.X - originX) / (_atlas.CellWidth * scale));
+        var row = (int)((position.Y - originY) / (_atlas.CellHeight * scale));
+
+        return column < 0 || row < 0 || column > _screen.Columns || row >= _screen.RowCount
+            ? null
+            : (row, Math.Min(column, _screen.Columns));
+    }
+
+    /// <summary>
+    /// Whether the mouse currently belongs to the hosted program rather than to selection.
+    /// </summary>
+    /// <remarks>
+    /// specs/input-and-local-commands: holding shift takes it back, so text in a
+    /// mouse-aware program can still be selected and copied.
+    /// </remarks>
+    private bool MouseGoesToShell =>
+        _emulator.MouseReporting
+        && !_screen.IsScrolledBack
+        && !_input.Keyboards.Any(k => k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
+
+    private void SendMouse(TerminalButton button, bool pressed, bool motion, int row, int column)
+    {
+        var keyboard = _input.Keyboards.FirstOrDefault();
+
+        var report = MouseReport.Encode(
+            _emulator.MouseTracking,
+            _emulator.MouseEncoding,
+            button,
+            pressed,
+            motion,
+            column,
+            row,
+            shift: false,
+            alt: keyboard?.IsKeyPressed(Key.AltLeft) == true || keyboard?.IsKeyPressed(Key.AltRight) == true,
+            control: keyboard?.IsKeyPressed(Key.ControlLeft) == true || keyboard?.IsKeyPressed(Key.ControlRight) == true);
+
+        if (report is not null)
+        {
+            _session?.Write(Encoding.UTF8.GetBytes(report));
+        }
+    }
+
     /// <summary>Window pixel to the grid cell under it, in absolute line numbering.</summary>
     private GridPoint? PointAt(System.Numerics.Vector2 position)
     {
@@ -328,9 +383,16 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         return new GridPoint(_screen.AbsoluteRowOf(row), Math.Min(column, _screen.Columns));
     }
 
-    private void OnMouseDown(IMouse mouse, MouseButton button)
+    private void OnMouseDown(IMouse mouse, Silk.NET.Input.MouseButton button)
     {
-        if (button != MouseButton.Left || PointAt(mouse.Position) is not { } point)
+        if (MouseGoesToShell && CellAt(mouse.Position) is { } cell)
+        {
+            SendMouse(ToTerminalButton(button), pressed: true, motion: false, cell.Row, cell.Column);
+            _mouseButtonDown = true;
+            return;
+        }
+
+        if (button != Silk.NET.Input.MouseButton.Left || PointAt(mouse.Position) is not { } point)
         {
             return;
         }
@@ -362,6 +424,21 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void OnMouseMove(IMouse mouse, System.Numerics.Vector2 position)
     {
+        if (MouseGoesToShell)
+        {
+            // Drag tracking wants motion only while a button is down; motion tracking wants
+            // it either way. The encoder drops what the level does not ask for.
+            if ((_mouseButtonDown || _emulator.MouseTracking == MouseTracking.Motion)
+                && CellAt(position) is { } moved
+                && (moved.Row, moved.Column) != _lastReported)
+            {
+                _lastReported = (moved.Row, moved.Column);
+                SendMouse(TerminalButton.Left, pressed: true, motion: true, moved.Row, moved.Column);
+            }
+
+            return;
+        }
+
         if (!_dragging || _selection is null || PointAt(position) is not { } point)
         {
             return;
@@ -371,9 +448,17 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         _needsPresent = true;
     }
 
-    private void OnMouseUp(IMouse mouse, MouseButton button)
+    private void OnMouseUp(IMouse mouse, Silk.NET.Input.MouseButton button)
     {
-        if (button != MouseButton.Left)
+        _mouseButtonDown = false;
+
+        if (MouseGoesToShell && CellAt(mouse.Position) is { } cell)
+        {
+            SendMouse(ToTerminalButton(button), pressed: false, motion: false, cell.Row, cell.Column);
+            return;
+        }
+
+        if (button != Silk.NET.Input.MouseButton.Left)
         {
             return;
         }
@@ -395,9 +480,29 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;
         }
 
+        // A program that tracks the mouse gets the wheel too — that is how a pager or an
+        // editor scrolls its own buffer rather than ours.
+        if (MouseGoesToShell && CellAt(mouse.Position) is { } cell)
+        {
+            var button = lines > 0 ? TerminalButton.WheelUp : TerminalButton.WheelDown;
+            for (var i = 0; i < Math.Min(Math.Abs(lines), 9); i++)
+            {
+                SendMouse(button, pressed: true, motion: false, cell.Row, cell.Column);
+            }
+
+            return;
+        }
+
         _screen.ScrollView(lines);
         _needsPresent = true;
     }
+
+    private static TerminalButton ToTerminalButton(Silk.NET.Input.MouseButton button) => button switch
+    {
+        Silk.NET.Input.MouseButton.Middle => TerminalButton.Middle,
+        Silk.NET.Input.MouseButton.Right => TerminalButton.Right,
+        _ => TerminalButton.Left,
+    };
 
     private void Copy()
     {

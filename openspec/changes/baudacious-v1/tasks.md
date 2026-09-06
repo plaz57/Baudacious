@@ -97,7 +97,7 @@ indicator (7.9).
 - [x] 5.13 Implement copy with trailing-whitespace trimming and wrapped lines copied as one line
 - [x] 5.14 Implement paste, unmetered, with bracketed paste markers when the mode is enabled
 - [x] 5.15 Implement Ctrl+C as copy when a selection is active, sending nothing and preserving the backlog
-- [ ] 5.16 Implement mouse reporting passthrough, with Shift+drag overriding it for local selection — the emulator already tracks the mode (`MouseReporting`); nothing consults it yet, so a mouse-aware program gets selection instead of clicks
+- [x] 5.16 Mouse reporting passthrough for modes 1000/1002/1003 in both the legacy and SGR encodings, with shift+drag taking the mouse back for local selection
 - [x] 5.17 Scrollback by wheel and shift+pgup/pgdn/home/end; the view stays put as output arrives, and the status bar shows how far back it is
 - [ ] 5.18 Implement multiple sessions with Alt+N and Alt+S
 - [ ] 5.19 Manual acceptance: a full working session at 2400 baud using only the keyboard

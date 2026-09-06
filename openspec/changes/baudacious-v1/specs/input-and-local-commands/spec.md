@@ -188,3 +188,29 @@ treating them as selection.
 
 - **WHEN** mouse reporting is enabled and the user drags with Shift held
 - **THEN** a selection is made locally and no mouse events are sent
+
+#### Scenario: Tracking level decides which events are worth sending
+
+- **WHEN** a program has enabled click tracking rather than drag or motion
+  tracking, and the pointer moves
+- **THEN** no event is sent, because the program asked only for presses and
+  releases
+
+#### Scenario: Encoding is chosen separately from tracking level
+
+- **WHEN** a program enables a tracking level and separately asks for the SGR
+  encoding
+- **THEN** events go out in the SGR form, and turning the tracking level off
+  again leaves the requested encoding in place
+
+#### Scenario: A position the legacy encoding cannot express
+
+- **WHEN** the legacy encoding is in force and an event falls beyond the column
+  or row it can represent
+- **THEN** no event is sent, rather than one naming a different cell
+
+#### Scenario: Scrolled back into history
+
+- **WHEN** mouse reporting is enabled but the view is scrolled back
+- **THEN** the mouse works locally, since the cells under the pointer are not
+  the ones the program believes it is drawing on
