@@ -296,8 +296,9 @@ internal sealed class TerminalWindow : IDisposable
     /// </summary>
     /// <remarks>
     /// The rate decides unless the user said otherwise. Fast echo trades away syntax
-    /// coloring, prediction, history search and probably tab completion, so it is not
-    /// something to turn on silently where the rich editor is comfortable.
+    /// coloring, prediction and history search — though not tab completion, which
+    /// survives it — so it is not something to turn on silently where the rich editor
+    /// is comfortable.
     /// </remarks>
     private bool FastEchoFor(string profile, LineRate rate) =>
         _options.FastEcho

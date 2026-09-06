@@ -169,9 +169,10 @@ For `pwsh`, fast echo is achieved by removing the PSReadLine module; measured at
 `cmd.exe` the mode is a no-op, as its line discipline already costs 1 byte per key.
 
 Fast echo trades away the rich editor's features — syntax coloring, inline
-prediction, incremental history search, multi-line editing, and probably tab
-completion — so the system SHALL NOT enable it silently at rates where the rich
-editor is comfortable, and SHALL make the trade explicit wherever it is offered.
+prediction, incremental history search and multi-line editing — so the system
+SHALL NOT enable it silently at rates where the rich editor is comfortable, and
+SHALL make the trade explicit wherever it is offered. Tab completion is not among
+the losses: the console host's own line reader provides it.
 
 #### Scenario: Fast echo reaches parity with cmd
 

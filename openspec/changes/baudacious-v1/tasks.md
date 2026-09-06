@@ -70,7 +70,7 @@ indicator (7.9).
 - [x] 4.10b Host a Linux shell under WSL, with an optional distribution name. Measured at 1.0 bytes per keystroke, so no taming is applied
 - [x] 4.10 Implement shell profiles, the pwsh and cmd defaults, and the pwsh readline taming with its per-profile opt-out
 - [x] 4.10a Implement fast echo: `Remove-Module PSReadLine` for pwsh, default below the 4800 baud threshold, toggleable on a live session with `fastecho`, no-op for cmd and wsl
-- [ ] 4.10b Verify by hand whether tab completion survives fast echo, and record the answer in phase-0-findings.md §4a (the Phase 0 probe was faulty)
+- [x] 4.10b Verify by hand whether tab completion survives fast echo, and record the answer in phase-0-findings.md §4a. **It survives** — command, path and parameter completion all work with PSReadLine removed
 - [x] 4.10c Implement the usable-rate-floor warning, once per session, explaining that echo cost accumulates rather than being a fixed delay
 - [x] 4.11 Handle shell exit: drain the remaining backlog at rate, then show the exit status and offer a restart
 - [x] 4.12 Implement session and process cleanup on close, verified with no orphaned processes

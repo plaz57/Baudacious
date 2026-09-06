@@ -164,11 +164,28 @@ Two things this probe also settled:
 
 **The cost of removing PSReadLine** is its feature set: syntax highlighting, inline
 prediction, `Ctrl+R` history search, rich multi-line editing, and its persistent
-history file. Tab completion is very likely lost too — PSReadLine provides it in
-modern PowerShell — but the micro-test written to confirm this returned 0 bytes for
-Tab in *both* configurations, including the one where completion certainly works,
-so the test was faulty and the question is recorded as **unverified**. It should be
-answered by hand in Phase 3, when there is a real terminal to type into.
+history file.
+
+**Tab completion survives, contrary to the guess recorded here originally.**
+Verified by hand in the window on 2026-09-06, in a live pwsh 7.6 session with the
+module removed:
+
+| Typed | Tab | Result |
+|---|---|---|
+| `Get-Ch` | → | `Get-ChildItem` |
+| `cd sr` | → | `cd .\src` |
+| `Get-ChildItem -Pa` | → | `Get-ChildItem -Path` |
+
+Command, path and parameter completion all work. PSReadLine binds Tab to its own
+completion, but it is not the only thing that does: the console host's own line
+reader calls `TabExpansion2` as well, so removing the module falls back to that
+rather than to nothing. The earlier micro-test returned 0 bytes for Tab in both
+configurations because the test was faulty, not because completion was absent.
+
+This does **not** make fast echo a defensible default at every rate, as
+`design.md` speculated it might. The threshold still earns its keep on the
+remaining losses — syntax coloring, inline prediction and `Ctrl+R` history
+search — which are exactly what someone at 9600 baud has the wire to afford.
 
 ### 4c. WSL, added later, needs no taming at all
 

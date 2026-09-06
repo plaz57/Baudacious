@@ -433,13 +433,13 @@ rich line editor, not the shell, was the cost. Removing PSReadLine puts pwsh at
 a v1 feature (`specs/shell-hosting`, "fast echo"), not a documented limitation.
 
 **Residual risk: fast echo costs real features** → syntax coloring, inline
-prediction, `Ctrl+R` history search, multi-line editing, and probably tab
-completion. Mitigated by making it a mode rather than a fate: default below 4800
-baud, toggleable on a live session, always announced. **Tab completion's fate is
-unverified** — the probe written to check it was faulty — and must be confirmed by
-hand in Phase 3. If completion does survive, fast echo becomes a defensible
-default at every rate; if it does not, the 4800-baud threshold is doing real work
-and should stay.
+prediction, `Ctrl+R` history search and multi-line editing. Mitigated by making it
+a mode rather than a fate: default below 4800 baud, toggleable on a live session,
+always announced. **Tab completion turned out to survive** — verified by hand in
+Phase 5, see phase-0-findings.md section 4a — because the console host's own line
+reader calls `TabExpansion2` too. The 4800-baud threshold stays anyway: the three
+features that really are lost are the ones someone above the threshold has the
+wire to afford.
 
 **Client-side line editing is no longer the only answer** → previously the planned
 post-v1 fix. Still worth having eventually for shells with no cooked-input
