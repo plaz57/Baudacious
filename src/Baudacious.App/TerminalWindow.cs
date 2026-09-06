@@ -70,6 +70,8 @@ internal sealed class TerminalWindow : IDisposable
     private long _lastClickAt;
     private GridPoint _lastClickPoint;
     private bool _helpVisible;
+    private MenuKind _menu;
+    private int _menuIndex;
 
     /// <summary>Kept for the life of the window so its history outlives one visit.</summary>
     private readonly CommandLine _commandLine = new();
@@ -246,6 +248,99 @@ internal sealed class TerminalWindow : IDisposable
     /// <summary>Handed to each session so anything it does can wake the frame loop.</summary>
     private void Invalidate() => _needsPresent = true;
 
+    // ---- Option menus --------------------------------------------------------------
+
+    /// <summary>
+    /// Opens a menu, or steps it on if it is already the one open.
+    /// </summary>
+    /// <remarks>
+    /// Pressing the chord again advancing the selection is what these keys did before they
+    /// had menus, so the habit still works; the list is there for everyone who never had
+    /// the habit.
+    /// </remarks>
+    private void OpenMenu(MenuKind kind)
+    {
+        if (_menu == kind)
+        {
+            _menuIndex = (_menuIndex + 1) % OptionMenu.Count(kind);
+            ApplyMenu();
+            return;
+        }
+
+        // Opening one changes nothing: it shows where you already are.
+        _menu = kind;
+        _menuIndex = OptionMenu.IndexOf(kind, Current.Governor.Rate, _settings.Phosphor);
+        _needsPresent = true;
+    }
+
+    private void CloseMenu()
+    {
+        _menu = MenuKind.None;
+        _needsPresent = true;
+    }
+
+    /// <summary>
+    /// Menu keys while one is open. Anything else closes it and is dealt with normally, so
+    /// a menu left open never swallows a keystroke.
+    /// </summary>
+    private bool HandleMenuKey(Key key)
+    {
+        var count = OptionMenu.Count(_menu);
+
+        switch (key)
+        {
+            case Key.Up:
+                _menuIndex = (_menuIndex + count - 1) % count;
+                ApplyMenu();
+                return true;
+
+            case Key.Down:
+                _menuIndex = (_menuIndex + 1) % count;
+                ApplyMenu();
+                return true;
+
+            case Key.Escape or Key.Enter or Key.KeypadEnter:
+                CloseMenu();
+                return true;
+
+            default:
+                CloseMenu();
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// Puts the highlighted option into effect at once, so the list is a preview rather
+    /// than a form to fill in.
+    /// </summary>
+    private void ApplyMenu()
+    {
+        switch (_menu)
+        {
+            case MenuKind.Baud:
+                Current.Governor.Rate =
+                    OptionMenu.RateAt(_menuIndex, Current.Governor.Rate.Framing);
+                break;
+
+            case MenuKind.Framing:
+                if (Current.Governor.Rate.IsUnlimited)
+                {
+                    Notify("framing has no effect at an unlimited rate");
+                    break;
+                }
+
+                Current.Governor.Rate = LineRate.Of(
+                    Current.Governor.Rate.Baud, OptionMenu.Framings[_menuIndex]);
+                break;
+
+            case MenuKind.Phosphor:
+                _settings = _settings with { Phosphor = OptionMenu.Phosphors[_menuIndex] };
+                break;
+        }
+
+        _needsPresent = true;
+    }
+
     private (int Columns, int Rows) GridFor(Vector2D<int> framebuffer)
     {
         var scale = Math.Max(1, _settings.FontScale);
@@ -361,9 +456,16 @@ internal sealed class TerminalWindow : IDisposable
     private (string Status, int Caret) StatusView() =>
         _promptOpen ? PromptStatus() : (StatusLine(), -1);
 
-    /// <summary>The panel over the grid: the prompt's own messages first, then help.</summary>
+    /// <summary>
+    /// The panel over the grid. Only one thing can have it: what the prompt has to say
+    /// first, then an open menu, then the help.
+    /// </summary>
     private IReadOnlyList<string>? Overlay() =>
-        _promptMessage ?? (_helpVisible ? Help.Lines : null);
+        _promptMessage
+        ?? (_menu != MenuKind.None
+            ? OptionMenu.Render(_menu, _menuIndex, Current.Governor.Rate, _settings.Phosphor)
+            : null)
+        ?? (_helpVisible ? Help.Lines : null);
 
     /// <summary>
     /// Which session is in front, or nothing at all when there is only the one. A count
@@ -751,6 +853,12 @@ internal sealed class TerminalWindow : IDisposable
             return;
         }
 
+        // A menu claims the keys it uses and gets out of the way for everything else.
+        if (_menu != MenuKind.None && !alt && HandleMenuKey(key))
+        {
+            return;
+        }
+
         if (control && key == Key.RightBracket)
         {
             OpenPrompt();
@@ -860,27 +968,6 @@ internal sealed class TerminalWindow : IDisposable
         }
     }
 
-    /// <summary>
-    /// Steps through the framings. 8N1 and 7E1 are both ten bits per character; 8N2 and 8E1
-    /// are eleven, so the same baud runs measurably slower.
-    /// </summary>
-    private void CycleFraming()
-    {
-        if (Current.Governor.Rate.IsUnlimited)
-        {
-            Notify("framing has no effect at an unlimited rate");
-            return;
-        }
-
-        Framing[] order = [Framing.N81, Framing.E71, Framing.N82, Framing.E81];
-        var next = order[(Array.IndexOf(order, Current.Governor.Rate.Framing) + 1) % order.Length];
-
-        Current.Governor.Rate = LineRate.Of(Current.Governor.Rate.Baud, next);
-        Notify(string.Create(
-            CultureInfo.InvariantCulture,
-            $"framing {next} - {Current.Governor.Rate.BytesPerSecond:F1} chars/sec"));
-    }
-
     /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
     /// <summary>How long a first Alt+X stays armed. Long enough to be deliberate, short
     /// enough that it lapses before you have forgotten pressing it.</summary>
@@ -936,10 +1023,7 @@ internal sealed class TerminalWindow : IDisposable
         switch (key)
         {
             case Key.B:
-                var rates = LineRate.StandardBauds;
-                var current = Array.IndexOf(rates, Current.Governor.Rate.Baud);
-                Current.Governor.Rate = LineRate.Of(rates[(current + 1) % rates.Length]);
-                Notify($"line rate now {Current.Governor.Rate}");
+                OpenMenu(MenuKind.Baud);
                 return true;
 
             case Key.F:
@@ -961,7 +1045,7 @@ internal sealed class TerminalWindow : IDisposable
                 return true;
 
             case Key.G:
-                CycleFraming();
+                OpenMenu(MenuKind.Framing);
                 return true;
 
             case Key.N:
@@ -980,8 +1064,7 @@ internal sealed class TerminalWindow : IDisposable
                 return true;
 
             case Key.P:
-                _settings = _settings with { Phosphor = (Phosphor)(((int)_settings.Phosphor + 1) % 4) };
-                Notify($"phosphor: {_settings.Phosphor}");
+                OpenMenu(MenuKind.Phosphor);
                 return true;
 
             case Key.C:

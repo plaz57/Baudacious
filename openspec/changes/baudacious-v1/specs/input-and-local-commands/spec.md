@@ -86,6 +86,34 @@ overlay, Alt+X quit.
 - **WHEN** the user presses Alt+B
 - **THEN** the baud rate menu opens and no bytes are sent to the shell
 
+#### Scenario: A menu shows what the choices are
+
+- **WHEN** a menu is open
+- **THEN** every option is listed with the one in force marked
+
+#### Scenario: Opening a menu changes nothing
+
+- **WHEN** a menu is opened
+- **THEN** the setting is unchanged, since the menu is showing where the user
+  already is
+
+#### Scenario: Choosing takes effect at once
+
+- **WHEN** the user moves the selection within an open menu
+- **THEN** that option takes effect immediately, so the list is a preview rather
+  than a form to fill in
+
+#### Scenario: The chord steps the menu on
+
+- **WHEN** the user presses the same Alt chord again with its menu open
+- **THEN** the selection advances to the next option, as the chord did before it
+  had a menu
+
+#### Scenario: A menu never swallows a keystroke
+
+- **WHEN** the user presses a key the open menu does not use
+- **THEN** the menu closes and the key is handled as it would have been
+
 #### Scenario: An unbound chord
 
 - **WHEN** the user presses Alt+Q, which is not bound

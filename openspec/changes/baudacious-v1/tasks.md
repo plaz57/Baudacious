@@ -89,7 +89,7 @@ indicator (7.9).
 - [x] 5.6 Implement the Alt chord dispatcher, with unbound chords falling through to the shell as ESC + key
 - [x] 5.7 Alt bindings B, F, Shift+F (held 10x), P, G, C, Z, X, N, S and font scale
 - [x] 5.7a Require two presses of the quit chord within a short window, since one press kills a live shell and Alt+X sits beside bindings pressed casually (done early in the window; the console harness still quits on one press)
-- [ ] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette — currently these cycle on their Alt key and report through the status bar, which works but does not show the options
+- [x] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette
 - [x] 5.9 Alt+Z help overlay listing every binding and its effect (the config file path arrives with the config file in Phase 6)
 - [x] 5.10 Implement the Ctrl+] local command prompt with history and completion
 - [x] 5.11 Implement the local commands: `baud`, `framing`, `flush`, `phosphor`, `fontsize`, `crt`, `session new`, `help`, `quit`, with local errors on unrecognised input. **`session new` parses and is refused** until 5.18

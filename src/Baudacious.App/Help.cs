@@ -28,8 +28,8 @@ public static class Help
         "  wheel scrolls history, or the program if it tracks",
         "  shift+pgup/pgdn page   shift+home/end oldest/live",
         "",
+        "  B, G and P open a menu; the chord again steps it on.",
         "  Any other alt chord goes to the shell as ESC + key.",
-        "",
         "  alt+Z or escape to close",
     ];
 }
