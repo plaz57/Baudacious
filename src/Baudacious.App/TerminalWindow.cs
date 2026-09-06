@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text;
 using Baudacious.Core.Baud;
+using Baudacious.Core.Commands;
 using Baudacious.Core.Terminal;
 using TerminalButton = Baudacious.Core.Terminal.MouseButton;
 using Baudacious.Core.Timing;
@@ -73,6 +74,13 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private GridPoint _lastClickPoint;
     private bool _helpVisible;
 
+    /// <summary>Kept for the life of the window so its history outlives one visit.</summary>
+    private readonly CommandLine _commandLine = new();
+    private CommandVocabulary _vocabulary = CommandVocabulary.Empty;
+    private bool _promptOpen;
+    private IReadOnlyList<string>? _promptMessage;
+    private bool _repeatToPrompt;
+
     private double _idleSeconds;
     private int? _exitCode;
 
@@ -136,6 +144,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     {
         _gl = GL.GetApi(_window);
         _atlas = GlyphAtlas.Build();
+
+        // The prompt cannot invent these: palettes belong to the renderer and profiles to
+        // the application, so it is told about both rather than keeping a second copy.
+        _vocabulary = new CommandVocabulary
+        {
+            Phosphors = [.. Enum.GetNames<Phosphor>().Select(n => n.ToLowerInvariant())],
+            Profiles = ShellProfiles.Names,
+        };
+
         _renderer = new TextRenderer(_gl, _atlas);
 
         _input = _window.CreateInput();
@@ -241,7 +258,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         if (_exitCode is null && _session?.TryGetExitCode() is { } code && _governor.PendingBytes == 0)
         {
             _exitCode = code;
-            Notify($"shell exited ({code}) — close the window");
+            Notify($"shell exited ({code}) - close the window");
         }
 
         // A blinking cursor is a reason to repaint even when nothing arrived.
@@ -257,8 +274,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         if (_needsPresent)
         {
+            var (status, caret) = StatusView();
             _renderer.RenderToTarget(
-                _screen, _settings, _clock.Elapsed, StatusLine(), _selection, _helpVisible ? Help.Lines : null);
+                _screen, _settings, _clock.Elapsed, status, _selection, Overlay(), caret);
             _renderer.Present(_window.FramebufferSize.X, _window.FramebufferSize.Y, _settings);
             _window.Title = BuildTitle();
             _needsPresent = false;
@@ -277,6 +295,21 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// specs/display-rendering wants the pending backlog visible; having the bindings
     /// there too means nobody has to remember them.
     /// </summary>
+    /// <summary>
+    /// What the bottom bar shows and where its caret is, if it has one.
+    /// </summary>
+    /// <remarks>
+    /// The local prompt takes the bar over while it is open. It is the one thing allowed
+    /// to put a cursor there, which is also what distinguishes it at a glance from the
+    /// shell's own input line a row above.
+    /// </remarks>
+    private (string Status, int Caret) StatusView() =>
+        _promptOpen ? PromptStatus() : (StatusLine(), -1);
+
+    /// <summary>The panel over the grid: the prompt's own messages first, then help.</summary>
+    private IReadOnlyList<string>? Overlay() =>
+        _promptMessage ?? (_helpVisible ? Help.Lines : null);
+
     private string StatusLine()
     {
         var pending = _governor.PendingBytes;
@@ -304,7 +337,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             CultureInfo.InvariantCulture,
             // Kept under 80 columns: the bar is truncated, not wrapped, so anything longer
             // is simply lost on a default-width window.
-            $" {_governor.Rate}  [{backlog}]  alt: B=baud F=flush P=phosphor C=crt X=quit");
+            $" {_governor.Rate}  [{backlog}]  alt: B=baud F=flush P=phosphor X=quit  ^]=cmd");
     }
 
     // ---- Mouse, selection and scrollback ----------------------------------------
@@ -608,6 +641,21 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;   // the Alt layer is ours; see OnKeyDown
         }
 
+        if (_promptOpen)
+        {
+            // Ctrl chords are commands at the prompt, never text — without this the ']' of
+            // Ctrl+] would be typed into the line it just opened.
+            var held = keyboard.IsKeyPressed(Key.ControlLeft) || keyboard.IsKeyPressed(Key.ControlRight);
+            if (!held && character >= 0x20)
+            {
+                _commandLine.Insert(character);
+                _promptMessage = null;
+                _needsPresent = true;
+            }
+
+            return;
+        }
+
         if (character < 0x20)
         {
             return;   // control codes arrive through OnKeyDown
@@ -625,6 +673,22 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             // Any other key means they did not mean to quit.
             _quitArmedUntil = 0;
+        }
+
+        var shifted = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
+
+        // While the prompt is up it has the whole keyboard, Alt chords included. Escape
+        // gives it back, and nothing typed at it ever reaches the shell.
+        if (_promptOpen)
+        {
+            HandlePromptKey(key, control, shifted);
+            return;
+        }
+
+        if (control && key == Key.RightBracket)
+        {
+            OpenPrompt();
+            return;
         }
 
         if (alt)
@@ -653,7 +717,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;
         }
 
-        var shift = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
+        var shift = shifted;
 
         // History navigation. Shift-qualified so the unmodified keys still reach the shell.
         if (shift && HandleScrollback(key))
@@ -748,7 +812,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         _governor.Rate = LineRate.Of(_governor.Rate.Baud, next);
         Notify(string.Create(
             CultureInfo.InvariantCulture,
-            $"framing {next} — {_governor.Rate.BytesPerSecond:F1} chars/sec"));
+            $"framing {next} - {_governor.Rate.BytesPerSecond:F1} chars/sec"));
     }
 
     /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
@@ -761,6 +825,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void BeginRepeat(Key key, ReadOnlyMemory<byte> bytes)
     {
+        _repeatToPrompt = false;
         _repeatKey = key;
         _repeatBytes = bytes.ToArray();
         _repeatNextAt = Environment.TickCount64 + RepeatDelayMs;
@@ -769,7 +834,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void PumpKeyRepeat()
     {
-        if (_repeatKey == Key.Unknown || _session is null)
+        if (_repeatKey == Key.Unknown)
         {
             return;
         }
@@ -780,7 +845,25 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;
         }
 
-        _session.Write(_repeatBytes);
+        if (_repeatToPrompt)
+        {
+            // Holding backspace has to work at the local prompt too, and it edits a line
+            // here rather than sending bytes anywhere.
+            if (!_promptOpen || !EditPrompt(_repeatKey))
+            {
+                _repeatKey = Key.Unknown;
+                return;
+            }
+        }
+        else if (_session is null)
+        {
+            return;
+        }
+        else
+        {
+            _session.Write(_repeatBytes);
+        }
+
         _repeatNextAt = now + RepeatIntervalMs;
         _repeatStarted = true;
         _ = _repeatStarted;
@@ -859,6 +942,316 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             default:
                 return false;
         }
+    }
+
+    // ---- The local command prompt -------------------------------------------------
+
+    /// <summary>
+    /// What the prompt is introduced by. Deliberately not a shell-looking prompt: whatever
+    /// is typed here never leaves the client.
+    /// </summary>
+    private const string PromptPrefix = " ] ";
+
+    private void OpenPrompt()
+    {
+        _promptOpen = true;
+        _promptMessage = null;
+        _helpVisible = false;
+        _repeatKey = Key.Unknown;
+        _commandLine.Clear();
+        _needsPresent = true;
+    }
+
+    private void ClosePrompt()
+    {
+        _promptOpen = false;
+        _promptMessage = null;
+        _repeatKey = Key.Unknown;
+        _needsPresent = true;
+    }
+
+    /// <summary>The bar while the prompt is open, and the column its cursor sits in.</summary>
+    private (string Status, int Caret) PromptStatus()
+    {
+        var width = Math.Max(8, _screen.Columns - PromptPrefix.Length - 1);
+        var text = _commandLine.Text;
+        var caret = _commandLine.Caret;
+
+        // Slide the window so the caret stays visible. Commands are short enough that this
+        // rarely matters; a pasted path is exactly when it does.
+        var start = Math.Max(0, caret - width + 1);
+        var visible = text[start..Math.Min(text.Length, start + width)];
+
+        return (PromptPrefix + visible, PromptPrefix.Length + (caret - start));
+    }
+
+    private void HandlePromptKey(Key key, bool control, bool shift)
+    {
+        if (control)
+        {
+            switch (key)
+            {
+                case Key.RightBracket or Key.G:
+                    ClosePrompt();
+                    return;
+
+                case Key.C:
+                    // As at any line editor: abandon the line, keep the prompt.
+                    _commandLine.Clear();
+                    _promptMessage = null;
+                    _needsPresent = true;
+                    return;
+
+                case Key.U:
+                    _commandLine.DeleteToStart();
+                    _promptMessage = null;
+                    _needsPresent = true;
+                    return;
+
+                case Key.W:
+                    _commandLine.DeleteWordBack();
+                    _promptMessage = null;
+                    _needsPresent = true;
+                    return;
+
+                case Key.A:
+                    _commandLine.MoveHome();
+                    _needsPresent = true;
+                    return;
+
+                case Key.E:
+                    _commandLine.MoveEnd();
+                    _needsPresent = true;
+                    return;
+
+                case Key.V:
+                    PasteIntoPrompt();
+                    return;
+            }
+        }
+
+        if (shift && key == Key.Insert)
+        {
+            PasteIntoPrompt();
+            return;
+        }
+
+        switch (key)
+        {
+            case Key.Escape:
+                ClosePrompt();
+                return;
+
+            case Key.Enter or Key.KeypadEnter:
+                var line = _commandLine.Submit();
+                Run(CommandParser.Parse(line, _vocabulary), line);
+                return;
+
+            case Key.Tab:
+                CompletePrompt();
+                return;
+
+            case Key.Up:
+                _commandLine.HistoryPrevious();
+                _promptMessage = null;
+                _needsPresent = true;
+                return;
+
+            case Key.Down:
+                _commandLine.HistoryNext();
+                _promptMessage = null;
+                _needsPresent = true;
+                return;
+
+            case Key.Home:
+                _commandLine.MoveHome();
+                _needsPresent = true;
+                return;
+
+            case Key.End:
+                _commandLine.MoveEnd();
+                _needsPresent = true;
+                return;
+        }
+
+        if (EditPrompt(key))
+        {
+            _repeatToPrompt = true;
+            _repeatKey = key;
+            _repeatNextAt = Environment.TickCount64 + RepeatDelayMs;
+        }
+    }
+
+    /// <summary>The editing keys worth repeating while held.</summary>
+    private bool EditPrompt(Key key)
+    {
+        switch (key)
+        {
+            case Key.Backspace: _commandLine.Backspace(); break;
+            case Key.Delete: _commandLine.Delete(); break;
+            case Key.Left: _commandLine.MoveLeft(); break;
+            case Key.Right: _commandLine.MoveRight(); break;
+            default: return false;
+        }
+
+        _promptMessage = null;
+        _needsPresent = true;
+        return true;
+    }
+
+    private void PasteIntoPrompt()
+    {
+        if (Clipboard.GetText() is not { Length: > 0 } text)
+        {
+            return;
+        }
+
+        // One line only: the prompt is one line, and a pasted block would otherwise arrive
+        // as a single run-together command.
+        var end = text.AsSpan().IndexOfAny('\r', '\n');
+        _commandLine.Insert(end < 0 ? text : text[..end]);
+        _promptMessage = null;
+        _needsPresent = true;
+    }
+
+    private void CompletePrompt()
+    {
+        var completion = _commandLine.Complete(_vocabulary);
+        _promptMessage = completion.Candidates.Count == 0 ? null : Columns(completion.Candidates);
+        _needsPresent = true;
+    }
+
+    /// <summary>Lays candidates out across the panel rather than one to a line.</summary>
+    private static string[] Columns(IReadOnlyList<string> candidates)
+    {
+        const int Width = 52;
+
+        var lines = new List<string>();
+        var line = new StringBuilder();
+
+        foreach (var candidate in candidates)
+        {
+            if (line.Length > 0 && line.Length + candidate.Length + 2 > Width)
+            {
+                lines.Add(line.ToString());
+                line.Clear();
+            }
+
+            if (line.Length > 0)
+            {
+                line.Append("  ");
+            }
+
+            line.Append(candidate);
+        }
+
+        if (line.Length > 0)
+        {
+            lines.Add(line.ToString());
+        }
+
+        return [.. lines];
+    }
+
+    private static string[] PromptHelp() =>
+        ["local commands - Ctrl+] opens, Escape closes", string.Empty, .. CommandVocabulary.Usage];
+
+    /// <summary>
+    /// Carries out a parsed command. Anything that succeeded closes the prompt and says so
+    /// in the bar; anything that did not leaves the prompt open with the reason.
+    /// </summary>
+    /// <param name="line">
+    /// What was typed. Anything that leaves the prompt open puts it back, so a typo is
+    /// corrected rather than retyped.
+    /// </param>
+    private void Run(LocalCommand command, string line)
+    {
+        switch (command)
+        {
+            case LocalCommand.Nothing:
+                ClosePrompt();
+                return;
+
+            case LocalCommand.Failed failed:
+                Refuse(failed.Message, line);
+                return;
+
+            case LocalCommand.ShowHelp:
+                _promptMessage = PromptHelp();
+                _needsPresent = true;
+                return;
+
+            case LocalCommand.Quit:
+                ClosePrompt();
+                _window.Close();
+                return;
+
+            case LocalCommand.SetRate rate:
+                _governor.Rate = rate.Rate;
+                Finish($"line rate now {_governor.Rate}");
+                return;
+
+            case LocalCommand.SetFraming framing:
+                if (_governor.Rate.IsUnlimited)
+                {
+                    Refuse("framing has no effect at an unlimited rate", line);
+                    return;
+                }
+
+                _governor.Rate = LineRate.Of(_governor.Rate.Baud, framing.Framing);
+                Finish(string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"framing {framing.Framing} - {_governor.Rate.BytesPerSecond:F1} chars/sec"));
+                return;
+
+            case LocalCommand.Flush:
+                var pending = _governor.PendingBytes;
+                _governor.FastForward();
+                Finish(pending > 0 ? $"fast-forwarding {pending} bytes" : "nothing queued");
+                return;
+
+            case LocalCommand.SetPhosphor phosphor:
+                if (!Enum.TryParse<Phosphor>(phosphor.Name, ignoreCase: true, out var palette))
+                {
+                    Refuse($"no phosphor named '{phosphor.Name}'", line);
+                    return;
+                }
+
+                _settings = _settings with { Phosphor = palette };
+                Finish($"phosphor: {palette}");
+                return;
+
+            case LocalCommand.SetFontSize size:
+                ClosePrompt();
+                SetFontScale(size.Scale);
+                return;
+
+            case LocalCommand.SetCrt crt:
+                var on = crt.On ?? !_settings.Crt.Enabled;
+                _settings = _settings with { Crt = _settings.Crt with { Enabled = on } };
+                Finish(on ? "CRT on" : "CRT off");
+                return;
+
+            case LocalCommand.NewSession:
+                // Parsed, understood, and honestly not there yet: one shell per window.
+                Refuse("a second session is not available yet - one shell per window", line);
+                return;
+        }
+    }
+
+    /// <summary>Done: the prompt goes away and the bar reports it.</summary>
+    private void Finish(string message)
+    {
+        ClosePrompt();
+        Notify(message);
+    }
+
+    /// <summary>Not done: the prompt stays, carrying the reason and the line to fix.</summary>
+    private void Refuse(string message, string line)
+    {
+        _commandLine.Insert(line);
+        _promptMessage = [message];
+        _needsPresent = true;
     }
 
     private void SetFontScale(int scale)

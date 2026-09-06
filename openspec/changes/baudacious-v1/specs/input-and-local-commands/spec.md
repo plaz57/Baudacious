@@ -138,13 +138,46 @@ Escape SHALL dismiss it without effect.
 #### Scenario: An unrecognised command
 
 - **WHEN** the user enters a command the prompt does not recognise
-- **THEN** an error is shown locally, the prompt stays open, and nothing is sent
-  to the shell
+- **THEN** an error is shown locally, the prompt stays open still carrying what
+  was typed, and nothing is sent to the shell
 
 #### Scenario: Dismissing
 
 - **WHEN** the user presses Escape at the local prompt
 - **THEN** the prompt closes with no effect and no bytes are sent
+
+#### Scenario: Completing a partly typed command
+
+- **WHEN** the user presses Tab on a word that matches exactly one thing that can
+  appear in that position
+- **THEN** the word is completed and the caret moves past it
+
+#### Scenario: Completing something ambiguous
+
+- **WHEN** the user presses Tab on a word that several candidates match
+- **THEN** the word is extended as far as they agree, the candidates are listed,
+  and the prompt stays open
+
+#### Scenario: An unambiguous abbreviation is the command
+
+- **WHEN** the user enters an abbreviation only one command begins with
+- **THEN** that command runs
+
+#### Scenario: An abbreviation several commands share
+
+- **WHEN** the user enters an abbreviation that more than one command begins with
+- **THEN** the candidates are named and nothing happens
+
+#### Scenario: Recalling an earlier command
+
+- **WHEN** the user presses Up at the prompt
+- **THEN** the previous command is offered for editing, and pressing Down again
+  returns to the line that was being typed
+
+#### Scenario: The prompt has the keyboard while it is open
+
+- **WHEN** the prompt is open and the user types anything, Alt chords included
+- **THEN** it goes to the prompt, and the shell receives nothing
 
 ### Requirement: Selection and clipboard
 

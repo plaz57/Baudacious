@@ -386,14 +386,15 @@ public sealed class TextRenderer : IDisposable
         TimeSpan elapsed,
         string? status = null,
         Selection? selection = null,
-        IReadOnlyList<string>? overlay = null)
+        IReadOnlyList<string>? overlay = null,
+        int statusCaret = -1)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
 
         var totalRows = screen.RowCount + (status is null ? 0 : 1);
         ResizeTarget(screen.Columns, totalRows);
-        BuildInstances(screen, settings, elapsed, status, selection, overlay);
+        BuildInstances(screen, settings, elapsed, status, selection, overlay, statusCaret);
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, _framebuffer);
         _gl.Viewport(0, 0, (uint)_targetWidth, (uint)_targetHeight);
@@ -519,7 +520,8 @@ public sealed class TextRenderer : IDisposable
         TimeSpan elapsed,
         string? status,
         Selection? selection,
-        IReadOnlyList<string>? overlay)
+        IReadOnlyList<string>? overlay,
+        int statusCaret)
     {
         var needed = (screen.Columns * (screen.RowCount + 1)) + (screen.Columns * screen.RowCount);
         if (_instances.Length < needed)
@@ -594,7 +596,8 @@ public sealed class TextRenderer : IDisposable
 
         if (status is not null)
         {
-            count = AppendStatusRow(status, screen.Columns, screen.RowCount, settings, count);
+            count = AppendStatusRow(
+                status, screen.Columns, screen.RowCount, settings, count, statusCaret);
         }
 
         _instanceCount = count;
@@ -661,8 +664,12 @@ public sealed class TextRenderer : IDisposable
     /// It is deliberately not part of the terminal grid: the shell must never be able to
     /// scroll it away, overwrite it, or be told the screen is a row taller than it is.
     /// </remarks>
+    /// <param name="caret">
+    /// A column to draw un-reversed, which against a reversed bar reads as a cursor, or -1
+    /// for none. The local command prompt uses it; the shell can never ask for it.
+    /// </param>
     private int AppendStatusRow(
-        string status, int columns, int row, DisplaySettings settings, int count)
+        string status, int columns, int row, DisplaySettings settings, int count, int caret)
     {
         var lit = PhosphorMap.Resolve(
             new Cell(' ', Palette.DefaultForeground, Palette.DefaultBackground, CellFlags.None),
@@ -675,12 +682,13 @@ public sealed class TextRenderer : IDisposable
         for (var column = 0; column < columns; column++)
         {
             var character = column < status.Length ? status[column] : ' ';
+            var onCaret = column == caret;
 
             _instances[count++] = new Instance
             {
                 Position = ((uint)column << 16) | (uint)row,
-                Foreground = foreground,
-                Background = background,
+                Foreground = onCaret ? background : foreground,
+                Background = onCaret ? foreground : background,
                 GlyphAndFlags = (uint)Cp437.IndexOf(character) << 16,
             };
         }

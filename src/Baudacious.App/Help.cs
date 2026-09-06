@@ -2,7 +2,7 @@ namespace Baudacious.App;
 
 /// <summary>The Alt+Z overlay text, in one place so the window and the renderer agree.</summary>
 /// <remarks>
-/// Kept to eighteen lines and about fifty columns so it fits inside a default 80x25 window
+/// Kept to about twenty lines and fifty columns so it fits inside a default 80x25 window
 /// with its border. The overlay clips rather than scrolls, so anything longer is simply not
 /// read.
 /// </remarks>
@@ -17,6 +17,7 @@ public static class Help
         "  alt+P  phosphor          alt+C  CRT pass",
         "  alt+- / alt+=  scale     alt+Z  this help",
         "  alt+X  quit (press twice within three seconds)",
+        "  ctrl+]  local command prompt (tab completes)",
         "",
         "  ctrl+C  interrupt, or copy when text is selected",
         "  ctrl+V or shift+insert  paste",
