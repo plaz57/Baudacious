@@ -41,7 +41,7 @@ static int RunWindow(string[] args)
             case "--phosphor" or "-p" when i + 1 < args.Length:
                 if (!Enum.TryParse<Phosphor>(args[++i], ignoreCase: true, out var phosphor))
                 {
-                    Console.Error.WriteLine($"not a phosphor: {args[i]} (green, amber, white, colour)");
+                    Console.Error.WriteLine($"not a phosphor: {args[i]} (green, amber, white, color)");
                     return 1;
                 }
 
@@ -115,7 +115,7 @@ static int Help()
 
             -b, --baud <rate>               line rate, or 'unlimited' (default 1200)
             -s, --shell <pwsh|cmd>          which shell to host
-            -p, --phosphor <name>           green (default), amber, white, colour
+            -p, --phosphor <name>           green (default), amber, white, color
                 --scale <n>                 whole-number magnification of the 8x16 cell
                 --rich-editor               keep PSReadLine; ~29 bytes per keystroke
                                             instead of 1, so typing lags below 9600 baud

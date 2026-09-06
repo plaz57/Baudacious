@@ -14,12 +14,12 @@ internal static class Probe
     private const int QuietTimeoutMs = 15_000;
 
     /// <summary>
-    /// Neutralises every PSReadLine syntax colour. Built with [char]27 and string
+    /// Neutralises every PSReadLine syntax color. Built with [char]27 and string
     /// concatenation because a single-quoted PowerShell string does not interpolate —
-    /// the first attempt at this passed the literal text "$([char]27)[0m" as a colour
+    /// the first attempt at this passed the literal text "$([char]27)[0m" as a color
     /// and silently did nothing.
     /// </summary>
-    private const string NeutralColours =
+    private const string NeutralColors =
         "$e=[char]27; $c=@{}; foreach($k in 'Command','Comment','Keyword','String'," +
         "'Operator','Variable','Parameter','Type','Number','Member','Default','Error'," +
         "'Selection','InlinePrediction','ListPrediction','ListPredictionSelected')" +
@@ -50,11 +50,11 @@ internal static class Probe
             ("pwsh-nopredict", Pwsh(pwsh, "-NoLogo -NoProfile"),
                 ["Set-PSReadLineOption -PredictionSource None"]),
 
-            ("pwsh-nocolour", Pwsh(pwsh, "-NoLogo -NoProfile"),
-                ["Set-PSReadLineOption -PredictionSource None", NeutralColours]),
+            ("pwsh-nocolor", Pwsh(pwsh, "-NoLogo -NoProfile"),
+                ["Set-PSReadLineOption -PredictionSource None", NeutralColors]),
 
             ("pwsh-plainprompt", Pwsh(pwsh, "-NoLogo -NoProfile"),
-                ["Set-PSReadLineOption -PredictionSource None", NeutralColours,
+                ["Set-PSReadLineOption -PredictionSource None", NeutralColors,
                  "function prompt { 'PS> ' }"]),
 
             // The interesting one: drop PSReadLine altogether so PowerShell falls back

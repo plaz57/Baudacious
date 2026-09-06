@@ -28,7 +28,7 @@ internal static class ShellProfiles
 
         // Fast echo: removing PSReadLine drops pwsh from 96.9 bytes per keystroke to 1.0,
         // matching cmd, because PowerShell then falls back to the console's cooked line
-        // input. The cost is syntax colour, prediction, history search and probably tab
+        // input. The cost is syntax color, prediction, history search and probably tab
         // completion — which is why it is a mode rather than a fate.
         return fastEcho
             ? (start, ["Remove-Module PSReadLine -ErrorAction SilentlyContinue", "function prompt { 'PS> ' }"])

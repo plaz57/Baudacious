@@ -72,7 +72,7 @@ public sealed class CrtPass : IDisposable
         in vec2 vUv;
         uniform sampler2D uSource;
         uniform vec2 uStep;          // one texel along the axis being blurred
-        out vec4 fragColour;
+        out vec4 fragColor;
 
         void main() {
             // Nine-tap Gaussian, run once per axis. Separable, so two passes cost what a
@@ -86,7 +86,7 @@ public sealed class CrtPass : IDisposable
                 sum += texture(uSource, vUv - offset).rgb * weight[i];
             }
 
-            fragColour = vec4(sum, 1.0);
+            fragColor = vec4(sum, 1.0);
         }
         """;
 
@@ -105,14 +105,14 @@ public sealed class CrtPass : IDisposable
         uniform float uAmbient;
         uniform vec3  uTint;
 
-        out vec4 fragColour;
+        out vec4 fragColor;
 
         void main() {
             vec3 base  = texture(uText, vUv).rgb;
             vec3 bloom = texture(uBloomHalf, vUv).rgb * 0.6
                        + texture(uBloomQuarter, vUv).rgb * 0.4;
 
-            vec3 colour = base + bloom * uBloom;
+            vec3 color = base + bloom * uBloom;
 
             // Scanlines. The period is one source pixel row, evaluated here at output
             // resolution so the gap is drawn as smoothly as the magnification allows.
@@ -123,16 +123,16 @@ public sealed class CrtPass : IDisposable
             // scanlines are wanted most.
             float phase = fract(vUv.y * uSourceSize.y);
             float gap = smoothstep(0.45, 0.55, phase);
-            colour *= 1.0 - (uScanline * gap);
+            color *= 1.0 - (uScanline * gap);
 
             // Vignette. Slightly wider than tall, because tubes were.
             float radius = length((vUv - 0.5) * vec2(1.0, 0.86));
-            colour *= 1.0 - (uVignette * smoothstep(0.30, 0.78, radius));
+            color *= 1.0 - (uVignette * smoothstep(0.30, 0.78, radius));
 
             // Unlit phosphor in a lit room is never quite black.
-            colour += uTint * uAmbient;
+            color += uTint * uAmbient;
 
-            fragColour = vec4(colour, 1.0);
+            fragColor = vec4(color, 1.0);
         }
         """;
 

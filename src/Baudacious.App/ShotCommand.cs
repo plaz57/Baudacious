@@ -23,6 +23,7 @@ internal static class ShotCommand
         var rows = 25;
         var crt = true;
         var bench = false;
+        var overlay = false;
         double? bloom = null, scanline = null, vignette = null;
 
         for (var i = 0; i < args.Length; i++)
@@ -60,6 +61,10 @@ internal static class ShotCommand
                         default: vignette = level; break;
                     }
 
+                    break;
+
+                case "--overlay":
+                    overlay = true;
                     break;
 
                 case "--no-crt":
@@ -137,7 +142,7 @@ internal static class ShotCommand
 
             return 0;
         }
-        OffscreenRenderer.CaptureToPng(screen, settings, output, magnify);
+        OffscreenRenderer.CaptureToPng(screen, settings, output, magnify, overlay: overlay ? Help.Lines : null);
 
         Console.Error.WriteLine(string.Create(
             CultureInfo.InvariantCulture,
@@ -184,7 +189,7 @@ internal static class ShotCommand
         "rule    ────  ════   corners ┌┐└┘ ╔╗╚╝\r\n";
     /// <summary>
     /// Exercises the things that are easy to get wrong and easy to see: box-drawing joins,
-    /// the block and shade ramp, colour, and the text attributes.
+    /// the block and shade ramp, color, and the text attributes.
     /// </summary>
     private static string TestPattern()
     {
@@ -204,7 +209,7 @@ internal static class ShotCommand
         sb.Append("  shades ░▒▓█   halves ▀▄▌▐   misc ■·∙√ⁿ²  arrows ←↑→↓ ↔↕\r\n");
         sb.Append("  accents ÇüéâäàåçêëèïîìÄÅ  greek αßΓπΣσµτΦΘΩδ∞φε∩\r\n\r\n");
 
-        // Colour: the 16 ANSI colours as background swatches.
+        // Color: the 16 ANSI colors as background swatches.
         sb.Append("  ");
         for (var i = 0; i < 8; i++)
         {

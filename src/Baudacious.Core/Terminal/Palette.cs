@@ -1,11 +1,11 @@
 namespace Baudacious.Core.Terminal;
 
 /// <summary>
-/// Resolves terminal colour attributes to RGBA. Values are 0xRRGGBBAA.
+/// Resolves terminal color attributes to RGBA. Values are 0xRRGGBBAA.
 /// </summary>
 public static class Palette
 {
-    /// <summary>The 16 ANSI colours, in SGR order: black..white, then the bright set.</summary>
+    /// <summary>The 16 ANSI colors, in SGR order: black..white, then the bright set.</summary>
     public static readonly uint[] Ansi16 =
     [
         0x000000FF, 0xCD0000FF, 0x00CD00FF, 0xCDCD00FF,
@@ -19,7 +19,7 @@ public static class Palette
 
     private static readonly uint[] Xterm256 = BuildXterm256();
 
-    /// <summary>Looks up one of the 256 indexed colours.</summary>
+    /// <summary>Looks up one of the 256 indexed colors.</summary>
     public static uint Indexed(int index) =>
         (uint)index < (uint)Xterm256.Length ? Xterm256[index] : DefaultForeground;
 
@@ -28,7 +28,7 @@ public static class Palette
 
     /// <summary>
     /// Rec. 709 relative luminance, 0..1. The basis of the monochrome phosphor mapping:
-    /// a per-colour lookup table cannot answer for 24-bit colour, whereas luminance
+    /// a per-color lookup table cannot answer for 24-bit color, whereas luminance
     /// degrades sensibly for schemes nobody anticipated.
     /// </summary>
     public static double Luminance(uint rgba)
@@ -45,7 +45,7 @@ public static class Palette
 
         Array.Copy(Ansi16, table, 16);
 
-        // 16-231: a 6x6x6 colour cube on the levels xterm uses.
+        // 16-231: a 6x6x6 color cube on the levels xterm uses.
         int[] levels = [0, 95, 135, 175, 215, 255];
         var i = 16;
         foreach (var r in levels)

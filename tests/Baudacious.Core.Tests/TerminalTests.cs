@@ -83,7 +83,7 @@ public class TerminalTests
         Assert.Equal("ABCDG", screen.RowText(0));
     }
 
-    // ---- Colour -------------------------------------------------------------
+    // ---- Color -------------------------------------------------------------
 
     [Fact]
     public void Truecolor_isStoredExactly()
@@ -95,7 +95,7 @@ public class TerminalTests
     }
 
     [Fact]
-    public void TruecolorInColonForm_withAndWithoutAColourSpaceId()
+    public void TruecolorInColonForm_withAndWithoutAColorSpaceId()
     {
         var (screen, parser, _) = Build();
         Feed(parser, "ESC[38:2::10:20:30mA");
@@ -106,7 +106,7 @@ public class TerminalTests
     }
 
     [Fact]
-    public void IndexedColour_usesTheXtermCube()
+    public void IndexedColor_usesTheXtermCube()
     {
         var (screen, parser, _) = Build();
         Feed(parser, "ESC[38;5;196mX");

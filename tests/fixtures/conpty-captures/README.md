@@ -15,10 +15,10 @@ came from.
 - `measurements.tsv` — the per-scenario byte counts, measured after the prompt
   had settled.
 
-Profiles are `pwsh-default` (profile loaded, predictions and syntax colouring
+Profiles are `pwsh-default` (profile loaded, predictions and syntax coloring
 on), `pwsh-tamed` (the taming from `specs/shell-hosting`), and `cmd`.
 
-Scenarios are `idle`, `keystrokes`, `prompt`, `listing`, `colour`,
+Scenarios are `idle`, `keystrokes`, `prompt`, `listing`, `color`,
 `deep-listing`, `git-status`, `altbuffer`.
 
 ## What they are used for

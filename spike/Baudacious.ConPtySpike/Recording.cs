@@ -35,7 +35,7 @@ internal static class Recording
                 results.Add(MeasureKeystrokes(profile, outputDir));
                 results.Add(MeasurePromptRedraw(profile, outputDir));
                 results.Add(MeasureCommand(profile, outputDir, "listing", profile.ListingCommand));
-                results.Add(MeasureCommand(profile, outputDir, "colour", profile.ColourCommand));
+                results.Add(MeasureCommand(profile, outputDir, "color", profile.ColorCommand));
                 results.Add(MeasureCommand(profile, outputDir, "deep-listing", profile.DeepListingCommand));
 
                 if (GitFixture() is { } repo)
@@ -88,23 +88,23 @@ internal static class Recording
 
         if (pwsh is not null)
         {
-            // Defaults: profile loaded, PSReadLine predictions and syntax colouring on.
+            // Defaults: profile loaded, PSReadLine predictions and syntax coloring on.
             // This is the worst case and the one design.md D2 has to survive.
             yield return new Profile(
                 "pwsh-default",
                 new PtyStartInfo { Executable = pwsh, Arguments = "-NoLogo" },
                 Startup: [],
                 ListingCommand: "Get-ChildItem",
-                ColourCommand: "Get-ChildItem | Format-Table",
+                ColorCommand: "Get-ChildItem | Format-Table",
                 DeepListingCommand: "Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue");
 
-            // Tamed, per specs/shell-hosting: no predictions, no syntax colour, plain prompt.
+            // Tamed, per specs/shell-hosting: no predictions, no syntax color, plain prompt.
             yield return new Profile(
                 "pwsh-tamed",
                 new PtyStartInfo { Executable = pwsh, Arguments = "-NoLogo -NoProfile" },
                 Startup: ShellProfiles.TamingCommands,
                 ListingCommand: "Get-ChildItem",
-                ColourCommand: "Get-ChildItem | Format-Table",
+                ColorCommand: "Get-ChildItem | Format-Table",
                 DeepListingCommand: "Get-ChildItem -Recurse -Force -ErrorAction SilentlyContinue");
         }
 
@@ -113,7 +113,7 @@ internal static class Recording
             ShellProfiles.Cmd(),
             Startup: [],
             ListingCommand: "dir",
-            ColourCommand: "dir /a",
+            ColorCommand: "dir /a",
             DeepListingCommand: "dir /s");
     }
 
@@ -122,7 +122,7 @@ internal static class Recording
         PtyStartInfo StartInfo,
         string[] Startup,
         string ListingCommand,
-        string ColourCommand,
+        string ColorCommand,
         string DeepListingCommand);
 
     private sealed record Measurement(
@@ -272,7 +272,7 @@ internal static class Recording
         return new Measurement(profile.Name, scenario, 1, bytes, recorder.ChunkCount, wall, command);
     }
 
-    /// <summary>The scratch repository used for the colourised git capture, if it exists.</summary>
+    /// <summary>The scratch repository used for the colorised git capture, if it exists.</summary>
     private static string? GitFixture()
     {
         var path = Environment.GetEnvironmentVariable("BAUDACIOUS_GIT_FIXTURE");

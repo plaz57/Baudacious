@@ -10,7 +10,7 @@ namespace Baudacious.App;
 /// The rule from specs/input-and-local-commands is in force here: apart from Ctrl+C,
 /// no plain Ctrl+letter chord is intercepted. They all belong to the shell.
 /// </remarks>
-internal static class GlKeyEncoder
+public static class GlKeyEncoder
 {
     /// <summary>Special keys. Printable characters arrive separately as KeyChar events.</summary>
     public static ReadOnlyMemory<byte> Encode(Key key, bool control, bool applicationCursorKeys)
@@ -61,6 +61,26 @@ internal static class GlKeyEncoder
 
         return ReadOnlyMemory<byte>.Empty;
     }
+
+    /// <summary>
+    /// The ASCII byte an Alt chord should send after ESC, or null if the key has no
+    /// sensible plain-text form.
+    /// </summary>
+    public static byte? MetaByte(Key key) => key switch
+    {
+        >= Key.A and <= Key.Z => (byte)('a' + (key - Key.A)),
+        >= Key.Number0 and <= Key.Number9 => (byte)('0' + (key - Key.Number0)),
+        Key.Space => (byte)' ',
+        Key.Minus => (byte)'-',
+        Key.Equal => (byte)'=',
+        Key.Period => (byte)'.',
+        Key.Comma => (byte)',',
+        Key.Slash => (byte)'/',
+        Key.BackSlash => (byte)'\\',
+        Key.Semicolon => (byte)';',
+        Key.Apostrophe => (byte)'\'',
+        _ => null,
+    };
 
     private static ReadOnlyMemory<byte> Ascii(string text) => Encoding.ASCII.GetBytes(text);
 }

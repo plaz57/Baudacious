@@ -27,7 +27,7 @@ public sealed record CrtSettings
     /// to be visible at all: at 1x every output row samples the same phase and the effect
     /// degrades to a slight uniform dimming rather than banding.
     /// </remarks>
-    public double Scanline { get; init; } = 0.30;
+    public double Scanline { get; init; } = 0.50;
 
     /// <summary>Darkening towards the corners.</summary>
     public double Vignette { get; init; } = 0.35;

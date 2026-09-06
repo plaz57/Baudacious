@@ -18,7 +18,7 @@ internal static class ShellProfiles
 
     /// <summary>
     /// pwsh with the readline taming from specs/shell-hosting applied: no predictive
-    /// suggestions, no syntax colouring, plain prompt.
+    /// suggestions, no syntax coloring, plain prompt.
     /// </summary>
     public static PtyStartInfo PwshTamed(short cols = 80, short rows = 24) => new()
     {
@@ -51,7 +51,7 @@ internal static class ShellProfiles
 
     /// <summary>
     /// Startup commands for the tamed-but-full-featured pwsh profile: keeps PSReadLine
-    /// and its completion and history, but turns off prediction and syntax colour.
+    /// and its completion and history, but turns off prediction and syntax color.
     /// Measured at 28.5 bytes per keystroke against 96.9 stock — a 71% reduction, but
     /// still 28x cmd.exe.
     /// </summary>
@@ -61,7 +61,7 @@ internal static class ShellProfiles
 
         // Built with [char]27 and concatenation on purpose. A single-quoted PowerShell
         // string does not interpolate, so an earlier version of this passed the literal
-        // text "$([char]27)[0m" as a colour and silently did nothing at all.
+        // text "$([char]27)[0m" as a color and silently did nothing at all.
         "$e=[char]27; $c=@{}; foreach($k in 'Command','Comment','Keyword','String'," +
         "'Operator','Variable','Parameter','Type','Number','Member','Default','Error'," +
         "'Selection','InlinePrediction','ListPrediction','ListPredictionSelected')" +

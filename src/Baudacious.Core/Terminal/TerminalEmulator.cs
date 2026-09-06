@@ -434,15 +434,15 @@ public sealed class TerminalEmulator : IVtHandler
                 case 49: pen.Background = Palette.DefaultBackground; break;
 
                 case 38 or 48:
-                    if (TryReadExtendedColour(parameters, colonMask, ref i, out var colour))
+                    if (TryReadExtendedColor(parameters, colonMask, ref i, out var color))
                     {
                         if (code == 38)
                         {
-                            pen.Foreground = colour;
+                            pen.Foreground = color;
                         }
                         else
                         {
-                            pen.Background = colour;
+                            pen.Background = color;
                         }
                     }
 
@@ -460,20 +460,20 @@ public sealed class TerminalEmulator : IVtHandler
         Screen.Pen = Cell.Blank(Palette.DefaultForeground, Palette.DefaultBackground);
 
     /// <summary>
-    /// Reads the argument of a 38/48 extended-colour selector, advancing
+    /// Reads the argument of a 38/48 extended-color selector, advancing
     /// <paramref name="index"/> past what it consumed.
     /// </summary>
     /// <remarks>
     /// Two notations are in the wild: the semicolon form <c>38;2;r;g;b</c> that ConPTY and
     /// most programs emit, and the ISO 8613-6 colon form <c>38:2:cs:r:g:b</c>, whose
-    /// colour-space id is usually empty. The colon mask says which separator preceded each
+    /// color-space id is usually empty. The colon mask says which separator preceded each
     /// parameter, which is what lets the six-element colon form be told apart from the
     /// five-element one.
     /// </remarks>
-    private static bool TryReadExtendedColour(
-        ReadOnlySpan<int> parameters, uint colonMask, ref int index, out uint colour)
+    private static bool TryReadExtendedColor(
+        ReadOnlySpan<int> parameters, uint colonMask, ref int index, out uint color)
     {
-        colour = 0;
+        color = 0;
         if (index + 1 >= parameters.Length)
         {
             return false;
@@ -506,19 +506,19 @@ public sealed class TerminalEmulator : IVtHandler
                     return false;
                 }
 
-                colour = Palette.Indexed(Math.Max(parameters[index + 2], 0));
+                color = Palette.Indexed(Math.Max(parameters[index + 2], 0));
                 index += colonForm ? groupLength - 1 : 2;
                 return true;
 
             case 2:
-                // Six in the group means a colour-space id sits at offset 2 and is skipped.
+                // Six in the group means a color-space id sits at offset 2 and is skipped.
                 var first = index + 2 + (colonForm && groupLength >= 6 ? 1 : 0);
                 if (first + 2 >= parameters.Length)
                 {
                     return false;
                 }
 
-                colour = Palette.Rgb(
+                color = Palette.Rgb(
                     Math.Max(parameters[first], 0),
                     Math.Max(parameters[first + 1], 0),
                     Math.Max(parameters[first + 2], 0));

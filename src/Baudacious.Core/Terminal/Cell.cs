@@ -20,8 +20,8 @@ public enum CellFlags : ushort
 /// One character cell. Sixteen bytes; a 200x60 grid is 12,000 of them, about 188 KB.
 /// </summary>
 /// <remarks>
-/// Colours are resolved to RGBA when the cell is written rather than stored as palette
-/// indices, so changing the palette later does not retroactively recolour history. The
+/// Colors are resolved to RGBA when the cell is written rather than stored as palette
+/// indices, so changing the palette later does not retroactively recolor history. The
 /// phosphor transform happens at render time from these resolved values, which is why
 /// switching phosphor <em>does</em> affect history — correct, because that is a property
 /// of the display rather than of the text.

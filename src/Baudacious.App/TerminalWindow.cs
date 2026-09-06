@@ -63,6 +63,13 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// </summary>
     private long _quitArmedUntil;
 
+    private Selection? _selection;
+    private bool _dragging;
+    private int _clickCount;
+    private long _lastClickAt;
+    private GridPoint _lastClickPoint;
+    private bool _helpVisible;
+
     private double _idleSeconds;
     private int? _exitCode;
 
@@ -134,6 +141,14 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             keyboard.KeyDown += OnKeyDown;
             keyboard.KeyUp += OnKeyUp;
             keyboard.KeyChar += OnKeyChar;
+        }
+
+        foreach (var mouse in _input.Mice)
+        {
+            mouse.MouseDown += OnMouseDown;
+            mouse.MouseUp += OnMouseUp;
+            mouse.MouseMove += OnMouseMove;
+            mouse.Scroll += OnScroll;
         }
 
         var (columns, rows) = GridFor(_window.FramebufferSize);
@@ -234,7 +249,8 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         if (_needsPresent)
         {
-            _renderer.RenderToTarget(_screen, _settings, _clock.Elapsed, StatusLine());
+            _renderer.RenderToTarget(
+                _screen, _settings, _clock.Elapsed, StatusLine(), _selection, _helpVisible ? Help.Lines : null);
             _renderer.Present(_window.FramebufferSize.X, _window.FramebufferSize.Y, _settings);
             _window.Title = BuildTitle();
             _needsPresent = false;
@@ -262,6 +278,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 CultureInfo.InvariantCulture,
                 $"{pending} pending, {_governor.EstimatedDrain.TotalSeconds:F1}s");
 
+        // specs/terminal-emulation: while scrolled back, say so, and say that the live view
+        // has moved on — otherwise a static screen looks like a hung shell.
+        if (_screen.IsScrolledBack)
+        {
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $" {_governor.Rate}  [{backlog}]  -- HISTORY, {_screen.ViewOffset} lines back; shift+end for live --");
+        }
+
         if (Environment.TickCount64 < _noticeUntil)
         {
             return string.Create(CultureInfo.InvariantCulture, $" {_governor.Rate}  [{backlog}]  {_notice}");
@@ -272,6 +297,142 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             // Kept under 80 columns: the bar is truncated, not wrapped, so anything longer
             // is simply lost on a default-width window.
             $" {_governor.Rate}  [{backlog}]  alt: B=baud F=flush P=phosphor C=crt X=quit");
+    }
+
+    // ---- Mouse, selection and scrollback ----------------------------------------
+
+    /// <summary>Window pixel to the grid cell under it, in absolute line numbering.</summary>
+    private GridPoint? PointAt(System.Numerics.Vector2 position)
+    {
+        var scale = Math.Max(1, Math.Min(
+            _window.FramebufferSize.X / Math.Max(1, _renderer.TargetWidth),
+            _window.FramebufferSize.Y / Math.Max(1, _renderer.TargetHeight)));
+
+        // The image is centred, so the margins have to come off before dividing.
+        var originX = (_window.FramebufferSize.X - (_renderer.TargetWidth * scale)) / 2;
+        var originY = (_window.FramebufferSize.Y - (_renderer.TargetHeight * scale)) / 2;
+
+        var column = (int)((position.X - originX) / (_atlas.CellWidth * scale));
+        var row = (int)((position.Y - originY) / (_atlas.CellHeight * scale));
+
+        if (column < 0 || row < 0 || column > _screen.Columns || row >= _screen.RowCount)
+        {
+            return null;
+        }
+
+        return new GridPoint(_screen.AbsoluteRowOf(row), Math.Min(column, _screen.Columns));
+    }
+
+    private void OnMouseDown(IMouse mouse, MouseButton button)
+    {
+        if (button != MouseButton.Left || PointAt(mouse.Position) is not { } point)
+        {
+            return;
+        }
+
+        var now = Environment.TickCount64;
+        var quick = now - _lastClickAt < 400 && point.Line == _lastClickPoint.Line
+                    && Math.Abs(point.Column - _lastClickPoint.Column) <= 1;
+
+        _clickCount = quick ? Math.Min(_clickCount + 1, 3) : 1;
+        _lastClickAt = now;
+        _lastClickPoint = point;
+
+        var mode = _clickCount switch
+        {
+            2 => SelectionMode.Word,
+            3 => SelectionMode.Line,
+            _ => SelectionMode.Character,
+        };
+
+        var shift = _input.Keyboards.Any(k => k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
+
+        _selection = shift && _selection is not null
+            ? _selection with { Focus = point }          // extend what is already there
+            : Selection.Expand(_screen, point, mode);
+
+        _dragging = mode == SelectionMode.Character;
+        _needsPresent = true;
+    }
+
+    private void OnMouseMove(IMouse mouse, System.Numerics.Vector2 position)
+    {
+        if (!_dragging || _selection is null || PointAt(position) is not { } point)
+        {
+            return;
+        }
+
+        _selection = _selection with { Focus = point };
+        _needsPresent = true;
+    }
+
+    private void OnMouseUp(IMouse mouse, MouseButton button)
+    {
+        if (button != MouseButton.Left)
+        {
+            return;
+        }
+
+        _dragging = false;
+
+        if (_selection is { IsEmpty: true })
+        {
+            _selection = null;
+            _needsPresent = true;
+        }
+    }
+
+    private void OnScroll(IMouse mouse, ScrollWheel wheel)
+    {
+        var lines = (int)Math.Round(wheel.Y) * 3;
+        if (lines == 0)
+        {
+            return;
+        }
+
+        _screen.ScrollView(lines);
+        _needsPresent = true;
+    }
+
+    private void Copy()
+    {
+        if (_selection is null || _selection.IsEmpty)
+        {
+            return;
+        }
+
+        var text = _selection.GetText(_screen);
+        Notify(Clipboard.SetText(text)
+            ? $"copied {text.Length} characters"
+            : "could not open the clipboard");
+    }
+
+    private void Paste()
+    {
+        if (Clipboard.GetText() is not { Length: > 0 } text)
+        {
+            return;
+        }
+
+        // Normalise to CR, which is what a terminal sends for Enter.
+        text = text.ReplaceLineEndings("\r");
+
+        // Bracketed paste tells the shell this arrived as a paste rather than as typing, so
+        // a multi-line paste is not run line by line as it lands.
+        if (_emulator.BracketedPaste)
+        {
+            _session?.Write("\u001b[200~"u8);
+            _session?.Write(Encoding.UTF8.GetBytes(text));
+            _session?.Write("\u001b[201~"u8);
+        }
+        else
+        {
+            _session?.Write(Encoding.UTF8.GetBytes(text));
+        }
+
+        // Never metered: input travels at full speed, and it is the echo coming back that
+        // the governor slows down.
+        Notify($"pasted {text.Length} characters");
     }
 
     private string BuildTitle()
@@ -356,18 +517,68 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             _quitArmedUntil = 0;
         }
 
-        if (alt && HandleLocalCommand(key))
+        if (alt)
+        {
+            if (HandleLocalCommand(key))
+            {
+                return;
+            }
+
+            // Unbound Alt chords are the shell's. Sending ESC + the key is what an
+            // xterm-compatible terminal does with Meta, and it is why the local layer lives
+            // on Alt at all: it can hand back anything it does not claim.
+            if (GlKeyEncoder.MetaByte(key) is { } meta)
+            {
+                _session?.Write([0x1B, meta]);
+                return;
+            }
+
+            return;
+        }
+
+        if (_helpVisible && key == Key.Escape)
+        {
+            _helpVisible = false;
+            _needsPresent = true;
+            return;
+        }
+
+        var shift = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
+
+        // History navigation. Shift-qualified so the unmodified keys still reach the shell.
+        if (shift && HandleScrollback(key))
         {
             return;
         }
 
         if (control && key == Key.C)
         {
+            // With a selection up, Ctrl+C copies and sends nothing — interrupting the shell
+            // because you wanted the text would be a poor trade.
+            if (_selection is { IsEmpty: false })
+            {
+                Copy();
+                return;
+            }
+
             var dropped = _governor.Flush();
             _parser.Reset();
             _session?.Write([0x03]);
             Notify(dropped > 0 ? $"interrupted, {dropped} queued bytes dropped" : "interrupted");
             return;
+        }
+
+        if ((control && key == Key.V) || (shift && key == Key.Insert))
+        {
+            Paste();
+            return;
+        }
+
+        // Typing returns to the live view; reading history should not silently swallow input.
+        if (_screen.IsScrolledBack && !control)
+        {
+            _screen.ScrollToLive();
+            _needsPresent = true;
         }
 
         var bytes = GlKeyEncoder.Encode(key, control, _emulator.ApplicationCursorKeys);
@@ -378,12 +589,56 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         }
     }
 
+    private bool HandleScrollback(Key key)
+    {
+        var page = Math.Max(1, _screen.RowCount - 2);
+
+        switch (key)
+        {
+            case Key.PageUp: _screen.ScrollView(page); break;
+            case Key.PageDown: _screen.ScrollView(-page); break;
+            case Key.Home: _screen.SetViewOffset(int.MaxValue); break;
+            case Key.End: _screen.ScrollToLive(); break;
+            default: return false;
+        }
+
+        _needsPresent = true;
+        return true;
+    }
+
     private void OnKeyUp(IKeyboard keyboard, Key key, int _)
     {
         if (key == _repeatKey)
         {
             _repeatKey = Key.Unknown;
         }
+
+        // Letting go of either half of Alt+Shift+F ends the skim.
+        if (key is Key.F or Key.ShiftLeft or Key.ShiftRight && _governor.SpeedMultiplier != 1)
+        {
+            _governor.SpeedMultiplier = 1;
+        }
+    }
+
+    /// <summary>
+    /// Steps through the framings. 8N1 and 7E1 are both ten bits per character; 8N2 and 8E1
+    /// are eleven, so the same baud runs measurably slower.
+    /// </summary>
+    private void CycleFraming()
+    {
+        if (_governor.Rate.IsUnlimited)
+        {
+            Notify("framing has no effect at an unlimited rate");
+            return;
+        }
+
+        Framing[] order = [Framing.N81, Framing.E71, Framing.N82, Framing.E81];
+        var next = order[(Array.IndexOf(order, _governor.Rate.Framing) + 1) % order.Length];
+
+        _governor.Rate = LineRate.Of(_governor.Rate.Baud, next);
+        Notify(string.Create(
+            CultureInfo.InvariantCulture,
+            $"framing {next} — {_governor.Rate.BytesPerSecond:F1} chars/sec"));
     }
 
     /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
@@ -433,9 +688,30 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 return true;
 
             case Key.F:
+                var shiftHeld = _input.Keyboards.Any(k =>
+                    k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
+
+                if (shiftHeld)
+                {
+                    // Held, not toggled: released in OnKeyUp. Skimming is something you do
+                    // while watching, not a mode you enter.
+                    _governor.SpeedMultiplier = 10;
+                    Notify("10x while held");
+                    return true;
+                }
+
                 var pending = _governor.PendingBytes;
                 _governor.FastForward();
                 Notify(pending > 0 ? $"fast-forwarding {pending} bytes" : "nothing queued");
+                return true;
+
+            case Key.G:
+                CycleFraming();
+                return true;
+
+            case Key.Z:
+                _helpVisible = !_helpVisible;
+                _needsPresent = true;
                 return true;
 
             case Key.P:

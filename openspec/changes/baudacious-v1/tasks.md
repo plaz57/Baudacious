@@ -8,7 +8,7 @@ can run and watch.
 - [x] 1.3 Launch `pwsh` through it and read its output to the console; prove the handle-close ordering shuts down cleanly with no hung reader thread
 - [x] 1.4 Build the spike recorder: log every received byte with a microsecond timestamp to a capture file, and a hex/annotated dump viewer
 - [x] 1.5 Capture and record the numbers for pwsh: bytes per keystroke, bytes per default prompt redraw, unsolicited repaint traffic at rest, and the same with predictions disabled and a simplified prompt
-- [x] 1.6 Capture the same numbers for `cmd.exe`, plus captures of `dir /s`, a colourised `git status`, and a full-screen program entering the alternate buffer
+- [x] 1.6 Capture the same numbers for `cmd.exe`, plus captures of `dir /s`, a colorised `git status`, and a full-screen program entering the alternate buffer
 - [x] 1.7 Write up the measurements in the change directory and decide whether D2 needs a repaint-coalescing escape hatch — if it does, amend the design before Phase 2
 - [x] 1.8 Promote the captures to `tests/fixtures/conpty-captures/` as fixtures for Phases 1 and 2 (repo is not yet under version control; see summary)
 
@@ -34,7 +34,7 @@ can run and watch.
 - [x] 3.4 Implement cursor movement: CUP, CUU, CUD, CUF, CUB, CHA, VPA, HVP, DECSC/DECRC, IND, RI, NEL
 - [x] 3.5 Implement erase and edit: ED, EL, IL, DL, ICH, DCH, ECH
 - [x] 3.6 Implement the scroll region (DECSTBM), SU, and SD
-- [x] 3.7 Implement SGR: attribute flags, the 16 base and 8 bright colours, 256-colour indexed, and 24-bit truecolor, resolving to RGBA at write time
+- [x] 3.7 Implement SGR: attribute flags, the 16 base and 8 bright colors, 256-color indexed, and 24-bit truecolor, resolving to RGBA at write time
 - [x] 3.8 Implement modes: DECAWM autowrap, DECTCEM cursor visibility, bracketed paste (2004), and application cursor-key mode
 - [x] 3.9 Implement the alternate screen buffer (1047/1048/1049) with correct primary-buffer restoration and no scrollback pollution
 - [x] 3.10 Implement tab stops (HTS, TBC, CHT) and the reports DSR, DA, DECSTR, RIS
@@ -63,7 +63,7 @@ indicator (7.9).
 - [x] 4.3 Implement the instanced text shader and per-frame instance buffer: one instance per cell carrying position, glyph index, fg, bg, and flags
 - [x] 4.4 Render the grid to an FBO at native cell resolution and blit it to the screen with nearest sampling and integer scaling
 - [x] 4.5 Implement attribute rendering: bold, faint, underline, reverse, invisible, strikethrough, and blink
-- [x] 4.6 Derive grid dimensions from the drawable area and the scaled cell size; fill the leftover margin with the background colour
+- [x] 4.6 Derive grid dimensions from the drawable area and the scaled cell size; fill the leftover margin with the background color
 - [x] 4.7 Implement the frame loop with vsync, wall-clock governor ticks, and the idle drop to 10 Hz when nothing is pending or changing
 - [x] 4.8 Implement the PTY reader and writer threads and wire ConPTY → ring → governor → parser → grid → renderer
 - [x] 4.9 Propagate grid size to ConPTY via `ResizePseudoConsole` on launch and on resize, without disturbing queued bytes
@@ -80,24 +80,24 @@ indicator (7.9).
 
 ## 5. Phase 4 — Input and local commands
 
-- [ ] 5.1 Implement key encoding: printable UTF-8, control codes, Enter, Backspace, Tab, Escape
-- [ ] 5.2 Implement special-key sequences for arrows, F1–F12, Home, End, Page Up/Down, Insert, and Delete, honouring application cursor-key mode
-- [ ] 5.3 Route input through the writer thread so the render loop never blocks on `WriteFile`
-- [ ] 5.4 Implement Ctrl+C: interrupt the shell, discard the backlog, reset the parser to ground while preserving SGR state
-- [ ] 5.5 Verify no plain Ctrl+letter chord other than Ctrl+C is consumed locally, with a test over the full alphabet
-- [ ] 5.6 Implement the Alt chord dispatcher, with unbound chords falling through to the shell as ESC + key
-- [ ] 5.7 Implement the v1 Alt bindings: B, F, Shift+F, P, G, N, S, C, Z, X
+- [x] 5.1 Implement key encoding: printable UTF-8, control codes, Enter, Backspace, Tab, Escape
+- [x] 5.2 Implement special-key sequences for arrows, F1–F12, Home, End, Page Up/Down, Insert, and Delete, honouring application cursor-key mode
+- [x] 5.3 Route input through the writer thread so the render loop never blocks on `WriteFile`
+- [x] 5.4 Implement Ctrl+C: interrupt the shell, discard the backlog, reset the parser to ground while preserving SGR state
+- [x] 5.5 Verify no plain Ctrl+letter chord other than Ctrl+C is consumed locally, with a test over the full alphabet
+- [x] 5.6 Implement the Alt chord dispatcher, with unbound chords falling through to the shell as ESC + key
+- [x] 5.7 Alt bindings B, F, Shift+F (held 10x), P, G, C, Z, X and font scale. **N and S deferred with 5.18** — no multi-session support yet
 - [x] 5.7a Require two presses of the quit chord within a short window, since one press kills a live shell and Alt+X sits beside bindings pressed casually (done early in the window; the console harness still quits on one press)
-- [ ] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette
-- [ ] 5.9 Implement the Alt+Z help overlay listing every binding, its effect, and the config file path
+- [ ] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette — currently these cycle on their Alt key and report through the status bar, which works but does not show the options
+- [x] 5.9 Alt+Z help overlay listing every binding and its effect (the config file path arrives with the config file in Phase 6)
 - [ ] 5.10 Implement the Ctrl+] local command prompt with history and completion
 - [ ] 5.11 Implement the local commands: `baud`, `framing`, `flush`, `phosphor`, `fontsize`, `crt`, `session new`, `help`, `quit`, with local errors on unrecognised input
-- [ ] 5.12 Implement mouse selection: drag, double-click word, triple-click logical line, Shift+drag extend, across screen and scrollback
-- [ ] 5.13 Implement copy with trailing-whitespace trimming and wrapped lines copied as one line
-- [ ] 5.14 Implement paste, unmetered, with bracketed paste markers when the mode is enabled
-- [ ] 5.15 Implement Ctrl+C as copy when a selection is active, sending nothing and preserving the backlog
-- [ ] 5.16 Implement mouse reporting passthrough, with Shift+drag overriding it for local selection
-- [ ] 5.17 Implement scrollback navigation, the stay-put behaviour when scrolled back, and the live-view-advanced indicator
+- [x] 5.12 Implement mouse selection: drag, double-click word, triple-click logical line, Shift+drag extend, across screen and scrollback
+- [x] 5.13 Implement copy with trailing-whitespace trimming and wrapped lines copied as one line
+- [x] 5.14 Implement paste, unmetered, with bracketed paste markers when the mode is enabled
+- [x] 5.15 Implement Ctrl+C as copy when a selection is active, sending nothing and preserving the backlog
+- [ ] 5.16 Implement mouse reporting passthrough, with Shift+drag overriding it for local selection — the emulator already tracks the mode (`MouseReporting`); nothing consults it yet, so a mouse-aware program gets selection instead of clicks
+- [x] 5.17 Scrollback by wheel and shift+pgup/pgdn/home/end; the view stays put as output arrives, and the status bar shows how far back it is
 - [ ] 5.18 Implement multiple sessions with Alt+N and Alt+S
 - [ ] 5.19 Manual acceptance: a full working session at 2400 baud using only the keyboard
 
@@ -108,7 +108,7 @@ indicator (7.9).
 - [x] 6.3 Implement the composite shader: additive bloom, horizontal scanlines, and edge vignette, each with an independent intensity uniform
 - [x] 6.4 Bypass path implemented and measured: 0.974 ms with the pass, 0.327 ms without, at 200x60
 - [x] 6.5 Implement the phosphor palettes: Rec. 709 luminance mapping to P1 green, P3 amber, and P4 white, with bold as an intensity boost and reverse swapping luminances
-- [x] 6.6 Implement full-colour mode bypassing the phosphor transform
+- [x] 6.6 Implement full-color mode bypassing the phosphor transform
 - [x] 6.7 Tuned by eye against the rendered test patterns: bloom 0.55, scanline 0.30, vignette 0.35, ambient 0.02
 - [x] 6.8 Legibility verified at 2x over the whole CP437 repertoire plus the confusable pairs (ILil1|! O0QoD S5 B8 G6 rn/m cl/d vv/w)
 - [x] 6.9 Verified at 1x, 2x and 4x. Scanlines need 2x or more; at 1x every output row samples the same phase, so the effect degrades to a slight uniform dimming rather than banding

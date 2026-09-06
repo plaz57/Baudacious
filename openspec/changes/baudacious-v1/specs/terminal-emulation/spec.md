@@ -9,7 +9,7 @@ they run behave as they would in any competent modern terminal.
 ### Requirement: The emulator maintains a character grid
 
 The system SHALL maintain a grid of cells, each holding a character, a
-foreground colour, a background colour, and attribute flags for bold, faint,
+foreground color, a background color, and attribute flags for bold, faint,
 italic, underline, blink, reverse, invisible, and strikethrough. The grid SHALL
 have a cursor position and SHALL be resizable.
 
@@ -32,7 +32,7 @@ CUB, CHA, VPA, HVP), cursor save and restore (DECSC/DECRC and their CSI forms),
 erase in display and line (ED, EL), insert and delete lines and characters
 (IL, DL, ICH, DCH, ECH), scroll region definition (DECSTBM), scroll up and down
 (SU, SD), index and reverse index (IND, RI, NEL), SGR attributes including the
-16 base colours, the bright set, 256-colour indexed and 24-bit truecolor forms,
+16 base colors, the bright set, 256-color indexed and 24-bit truecolor forms,
 autowrap mode (DECAWM), cursor visibility (DECTCEM), the alternate screen
 buffer (private modes 1047, 1048, 1049), bracketed paste mode (2004), tab set
 and clear (HTS, TBC) with cursor forward tabulation, device status and identity
@@ -46,7 +46,7 @@ reports (DSR, DA), soft and hard reset (DECSTR, RIS), and OSC 0/2 window title.
 #### Scenario: Truecolor
 
 - **WHEN** the sequence `ESC [ 38 ; 2 ; 255 ; 128 ; 0 m` is interpreted
-- **THEN** the current foreground colour is exactly RGB(255,128,0)
+- **THEN** the current foreground color is exactly RGB(255,128,0)
 
 #### Scenario: Alternate screen buffer
 
@@ -94,7 +94,7 @@ view.
 #### Scenario: Scrolling back
 
 - **WHEN** 200 lines have scrolled off and the user scrolls up
-- **THEN** the earlier lines are shown with their original characters, colours,
+- **THEN** the earlier lines are shown with their original characters, colors,
   and attributes
 
 #### Scenario: New output while scrolled back

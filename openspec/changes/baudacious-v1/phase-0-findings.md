@@ -72,7 +72,7 @@ This is the measurement that decides D2.
 |---|---|---|---|---|
 | pwsh-tamed keystrokes | 2,561 | 1,322 | 1,226 | **47.9%** |
 | pwsh-default keystrokes | 2,273 | 1,191 | 1,077 | **47.4%** |
-| cmd git status (colour) | 1,066 | 656 | 398 | **37.3%** |
+| cmd git status (color) | 1,066 | 656 | 398 | **37.3%** |
 | pwsh-tamed prompt redraws | 1,746 | 1,105 | 611 | **35.0%** |
 | pwsh-default git status | 916 | 632 | 271 | 29.6% |
 | pwsh-tamed listing | 2,389 | 1,700 | 657 | 27.5% |
@@ -80,7 +80,7 @@ This is the measurement that decides D2.
 | cmd `dir /s` | 68,699 | 65,816 | 411 | 0.6% |
 
 **D2 is confirmed, and the margin is large.** For everything interactive —
-typing, prompts, coloured output — between a third and a half of the wire time is
+typing, prompts, colored output — between a third and a half of the wire time is
 spent on bytes that draw no glyph. Metering decoded glyphs instead of raw bytes
 would make a pwsh session arrive roughly twice as fast as a real line would deliver
 it, and would erase precisely the uneven cadence that the product exists to
@@ -132,7 +132,7 @@ Follow-up probe, same method, same typed string, measured per configuration:
 | pwsh, stock | 103.2 | 49 | 343 | 103x |
 | pwsh `-NoProfile` | 96.9 | 49 | 209 | 97x |
 | + `PredictionSource None` | 39.1 | 18 | 58 | 39x |
-| + syntax colours neutralised | 29.4 | 13 | 40 | 29x |
+| + syntax colors neutralised | 29.4 | 13 | 40 | 29x |
 | + plain prompt | 28.5 | 13 | 39 | 28x |
 | **pwsh, PSReadLine removed** | **1.0** | **1** | **1** | **1x** |
 | cmd.exe (reference) | 1.0 | 1 | 1 | 1x |
@@ -152,9 +152,9 @@ same number.
 
 Two things this probe also settled:
 
-- **The original taming was partly broken.** It set PSReadLine colours from a
+- **The original taming was partly broken.** It set PSReadLine colors from a
   single-quoted PowerShell string, which does not interpolate, so the literal text
-  `$([char]27)[0m` was passed as a colour and silently ignored. Only the prediction
+  `$([char]27)[0m` was passed as a color and silently ignored. Only the prediction
   setting was actually taking effect. Fixed; the corrected version is what produces
   the 28.5 figure above, against 38.2 previously reported.
 - **Incremental taming cannot close the gap.** Turning prediction off is the single
@@ -189,7 +189,7 @@ broken, and it is why the fix below is a v1 concern rather than a polish item.
 | Command | Bytes | 300 baud | 1200 baud | 9600 baud | 115200 baud |
 |---|---|---|---|---|---|
 | `dir` | 738 | 25 s | 6.2 s | 0.8 s | 0.06 s |
-| `git status` (colour) | 871 | 29 s | 7.3 s | 0.9 s | 0.08 s |
+| `git status` (color) | 871 | 29 s | 7.3 s | 0.9 s | 0.08 s |
 | `dir /s` | 68,504 | 38 min | 9.5 min | 71 s | 6 s |
 
 A recursive listing at 1200 baud takes nine and a half minutes. That is
@@ -252,7 +252,7 @@ so an unanswered query is a hang, not a cosmetic gap.
 ## 8. Fixtures produced
 
 24 captures, 262 KB, in `spike/captures/` — every profile × {idle, keystrokes,
-prompt, listing, colour, deep-listing, git-status, altbuffer}. Each is a `.bin`
+prompt, listing, color, deep-listing, git-status, altbuffer}. Each is a `.bin`
 (raw bytes as received, the parser fixture) plus a `.timing` (`micros offset
 length` per read).
 

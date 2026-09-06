@@ -23,7 +23,12 @@ namespace Baudacious.Render;
 public static class OffscreenRenderer
 {
     public static void CaptureToPng(
-        Screen screen, DisplaySettings settings, string path, int magnify = 1, string? status = null)
+        Screen screen,
+        DisplaySettings settings,
+        string path,
+        int magnify = 1,
+        string? status = null,
+        IReadOnlyList<string>? overlay = null)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
@@ -47,7 +52,7 @@ public static class OffscreenRenderer
         var atlas = GlyphAtlas.Build();
 
         using var renderer = new TextRenderer(gl, atlas);
-        renderer.RenderToTarget(screen, settings, TimeSpan.Zero, status);
+        renderer.RenderToTarget(screen, settings, TimeSpan.Zero, status, selection: null, overlay: overlay);
 
         // Capture what would reach the screen, not the text target: the CRT pass runs at
         // output resolution, so a frame read back before it would show none of it.

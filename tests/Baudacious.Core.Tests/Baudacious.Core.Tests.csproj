@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Baudacious.Core\Baudacious.Core.csproj" />
+    <ProjectReference Include="..\..\src\Baudacious.App\Baudacious.App.csproj" />
   </ItemGroup>
 
 </Project>

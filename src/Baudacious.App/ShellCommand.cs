@@ -63,7 +63,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
                 case "--phosphor" or "-p" when i + 1 < args.Length:
                     if (!Enum.TryParse<Phosphor>(args[++i], ignoreCase: true, out var phosphor))
                     {
-                        Console.Error.WriteLine($"not a phosphor: {args[i]} (colour, green, amber, white)");
+                        Console.Error.WriteLine($"not a phosphor: {args[i]} (color, green, amber, white)");
                         return 1;
                     }
 
@@ -418,7 +418,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
 
               -b, --baud <rate>      line rate, or 'unlimited' (default 1200)
               -s, --shell <name>     pwsh (default) or cmd
-              -p, --phosphor <name>  green (default), amber, white, colour
+              -p, --phosphor <name>  green (default), amber, white, color
                   --rich-editor      keep PSReadLine; costs ~29 bytes per keystroke
                                      instead of 1, so typing lags below 9600 baud
 

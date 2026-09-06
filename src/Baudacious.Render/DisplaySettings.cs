@@ -4,8 +4,8 @@ namespace Baudacious.Render;
 
 public enum Phosphor
 {
-    /// <summary>No transform: colour attributes render as their actual colours.</summary>
-    Colour,
+    /// <summary>No transform: color attributes render as their actual colors.</summary>
+    Color,
 
     /// <summary>P1 green.</summary>
     Green,
@@ -43,13 +43,13 @@ public sealed record DisplaySettings
 }
 
 /// <summary>
-/// Maps a cell's colour attributes to the colours actually drawn.
+/// Maps a cell's color attributes to the colors actually drawn.
 /// </summary>
 /// <remarks>
 /// Reverse, invisible and the phosphor transform are resolved here rather than in the
 /// shader, so the GPU renderer and the console renderer cannot disagree about what a cell
-/// looks like. Luminance, not a per-colour lookup table: a table cannot answer for 24-bit
-/// colour, whereas luminance degrades sensibly for schemes nobody anticipated.
+/// looks like. Luminance, not a per-color lookup table: a table cannot answer for 24-bit
+/// color, whereas luminance degrades sensibly for schemes nobody anticipated.
 /// </remarks>
 public static class PhosphorMap
 {
@@ -68,7 +68,7 @@ public static class PhosphorMap
             foreground = background;
         }
 
-        if (phosphor == Phosphor.Colour)
+        if (phosphor == Phosphor.Color)
         {
             return (foreground, background);
         }
@@ -86,7 +86,7 @@ public static class PhosphorMap
             intensity *= 0.6;
         }
 
-        // The background keeps a fraction of its luminance so a reversed or coloured
+        // The background keeps a fraction of its luminance so a reversed or colored
         // background still reads as one, without washing the screen out.
         return (Apply(tint, intensity), Apply(tint, Palette.Luminance(background) * 0.35));
     }

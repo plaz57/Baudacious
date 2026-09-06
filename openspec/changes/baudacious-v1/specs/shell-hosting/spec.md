@@ -75,7 +75,7 @@ system SHALL launch any profile the user defines.
 
 Because PowerShell's line editor repaints the entire input line on every
 keystroke, the system SHALL by default send startup configuration to `pwsh`
-sessions that disables predictive suggestions, disables syntax colouring, and
+sessions that disables predictive suggestions, disables syntax coloring, and
 simplifies the prompt. This behaviour SHALL be disableable by the user per
 profile. Taming SHALL reduce per-keystroke echo traffic by at least half against
 the same shell's untamed defaults.
@@ -105,7 +105,7 @@ For `pwsh`, fast echo is achieved by removing the PSReadLine module; measured at
 1.0 bytes per keystroke, identical to `cmd.exe`, against 96.9 for stock pwsh. For
 `cmd.exe` the mode is a no-op, as its line discipline already costs 1 byte per key.
 
-Fast echo trades away the rich editor's features — syntax colouring, inline
+Fast echo trades away the rich editor's features — syntax coloring, inline
 prediction, incremental history search, multi-line editing, and probably tab
 completion — so the system SHALL NOT enable it silently at rates where the rich
 editor is comfortable, and SHALL make the trade explicit wherever it is offered.
@@ -127,7 +127,7 @@ editor is comfortable, and SHALL make the trade explicit wherever it is offered.
 
 - **WHEN** a pwsh session is started at 9600 baud or above
 - **THEN** the session keeps its rich line editor, with prediction and syntax
-  colouring tamed but present, and no notice is shown
+  coloring tamed but present, and no notice is shown
 
 #### Scenario: Toggling on a live session
 

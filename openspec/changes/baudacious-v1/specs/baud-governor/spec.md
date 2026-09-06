@@ -62,11 +62,11 @@ time identically to a printable character.
 - **THEN** approximately 41.7 ms of wire time elapses before the following byte
   is released, and no text appears during that interval
 
-#### Scenario: A coloured prompt takes longer than a plain one
+#### Scenario: A colored prompt takes longer than a plain one
 
 - **WHEN** two prompts render the same 20 visible characters, one wrapped in SGR
-  colour sequences totalling 60 additional bytes
-- **THEN** the coloured prompt takes proportionally longer to finish painting,
+  color sequences totalling 60 additional bytes
+- **THEN** the colored prompt takes proportionally longer to finish painting,
   in the ratio 80:20
 
 #### Scenario: Multi-byte UTF-8 costs per byte

@@ -25,7 +25,7 @@ This change bootstraps the entire product; there is no existing code.
   for their framing and Baudacious will honour the difference.
 - Metering happens on the **byte** stream, ahead of terminal emulation. An
   escape sequence consumes wire time exactly as printable text does, so a
-  syntax-coloured prompt genuinely takes longer to paint than a plain one.
+  syntax-colored prompt genuinely takes longer to paint than a plain one.
   This is the single most load-bearing decision in the design.
 - The hosted shell runs at full speed and its output queues; the queue drains
   at line rate. A command that finishes in 20 ms may still be painting
@@ -55,7 +55,7 @@ This change bootstraps the entire product; there is no existing code.
 - An in-house VT100/VT220/xterm-subset parser built on the DEC/Williams state
   machine, feeding an in-house cell grid with scrollback.
 - Enough xterm fidelity for pwsh and cmd.exe to be genuinely usable: SGR
-  colour including 256-colour and truecolor, cursor addressing, scroll
+  color including 256-color and truecolor, cursor addressing, scroll
   regions, erase/insert/delete, alternate screen buffer, OSC window title,
   bracketed paste, DECAWM autowrap.
 
@@ -66,7 +66,7 @@ This change bootstraps the entire product; there is no existing code.
 - Text is drawn from a CP437 bitmap glyph atlas (IBM VGA 8x16) as a single
   instanced quad batch, one instance per visible cell.
 - A post-process pass gives the display its CRT character. v1 scope: phosphor
-  bloom, scanlines, and vignette, with selectable phosphor colour (P1 green,
+  bloom, scanlines, and vignette, with selectable phosphor color (P1 green,
   P3 amber, P4 white). Barrel distortion, aperture-grille masking, and
   phosphor persistence/decay are explicitly deferred — but the render pipeline
   is structured so they are a shader change and nothing more.
@@ -77,7 +77,7 @@ This change bootstraps the entire product; there is no existing code.
   wants. `Ctrl+]` (telnet's own escape character, and unbound in both pwsh and
   cmd) drops into a local command prompt for keyboard-only operation.
 - v1 commands: change baud, change framing, fast-forward, flush, phosphor
-  colour, font size, new/switch shell session, help overlay, quit.
+  color, font size, new/switch shell session, help overlay, quit.
 - **Constraint**: apart from `Ctrl+C`, no plain `Ctrl+<letter>` chord is
   consumed by Baudacious. They all belong to the shell.
 

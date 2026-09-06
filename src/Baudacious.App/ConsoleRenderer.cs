@@ -11,7 +11,7 @@ namespace Baudacious.App;
 /// <remarks>
 /// A stand-in for the GPU renderer of Phase 3, and deliberately the same shape: it takes a
 /// grid and a display setting and knows nothing about baud rates, shells or parsing. The
-/// phosphor mapping is the real one — Rec. 709 luminance onto a single-colour ramp — so
+/// phosphor mapping is the real one — Rec. 709 luminance onto a single-color ramp — so
 /// the aesthetic can be judged before any OpenGL exists.
 /// </remarks>
 internal sealed class ConsoleRenderer

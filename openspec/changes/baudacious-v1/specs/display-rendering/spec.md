@@ -68,7 +68,7 @@ from the window size divided by the scaled cell size.
 - **WHEN** the window's drawable area is 1280x800 with a 3x-scaled 8x16 cell
   (24x48 pixels)
 - **THEN** the grid is 53 columns by 16 rows and the leftover margin is filled
-  with the background colour
+  with the background color
 
 ### Requirement: The typeface is selectable
 
@@ -101,10 +101,10 @@ in weight, so that the choice is a real one.
 ### Requirement: Phosphor palette
 
 The system SHALL provide selectable monochrome phosphor palettes — at minimum
-green (P1), amber (P3), and white (P4) — in which the terminal's colour
-attributes are mapped to intensity levels of the single phosphor colour. The
-system SHALL also provide a full-colour mode in which colour attributes render
-as their actual colours.
+green (P1), amber (P3), and white (P4) — in which the terminal's color
+attributes are mapped to intensity levels of the single phosphor color. The
+system SHALL also provide a full-color mode in which color attributes render
+as their actual colors.
 
 #### Scenario: Green phosphor
 
@@ -112,10 +112,10 @@ as their actual colours.
 - **THEN** the text renders in green at an intensity derived from the red's
   luminance, and no red appears on screen
 
-#### Scenario: Full-colour mode
+#### Scenario: Full-color mode
 
-- **WHEN** full-colour mode is active
-- **THEN** colour attributes render as their specified colours
+- **WHEN** full-color mode is active
+- **THEN** color attributes render as their specified colors
 
 ### Requirement: CRT post-processing
 

@@ -62,6 +62,98 @@ public sealed class Screen
     public IReadOnlyList<Row> Scrollback => _scrollback;
 
     /// <summary>
+    /// How many lines have ever scrolled off the top, including ones since dropped from
+    /// the buffer.
+    /// </summary>
+    /// <remarks>
+    /// Monotonic, so it can number lines absolutely. A selection anchored to an absolute
+    /// line survives new output arriving and old lines being evicted, which a selection
+    /// anchored to a scrollback index would not.
+    /// </remarks>
+    public long ScrolledLines { get; private set; }
+
+    /// <summary>
+    /// How far the view is scrolled back, in lines. Zero is the live view.
+    /// </summary>
+    /// <remarks>
+    /// Only the renderer consults this. The emulator keeps writing to the live grid
+    /// regardless, so output arriving while the user is reading history neither moves the
+    /// view nor is lost.
+    /// </remarks>
+    public int ViewOffset { get; private set; }
+
+    public bool IsScrolledBack => ViewOffset > 0;
+
+    /// <summary>Absolute line number of a row in the current view.</summary>
+    public long AbsoluteRowOf(int viewRow) => ScrolledLines - ViewOffset + viewRow;
+
+    /// <summary>Scrolls the view. Positive moves into history; clamped to what exists.</summary>
+    public void ScrollView(int lines) => SetViewOffset(ViewOffset + lines);
+
+    public void SetViewOffset(int offset) =>
+        ViewOffset = Math.Clamp(offset, 0, _scrollback.Count);
+
+    /// <summary>Returns to the live view.</summary>
+    public void ScrollToLive() => ViewOffset = 0;
+
+    /// <summary>
+    /// The cell shown at a view position, which is a scrollback line when scrolled back.
+    /// </summary>
+    public Cell GetViewCell(int row, int column)
+    {
+        if (column < 0 || column >= Columns || row < 0 || row >= RowCount)
+        {
+            return default;
+        }
+
+        var index = row - ViewOffset;
+        if (index >= 0)
+        {
+            return _rows[index].Cells[column];
+        }
+
+        var line = _scrollback[_scrollback.Count + index];
+        return column < line.Length ? line.Cells[column] : default;
+    }
+
+    /// <summary>
+    /// Finds a row by absolute line number, wherever it currently lives.
+    /// </summary>
+    /// <returns>False when the line has been evicted from history or is not yet written.</returns>
+    public bool TryGetAbsoluteRow(long absolute, out Row row)
+    {
+        var offsetFromScreen = absolute - ScrolledLines;
+
+        if (offsetFromScreen >= 0)
+        {
+            if (offsetFromScreen < RowCount)
+            {
+                row = _rows[(int)offsetFromScreen];
+                return true;
+            }
+        }
+        else
+        {
+            var index = _scrollback.Count + (int)offsetFromScreen;
+            if (index >= 0 && index < _scrollback.Count)
+            {
+                row = _scrollback[index];
+                return true;
+            }
+        }
+
+        row = null!;
+        return false;
+    }
+
+    /// <summary>The row shown at a view position, for text extraction.</summary>
+    public Row GetViewRow(int row)
+    {
+        var index = row - ViewOffset;
+        return index >= 0 ? _rows[index] : _scrollback[_scrollback.Count + index];
+    }
+
+    /// <summary>
     /// Deferred wrap. After printing into the last column the cursor stays put and this is
     /// set; the next printable character wraps first. Without it, writing exactly one
     /// screen-width of text would scroll the display a line early.
@@ -265,9 +357,18 @@ public sealed class Screen
     private void PushScrollback(Row row)
     {
         _scrollback.Add(row);
+        ScrolledLines++;
+
         if (_scrollback.Count > ScrollbackCapacity)
         {
             _scrollback.RemoveRange(0, _scrollback.Count - ScrollbackCapacity);
+        }
+
+        // A reader scrolled back stays looking at the same text as new output arrives,
+        // rather than being dragged along by it.
+        if (ViewOffset > 0)
+        {
+            ViewOffset = Math.Min(ViewOffset + 1, _scrollback.Count);
         }
     }
 
@@ -544,6 +645,7 @@ public sealed class Screen
 
         ScrollTop = 0;
         ScrollBottom = rows - 1;
+        ViewOffset = 0;
         CursorRow = Math.Clamp(newCursorRow - keepFrom, 0, rows - 1);
         CursorColumn = Math.Clamp(newCursorColumn, 0, columns - 1);
         _pendingWrap = false;
@@ -733,6 +835,7 @@ public sealed class Screen
         }
 
         _scrollback.Clear();
+        ViewOffset = 0;
         Pen = Cell.Blank(Palette.DefaultForeground, Palette.DefaultBackground);
         CursorRow = 0;
         CursorColumn = 0;

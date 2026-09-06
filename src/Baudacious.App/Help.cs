@@ -1,0 +1,32 @@
+namespace Baudacious.App;
+
+/// <summary>The Alt+Z overlay text, in one place so the window and the renderer agree.</summary>
+/// <remarks>
+/// Kept to eighteen lines and about fifty columns so it fits inside a default 80x25 window
+/// with its border. The overlay clips rather than scrolls, so anything longer is simply not
+/// read.
+/// </remarks>
+public static class Help
+{
+    public static readonly string[] Lines =
+    [
+        "  BAUDACIOUS",
+        "",
+        "  alt+B  line rate         alt+G  framing",
+        "  alt+F  fast-forward      alt+shift+F  10x while held",
+        "  alt+P  phosphor          alt+C  CRT pass",
+        "  alt+- / alt+=  scale     alt+Z  this help",
+        "  alt+X  quit (press twice within three seconds)",
+        "",
+        "  ctrl+C  interrupt, or copy when text is selected",
+        "  ctrl+V or shift+insert  paste",
+        "",
+        "  drag select    dbl-click word   triple-click line",
+        "  shift+drag extend             wheel scrolls history",
+        "  shift+pgup/pgdn page   shift+home/end oldest/live",
+        "",
+        "  Any other alt chord goes to the shell as ESC + key.",
+        "",
+        "  alt+Z or escape to close",
+    ];
+}

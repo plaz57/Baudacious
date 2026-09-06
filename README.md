@@ -23,7 +23,7 @@ dotnet run -c Release --project src/Baudacious.App -- --baud 1200 --shell cmd
 |---|---|
 | `Alt+B` | step through 110 → 300 → 1200 → … → 115200 |
 | `Alt+F` | fast-forward the queued backlog |
-| `Alt+P` | cycle phosphor: green, amber, white, full colour |
+| `Alt+P` | cycle phosphor: green, amber, white, full color |
 | `Alt+C` | toggle the CRT pass |
 | `Alt+-` / `Alt+=` | font scale |
 | `Alt+X` | quit |
@@ -122,7 +122,7 @@ Three effects over the text, each with its own intensity, all switchable with `A
 | Flag | Default | What it does |
 |---|---|---|
 | `--bloom` | `0.55` | Phosphor bleed. **Additive and unbounded**, so values above 1 keep going. Its effect is almost entirely on the black around glyphs — the glyph cores are already near maximum. At 2.5 the halo spreads far enough to roughly triple how much of the screen reads as lit. |
-| `--scanline` | `0.30` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. |
+| `--scanline` | `0.50` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. |
 | `--vignette` | `0.35` | Corner falloff. Untouched through the middle 60% of the width; darkening starts in the outer 20% each side and the outer 15% top and bottom. At the extreme corner the darkening is about `vignette x 0.82`. |
 
 Both `scanline` and `vignette` are fractions of brightness *removed*, so 0–1 is the whole

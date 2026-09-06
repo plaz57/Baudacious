@@ -36,7 +36,7 @@ public sealed class TextRenderer : IDisposable
     private uint _instanceBuffer;
     private uint _glyphTexture;
     private uint _framebuffer;
-    private uint _colourTarget;
+    private uint _colorTarget;
     private uint _blitVao;
 
     private Instance[] _instances = new Instance[MaxInstances];
@@ -144,7 +144,7 @@ public sealed class TextRenderer : IDisposable
         uniform sampler2D uGlyphs;
         uniform vec2 uCellSize;
 
-        out vec4 fragColour;
+        out vec4 fragColor;
 
         const uint FLAG_UNDERLINE      = 1u;
         const uint FLAG_STRIKETHROUGH  = 2u;
@@ -165,17 +165,17 @@ public sealed class TextRenderer : IDisposable
                 coverage = 1.0;
             }
 
-            vec4 colour = mix(vBackground, vForeground, coverage);
+            vec4 color = mix(vBackground, vForeground, coverage);
 
             if ((vFlags & FLAG_CURSOR_BLOCK) != 0u) {
-                colour = vec4(vForeground.rgb, 1.0) * (1.0 - coverage) + vBackground * coverage;
+                color = vec4(vForeground.rgb, 1.0) * (1.0 - coverage) + vBackground * coverage;
             } else if ((vFlags & FLAG_CURSOR_UNDER) != 0u && row >= uCellSize.y - 2.0) {
-                colour = vForeground;
+                color = vForeground;
             } else if ((vFlags & FLAG_CURSOR_BAR) != 0u && vCellUv.x * uCellSize.x < 2.0) {
-                colour = vForeground;
+                color = vForeground;
             }
 
-            fragColour = vec4(colour.rgb, 1.0);
+            fragColor = vec4(color.rgb, 1.0);
         }
         """;
 
@@ -194,13 +194,13 @@ public sealed class TextRenderer : IDisposable
         #version 330 core
         in vec2 vUv;
         uniform sampler2D uSource;
-        out vec4 fragColour;
+        out vec4 fragColor;
         void main() {
             // No flip. Row 0 of the grid was drawn at the top of the offscreen target in
             // GL's bottom-up convention, which is texture v = 1 — the same place the top of
             // the screen samples from. Flipping here turns the display upside down, and the
             // screenshot path hides it because ReadTarget flips separately.
-            fragColour = texture(uSource, vUv);
+            fragColor = texture(uSource, vUv);
         }
         """;
 
@@ -335,14 +335,14 @@ public sealed class TextRenderer : IDisposable
         if (_framebuffer != 0)
         {
             _gl.DeleteFramebuffer(_framebuffer);
-            _gl.DeleteTexture(_colourTarget);
+            _gl.DeleteTexture(_colorTarget);
         }
 
         _targetWidth = width;
         _targetHeight = height;
 
-        _colourTarget = _gl.GenTexture();
-        _gl.BindTexture(TextureTarget.Texture2D, _colourTarget);
+        _colorTarget = _gl.GenTexture();
+        _gl.BindTexture(TextureTarget.Texture2D, _colorTarget);
         _gl.TexImage2D(
             TextureTarget.Texture2D,
             0,
@@ -365,7 +365,7 @@ public sealed class TextRenderer : IDisposable
             FramebufferTarget.Framebuffer,
             FramebufferAttachment.ColorAttachment0,
             TextureTarget.Texture2D,
-            _colourTarget,
+            _colorTarget,
             0);
 
         var state = _gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
@@ -381,14 +381,19 @@ public sealed class TextRenderer : IDisposable
 
     /// <summary>Draws the grid into the offscreen target.</summary>
     public unsafe void RenderToTarget(
-        Screen screen, DisplaySettings settings, TimeSpan elapsed, string? status = null)
+        Screen screen,
+        DisplaySettings settings,
+        TimeSpan elapsed,
+        string? status = null,
+        Selection? selection = null,
+        IReadOnlyList<string>? overlay = null)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
 
         var totalRows = screen.RowCount + (status is null ? 0 : 1);
         ResizeTarget(screen.Columns, totalRows);
-        BuildInstances(screen, settings, elapsed, status);
+        BuildInstances(screen, settings, elapsed, status, selection, overlay);
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, _framebuffer);
         _gl.Viewport(0, 0, (uint)_targetWidth, (uint)_targetHeight);
@@ -477,7 +482,7 @@ public sealed class TextRenderer : IDisposable
         if (settings.Crt.Enabled)
         {
             _crt.Render(
-                _colourTarget, _targetWidth, _targetHeight,
+                _colorTarget, _targetWidth, _targetHeight,
                 destinationFramebuffer,
                 originX, originY, drawWidth, drawHeight,
                 settings.Crt, settings.Phosphor);
@@ -490,7 +495,7 @@ public sealed class TextRenderer : IDisposable
         _gl.UseProgram(_blitProgram);
         _gl.BindVertexArray(_blitVao);
         _gl.ActiveTexture(TextureUnit.Texture0);
-        _gl.BindTexture(TextureTarget.Texture2D, _colourTarget);
+        _gl.BindTexture(TextureTarget.Texture2D, _colorTarget);
         _gl.Uniform1(_gl.GetUniformLocation(_blitProgram, "uSource"), 0);
         _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
         _gl.BindVertexArray(0);
@@ -498,7 +503,7 @@ public sealed class TextRenderer : IDisposable
 
     private static (float R, float G, float B) BackgroundOf(DisplaySettings settings)
     {
-        if (settings.Phosphor == Phosphor.Colour)
+        if (settings.Phosphor == Phosphor.Color)
         {
             return (0f, 0f, 0f);
         }
@@ -508,9 +513,15 @@ public sealed class TextRenderer : IDisposable
         return ((float)(r * 0.02), (float)(g * 0.02), (float)(b * 0.02));
     }
 
-    private void BuildInstances(Screen screen, DisplaySettings settings, TimeSpan elapsed, string? status)
+    private void BuildInstances(
+        Screen screen,
+        DisplaySettings settings,
+        TimeSpan elapsed,
+        string? status,
+        Selection? selection,
+        IReadOnlyList<string>? overlay)
     {
-        var needed = screen.Columns * (screen.RowCount + 1);
+        var needed = (screen.Columns * (screen.RowCount + 1)) + (screen.Columns * screen.RowCount);
         if (_instances.Length < needed)
         {
             _instances = new Instance[needed];
@@ -520,6 +531,7 @@ public sealed class TextRenderer : IDisposable
             && (long)(elapsed.TotalMilliseconds / settings.TextBlinkInterval.TotalMilliseconds) % 2 == 0;
 
         var cursorOn = screen.CursorVisible
+            && !screen.IsScrolledBack
             && (!settings.CursorBlink
                 || (long)(elapsed.TotalMilliseconds / settings.CursorBlinkInterval.TotalMilliseconds) % 2 == 0);
 
@@ -528,8 +540,15 @@ public sealed class TextRenderer : IDisposable
         {
             for (var column = 0; column < screen.Columns; column++)
             {
-                var cell = screen.GetCell(row, column);
+                var cell = screen.GetViewCell(row, column);
                 var (foreground, background) = PhosphorMap.Resolve(cell, settings.Phosphor);
+
+                // Selected cells are shown reversed. Done here rather than as a cell flag
+                // so that selecting text never touches what the emulator wrote.
+                if (selection is not null && selection.Contains(screen.AbsoluteRowOf(row), column))
+                {
+                    (foreground, background) = (background, foreground);
+                }
 
                 var glyph = Cp437.IndexOf(cell.Rune);
                 if (cell.Flags.HasFlag(CellFlags.Blink) && !textBlinkOn)
@@ -568,6 +587,11 @@ public sealed class TextRenderer : IDisposable
             }
         }
 
+        if (overlay is not null)
+        {
+            count = AppendOverlay(overlay, screen, settings, count);
+        }
+
         if (status is not null)
         {
             count = AppendStatusRow(status, screen.Columns, screen.RowCount, settings, count);
@@ -575,6 +599,60 @@ public sealed class TextRenderer : IDisposable
 
         _instanceCount = count;
     }
+
+    /// <summary>
+    /// Draws a panel of text over the grid, centred, on a dimmed ground.
+    /// </summary>
+    /// <remarks>
+    /// Later instances win because they are drawn over earlier ones, so the overlay simply
+    /// re-emits the cells it covers. No compositing and no separate pass.
+    /// </remarks>
+    private int AppendOverlay(
+        IReadOnlyList<string> lines, Screen screen, DisplaySettings settings, int count)
+    {
+        var width = Math.Min(screen.Columns - 2, Math.Max(30, lines.Max(l => l.Length) + 2));
+        var height = Math.Min(screen.RowCount - 2, lines.Count + 2);
+        var left = (screen.Columns - width) / 2;
+        var top = (screen.RowCount - height) / 2;
+
+        var lit = PhosphorMap.Resolve(
+            new Cell(' ', Palette.DefaultForeground, Palette.DefaultBackground, CellFlags.None),
+            settings.Phosphor);
+
+        var ground = Dim(lit.Foreground, 0.12);
+
+        for (var row = 0; row < height; row++)
+        {
+            var text = row is 0 || row > lines.Count ? string.Empty : lines[row - 1];
+
+            for (var column = 0; column < width; column++)
+            {
+                var character = column < text.Length ? text[column] : ' ';
+                var edge = row == 0 || row == height - 1 || column == 0 || column == width - 1;
+
+                if (_instances.Length <= count)
+                {
+                    return count;
+                }
+
+                _instances[count++] = new Instance
+                {
+                    Position = ((uint)(left + column) << 16) | (uint)(top + row),
+                    Foreground = edge ? Dim(lit.Foreground, 0.55) : lit.Foreground,
+                    Background = ground,
+                    GlyphAndFlags = (uint)Cp437.IndexOf(character) << 16,
+                };
+            }
+        }
+
+        return count;
+    }
+
+    private static uint Dim(uint rgba, double factor) =>
+        Palette.Rgb(
+            (int)(((rgba >> 24) & 0xFF) * factor),
+            (int)(((rgba >> 16) & 0xFF) * factor),
+            (int)(((rgba >> 8) & 0xFF) * factor));
 
     /// <summary>
     /// Draws the status bar as one extra row below the grid, in reverse video.
@@ -642,7 +720,7 @@ public sealed class TextRenderer : IDisposable
         if (_framebuffer != 0)
         {
             _gl.DeleteFramebuffer(_framebuffer);
-            _gl.DeleteTexture(_colourTarget);
+            _gl.DeleteTexture(_colorTarget);
         }
 
         _gl.DeleteTexture(_glyphTexture);

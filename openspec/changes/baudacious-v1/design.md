@@ -93,14 +93,14 @@ The governor releases *raw bytes*. Escape-sequence bytes, control characters,
 and UTF-8 continuation bytes each cost one character of wire time.
 
 *Why:* a UART has no idea what ANSI is. Metering decoded glyphs instead would
-make `ESC [ 3 1 m` free, so coloured text would arrive at the same cadence as
+make `ESC [ 3 1 m` free, so colored text would arrive at the same cadence as
 plain text — and it is precisely the *unevenness* caused by escape traffic that
 made a 1200-baud session feel the way it did. The alternative is cheaper to
 build and visibly wrong.
 
 *Measured in Phase 0, and the margin is wide:* across the interactive captures,
 escape sequences are **28–48% of the byte stream** — 47.9% for tamed pwsh
-keystrokes, 37.3% for a coloured `git status`. Metering decoded glyphs instead
+keystrokes, 37.3% for a colored `git status`. Metering decoded glyphs instead
 would deliver a pwsh session at roughly twice the speed a real line would, and
 would flatten exactly the uneven cadence the product exists to reproduce.
 
@@ -279,8 +279,8 @@ work and copy-of-a-wrapped-line produce one line instead of two. Reflow is the
 classic terminal bug farm; carrying the flag from the first commit is the cheap
 insurance.
 
-Colours are resolved to RGBA at write time rather than stored as palette
-indices, so a palette change does not retroactively recolour history. Phosphor
+Colors are resolved to RGBA at write time rather than stored as palette
+indices, so a palette change does not retroactively recolor history. Phosphor
 mapping (D10) happens at render time from the resolved RGBA, so switching
 phosphor *does* affect history — which is the right behaviour for a display
 property.
@@ -370,7 +370,7 @@ dropping bytes mid-sequence would otherwise leave the parser waiting for a final
 byte that will never arrive, swallowing everything after it. Note the asymmetry
 — fast-forward must **not** reset the parser (no bytes are lost), flush must.
 The current SGR attribute state is preserved across a flush rather than reset,
-so the screen does not change colour because you pressed Ctrl+C.
+so the screen does not change color because you pressed Ctrl+C.
 
 ### D10. Phosphor mapping is a render-time transform
 
@@ -380,11 +380,11 @@ intensity boost; reverse video swaps foreground and background luminance.
 Starting values, all tunable: P1 green `#33FF66`, P3 amber `#FFB000`, P4 white
 `#F0F0FF`.
 
-*Why luminance rather than a per-colour lookup:* it gives a defensible answer
-for 24-bit colour, which a 16-entry table cannot, and it degrades sensibly for
-colour schemes the author never saw.
+*Why luminance rather than a per-color lookup:* it gives a defensible answer
+for 24-bit color, which a 16-entry table cannot, and it degrades sensibly for
+color schemes the author never saw.
 
-Full-colour mode skips the transform. It is not the aesthetic point of the
+Full-color mode skips the transform. It is not the aesthetic point of the
 product, but a monochrome-only terminal is one that cannot show you a `git diff`.
 
 ### D11. INI configuration, hand-rolled, with state kept separately
@@ -432,7 +432,7 @@ rich line editor, not the shell, was the cost. Removing PSReadLine puts pwsh at
 1.0 bytes per keystroke, exact parity with cmd.exe, usable down to 300 baud. Now
 a v1 feature (`specs/shell-hosting`, "fast echo"), not a documented limitation.
 
-**Residual risk: fast echo costs real features** → syntax colouring, inline
+**Residual risk: fast echo costs real features** → syntax coloring, inline
 prediction, `Ctrl+R` history search, multi-line editing, and probably tab
 completion. Mitigated by making it a mode rather than a fate: default below 4800
 baud, toggleable on a live session, always announced. **Tab completion's fate is
