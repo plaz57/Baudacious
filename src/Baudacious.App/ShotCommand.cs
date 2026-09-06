@@ -21,6 +21,8 @@ internal static class ShotCommand
         string? capture = null;
         var columns = 80;
         var rows = 25;
+        var crt = true;
+        var bench = false;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -36,6 +38,14 @@ internal static class ShotCommand
 
                 case "--phosphor" or "-p" when i + 1 < args.Length:
                     phosphor = Enum.Parse<Phosphor>(args[++i], ignoreCase: true);
+                    break;
+
+                case "--bench":
+                    bench = true;
+                    break;
+
+                case "--no-crt":
+                    crt = false;
                     break;
 
                 case "--capture" or "-c" when i + 1 < args.Length:
@@ -57,7 +67,11 @@ internal static class ShotCommand
         var screen = new Screen(columns, rows);
         var parser = new VtParser(new TerminalEmulator(screen, NullTerminalHost.Instance));
 
-        if (capture == "blocks")
+        if (capture == "charset")
+        {
+            parser.Consume(Encoding.UTF8.GetBytes(CharsetPattern()));
+        }
+        else if (capture == "blocks")
         {
             parser.Consume(Encoding.UTF8.GetBytes(BlockPattern()));
         }
@@ -70,7 +84,33 @@ internal static class ShotCommand
             parser.Consume(Encoding.UTF8.GetBytes(TestPattern()));
         }
 
-        var settings = new DisplaySettings { Phosphor = phosphor, CursorBlink = false };
+        var settings = new DisplaySettings
+        {
+            Phosphor = phosphor,
+            CursorBlink = false,
+            Crt = crt ? new CrtSettings() : CrtSettings.Off,
+        };
+
+        if (bench)
+        {
+            var (crtMs, plainMs) = OffscreenRenderer.Benchmark(screen, settings, magnify, frames: 300);
+            var budget = 1000.0 / 60.0;
+
+            Console.Error.WriteLine(string.Create(
+                CultureInfo.InvariantCulture,
+                $"{columns}x{rows} grid at {magnify}x ({columns * 8 * magnify}x{rows * 16 * magnify} px)"));
+            Console.Error.WriteLine(string.Create(
+                CultureInfo.InvariantCulture,
+                $"  CRT pass on : {crtMs:F3} ms/frame ({budget / crtMs:F1}x the 60 Hz budget)"));
+            Console.Error.WriteLine(string.Create(
+                CultureInfo.InvariantCulture,
+                $"  CRT pass off: {plainMs:F3} ms/frame ({budget / plainMs:F1}x)"));
+            Console.Error.WriteLine(string.Create(
+                CultureInfo.InvariantCulture,
+                $"  CRT costs   : {crtMs - plainMs:F3} ms/frame"));
+
+            return 0;
+        }
         OffscreenRenderer.CaptureToPng(screen, settings, output, magnify);
 
         Console.Error.WriteLine(string.Create(
@@ -78,6 +118,36 @@ internal static class ShotCommand
             $"{columns}x{rows} grid rendered at {magnify}x -> {output}"));
 
         return 0;
+    }
+
+    /// <summary>
+    /// Every CP437 glyph, plus the pairs that are easiest to confuse.
+    /// </summary>
+    /// <remarks>
+    /// The acceptance test for the CRT pass: bloom that makes the display look right but
+    /// renders O and 0 or l and 1 indistinguishable has failed, however good it looks.
+    /// </remarks>
+    private static string CharsetPattern()
+    {
+        var sb = new StringBuilder();
+        sb.Append("full CP437 repertoire\r\n\r\n");
+
+        for (var row = 0; row < 16; row++)
+        {
+            sb.Append("  ");
+            for (var column = 0; column < 16; column++)
+            {
+                var slot = (row * 16) + column;
+                // NUL, space and NBSP are blank by design; show a dot so the cell is visible.
+                sb.Append(slot is 0x00 or 0x20 or 0xFF ? '.' : Baudacious.Render.Cp437.ToUnicode[slot]);
+                sb.Append(' ');
+            }
+
+            sb.Append("\r\n");
+        }
+
+        sb.Append("\r\n  confusable: ILil1|! O0QoD S5 B8 G6 rn/m cl/d vv/w ,.;: ´`'\r\n");
+        return sb.ToString();
     }
 
     /// <summary>Just the block and shade glyphs, spaced out so each can be seen alone.</summary>

@@ -59,6 +59,22 @@ static int RunWindow(string[] args)
                 options = options with { FastEcho = false };
                 break;
 
+            case "--no-crt":
+                options = options with { Crt = CrtSettings.Off };
+                break;
+
+            case "--bloom" when i + 1 < args.Length:
+                options = options with { Crt = options.Crt with { Bloom = Number(args[++i]) } };
+                break;
+
+            case "--scanline" when i + 1 < args.Length:
+                options = options with { Crt = options.Crt with { Scanline = Number(args[++i]) } };
+                break;
+
+            case "--vignette" when i + 1 < args.Length:
+                options = options with { Crt = options.Crt with { Vignette = Number(args[++i]) } };
+                break;
+
             case "-h" or "--help":
                 return Help();
 
@@ -81,6 +97,9 @@ static int RunWindow(string[] args)
     return TerminalWindow.Run(options);
 }
 
+static double Number(string text) =>
+    double.TryParse(text, CultureInfo.InvariantCulture, out var value) ? Math.Clamp(value, 0, 4) : 0;
+
 static int Unknown(string command)
 {
     Console.Error.WriteLine($"unknown command: {command}");
@@ -100,11 +119,17 @@ static int Help()
                 --scale <n>                 whole-number magnification of the 8x16 cell
                 --rich-editor               keep PSReadLine; ~29 bytes per keystroke
                                             instead of 1, so typing lags below 9600 baud
+                --no-crt                    skip the CRT pass entirely
+                --bloom <n>                 phosphor bleed, 0 to switch off (default 0.55)
+                --scanline <n>              raster gap depth (default 0.30); needs 2x
+                                            magnification or more to be visible
+                --vignette <n>              corner darkening (default 0.35)
 
           In the window:
             Alt+B  step through the standard line rates
             Alt+F  fast-forward the queued backlog
             Alt+P  cycle the phosphor
+            Alt+C  toggle the CRT pass
             Alt+- / Alt+=   font scale
             Alt+X  quit
             Ctrl+C interrupt the shell and drop the backlog

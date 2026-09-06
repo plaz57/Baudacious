@@ -24,6 +24,7 @@ dotnet run -c Release --project src/Baudacious.App -- --baud 1200 --shell cmd
 | `Alt+B` | step through 110 → 300 → 1200 → … → 115200 |
 | `Alt+F` | fast-forward the queued backlog |
 | `Alt+P` | cycle phosphor: green, amber, white, full colour |
+| `Alt+C` | toggle the CRT pass |
 | `Alt+-` / `Alt+=` | font scale |
 | `Alt+X` | quit |
 | `Ctrl+C` | interrupt the shell **and** drop the backlog |
@@ -69,18 +70,21 @@ is the authentic behaviour of a fast host on a slow line.
 
 ## Status
 
-Phases 0–3 of [the v1 plan](openspec/changes/baudacious-v1/tasks.md) are done:
-ConPTY hosting, the governor, terminal emulation, and the GPU window. **The CRT
-pass is still ahead** — bloom, scanlines and vignette are Phase 5, so text is
-currently crisp rather than glowing.
+Phases 0–3 and 5 of [the v1 plan](openspec/changes/baudacious-v1/tasks.md) are
+done: ConPTY hosting, the governor, terminal emulation, the GPU window and the
+CRT pass. Phase 4 — the full input and local-command layer — is the remaining
+gap; the window has the bindings it needs but not the local command prompt,
+selection or clipboard.
 
 - `src/Baudacious.Core` — governor, VT parser, cell grid, scrollback, reflow.
   No I/O, no graphics, no clock of its own; fully unit-testable.
 - `src/Baudacious.Pty` — ConPTY interop. Hand-written, because the hard part of
   ConPTY is handle lifetime and wrapping it hides the thing that has to be right.
 - `src/Baudacious.Render` — OpenGL 3.3. Text goes into an offscreen target at
-  native cell resolution, then blits out at whole-number magnification; the CRT
-  pass will slot in between those two steps.
+  native cell resolution; the CRT pass then composites bloom, scanlines and
+  vignette at output resolution while taking its scanline period from the source
+  pixel grid. At a 200x60 grid the whole frame costs 0.97 ms against a 16.67 ms
+  budget, and `--no-crt` brings that to 0.33 ms.
 - `src/Baudacious.App` — composition root, the window, and the diagnostics.
 - `spike/` — the Phase 0 measurement spike. Throwaway, kept for the record.
 

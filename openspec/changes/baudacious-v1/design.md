@@ -521,9 +521,13 @@ if it does not meet the legibility bar in time.
 - **Exact CRT parameter values.** Bloom radius, scanline duty cycle and depth,
   vignette falloff. These are tuned by eye against reference photographs in
   Phase 5, not decided now.
-- **Whether to expose CRT presets** (purist / authentic / heavy) in addition to
-  per-effect sliders. Cosmetic, decidable in Phase 5 once the sliders exist and
-  we know which combinations are worth naming.
+- ~~**Whether to expose CRT presets**~~ **DECIDED (Phase 5): no.** Now that the three
+  intensities exist and can be judged, naming combinations of them adds vocabulary without
+  adding capability — and every named preset is a thing to document, translate and keep
+  honest. The defaults are the one combination worth shipping, and `--no-crt` is the
+  purist option. Reconsider only if a fourth or fifth effect arrives and the space of
+  useful settings stops being obvious.
+
 - **Whether the backlog indicator should show a progress bar or just a marker.**
   Depends on how the drain-time estimate reads in practice at low rates; the
   spec requires only that pending output is visible.

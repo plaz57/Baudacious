@@ -77,12 +77,19 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         public Phosphor Phosphor { get; init; } = Phosphor.Green;
 
         public int FontScale { get; init; } = 2;
+
+        public CrtSettings Crt { get; init; } = new();
     }
 
     private TerminalWindow(Options options)
     {
         _options = options;
-        _settings = new DisplaySettings { Phosphor = options.Phosphor, FontScale = options.FontScale };
+        _settings = new DisplaySettings
+        {
+            Phosphor = options.Phosphor,
+            FontScale = options.FontScale,
+            Crt = options.Crt,
+        };
     }
 
     public static int Run(Options options)
@@ -262,7 +269,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $" {_governor.Rate}  [{backlog}]  alt+B baud  alt+F flush  alt+P phosphor  alt+X quit");
+            // Kept under 80 columns: the bar is truncated, not wrapped, so anything longer
+            // is simply lost on a default-width window.
+            $" {_governor.Rate}  [{backlog}]  alt: B=baud F=flush P=phosphor C=crt X=quit");
     }
 
     private string BuildTitle()
@@ -432,6 +441,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             case Key.P:
                 _settings = _settings with { Phosphor = (Phosphor)(((int)_settings.Phosphor + 1) % 4) };
                 Notify($"phosphor: {_settings.Phosphor}");
+                return true;
+
+            case Key.C:
+                var on = !_settings.Crt.Enabled;
+                _settings = _settings with { Crt = _settings.Crt with { Enabled = on } };
+                Notify(on ? "CRT on" : "CRT off");
                 return true;
 
             case Key.Equal or Key.KeypadAdd:

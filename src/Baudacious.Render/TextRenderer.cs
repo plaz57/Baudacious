@@ -27,6 +27,7 @@ public sealed class TextRenderer : IDisposable
 
     private readonly GL _gl;
     private readonly GlyphAtlas _atlas;
+    private readonly CrtPass _crt;
 
     private uint _program;
     private uint _blitProgram;
@@ -55,6 +56,7 @@ public sealed class TextRenderer : IDisposable
         CreatePrograms();
         CreateGeometry();
         CreateGlyphTexture();
+        _crt = new CrtPass(gl);
     }
 
     /// <summary>Width in pixels of the offscreen target — the CRT's own resolution.</summary>
@@ -436,9 +438,25 @@ public sealed class TextRenderer : IDisposable
     /// some stems a pixel wider than others, which at 8x16 is the difference between crisp
     /// and mushy.
     /// </remarks>
-    public void Present(int windowWidth, int windowHeight, DisplaySettings settings)
+    public void Present(int windowWidth, int windowHeight, DisplaySettings settings) =>
+        Present(windowWidth, windowHeight, settings, destinationFramebuffer: 0);
+
+    /// <summary>
+    /// Puts the offscreen target on screen, centred, at the largest whole magnification
+    /// that fits, through the CRT pass unless it is switched off.
+    /// </summary>
+    /// <remarks>
+    /// Whole-number magnification only. A fractional scale resamples glyph pixels unevenly
+    /// and makes some stems a pixel wider than others, which at 8x16 is the difference
+    /// between crisp and mushy — and it would put the scanline period out of step with the
+    /// pixel grid it is supposed to describe.
+    /// </remarks>
+    public void Present(
+        int windowWidth, int windowHeight, DisplaySettings settings, uint destinationFramebuffer)
     {
-        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        ArgumentNullException.ThrowIfNull(settings);
+
+        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, destinationFramebuffer);
 
         var (r, g, b) = BackgroundOf(settings);
         _gl.Viewport(0, 0, (uint)windowWidth, (uint)windowHeight);
@@ -453,13 +471,22 @@ public sealed class TextRenderer : IDisposable
         var scale = Math.Max(1, Math.Min(windowWidth / _targetWidth, windowHeight / _targetHeight));
         var drawWidth = _targetWidth * scale;
         var drawHeight = _targetHeight * scale;
+        var originX = (windowWidth - drawWidth) / 2;
+        var originY = (windowHeight - drawHeight) / 2;
 
-        _gl.Viewport(
-            (windowWidth - drawWidth) / 2,
-            (windowHeight - drawHeight) / 2,
-            (uint)drawWidth,
-            (uint)drawHeight);
+        if (settings.Crt.Enabled)
+        {
+            _crt.Render(
+                _colourTarget, _targetWidth, _targetHeight,
+                destinationFramebuffer,
+                originX, originY, drawWidth, drawHeight,
+                settings.Crt, settings.Phosphor);
+            return;
+        }
 
+        // Bypass: a straight nearest blit, skipping six draws and four intermediate
+        // targets. This is the reference for what the CRT pass costs.
+        _gl.Viewport(originX, originY, (uint)drawWidth, (uint)drawHeight);
         _gl.UseProgram(_blitProgram);
         _gl.BindVertexArray(_blitVao);
         _gl.ActiveTexture(TextureUnit.Texture0);
@@ -624,6 +651,7 @@ public sealed class TextRenderer : IDisposable
         _gl.DeleteVertexArray(_vao);
         _gl.DeleteVertexArray(_blitVao);
         _gl.DeleteProgram(_program);
+        _crt.Dispose();
         _gl.DeleteProgram(_blitProgram);
     }
 }

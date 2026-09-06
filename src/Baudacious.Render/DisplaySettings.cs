@@ -38,6 +38,8 @@ public sealed record DisplaySettings
     public TimeSpan CursorBlinkInterval { get; init; } = TimeSpan.FromMilliseconds(500);
 
     public TimeSpan TextBlinkInterval { get; init; } = TimeSpan.FromMilliseconds(750);
+
+    public CrtSettings Crt { get; init; } = new();
 }
 
 /// <summary>
