@@ -33,6 +33,9 @@ public abstract record LocalCommand
     /// <summary>Null means toggle, which is what a bare <c>crt</c> asks for.</summary>
     public sealed record SetCrt(bool? On) : LocalCommand;
 
+    /// <summary>Null means toggle, as with <see cref="SetCrt"/>.</summary>
+    public sealed record SetFastEcho(bool? On) : LocalCommand;
+
     public sealed record NewSession(string Profile) : LocalCommand;
 
     public sealed record ShowHelp : LocalCommand;

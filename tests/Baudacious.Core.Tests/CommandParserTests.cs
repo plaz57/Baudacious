@@ -124,6 +124,27 @@ public class CommandParserTests
     }
 
     [Fact]
+    public void FastEchoIsASwitchLikeCrt()
+    {
+        Assert.Null(Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fastecho")).On);
+        Assert.True(Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fastecho on")).On);
+        Assert.False(Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fastecho off")).On);
+
+        var failure = Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("fastecho sometimes"));
+        Assert.Contains("sometimes", failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheSecondLetterSettlesEveryFVerb()
+    {
+        // fastecho, flush, fontsize and framing all begin with f and diverge at once.
+        Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fa"));
+        Assert.IsType<LocalCommand.Flush>(CommandParser.Parse("fl"));
+        Assert.IsType<LocalCommand.SetFontSize>(CommandParser.Parse("fo 3"));
+        Assert.IsType<LocalCommand.SetFraming>(CommandParser.Parse("fr 8N1"));
+    }
+
+    [Fact]
     public void SessionNewTakesAProfile()
     {
         var command = Assert.IsType<LocalCommand.NewSession>(

@@ -225,8 +225,9 @@ long as the user keeps typing.
 #### Scenario: Selecting a rate below the floor
 
 - **WHEN** the user selects 1200 baud with a tamed rich-editor pwsh profile
-- **THEN** a one-line notice states that typing will fall progressively behind at
-  this rate, offers fast echo as the remedy, and the rate is applied anyway
+- **THEN** a notice states how much wire each second of typing generates at this
+  rate, that the backlog therefore grows rather than settling at a fixed delay,
+  and offers fast echo as the remedy; the rate is applied anyway
 
 #### Scenario: No warning where there is no problem
 

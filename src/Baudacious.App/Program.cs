@@ -59,6 +59,10 @@ static int RunWindow(string[] args)
                 options = options with { FastEcho = false };
                 break;
 
+            case "--fast-echo":
+                options = options with { FastEcho = true };
+                break;
+
             case "--no-crt":
                 options = options with { Crt = CrtSettings.Off };
                 break;
@@ -84,16 +88,6 @@ static int RunWindow(string[] args)
         }
     }
 
-    // Below the threshold the rich line editor stops being an annoyance and starts being
-    // unusable, so fast echo becomes the default unless the user asked otherwise.
-    if (!options.Rate.IsUnlimited
-        && options.Rate.Baud < ShellProfiles.FastEchoThresholdBaud
-        && options.FastEcho
-        && options.Profile.StartsWith("pwsh", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.Error.WriteLine(
-            $"{options.Rate}: using fast echo (no PSReadLine) so typing keeps up. --rich-editor to override.");
-    }
 
     return TerminalWindow.Run(options);
 }
@@ -120,6 +114,7 @@ static int Help()
             -p, --phosphor <name>           green (default), amber, white, color
                 --scale <n>                 whole-number magnification of the 8x16 cell
                 --rich-editor               keep PSReadLine; ~29 bytes per keystroke
+                --fast-echo                 drop PSReadLine whatever the rate
                                             instead of 1, so typing lags below 9600 baud
                 --no-crt                    skip the CRT pass entirely
                 --bloom <n>                 phosphor bleed, 0 to switch off (default 0.55)

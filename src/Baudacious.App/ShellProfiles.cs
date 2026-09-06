@@ -19,6 +19,53 @@ internal static class ShellProfiles
     /// <summary>Profile names accepted on the command line.</summary>
     public static readonly string[] Names = ["pwsh", "cmd", "wsl"];
 
+    /// <summary>Echo traffic a tamed pwsh generates per keystroke. Measured, not guessed.</summary>
+    public const double RichEchoBytesPerKeystroke = 28.5;
+
+    /// <summary>
+    /// Characters a second an unhurried typist produces. Only used to turn the echo cost
+    /// into the shape of the problem — seconds of wire per second of typing.
+    /// </summary>
+    public const double TypingCharsPerSecond = 4.0;
+
+    /// <summary>
+    /// The rate below which a profile's own line editor stops keeping up, or 0 where there
+    /// is nothing to warn about.
+    /// </summary>
+    /// <remarks>
+    /// Measured, not guessed; see phase-0-findings.md section 4. cmd and wsl echo 1.0 bytes
+    /// per keystroke and are comfortable at 300 baud, so they have no floor. A tamed pwsh
+    /// costs 28.5 bytes per keystroke, which is comfortable from 9600 baud and progressively
+    /// worse below it.
+    /// </remarks>
+    public static int UsableFloorBaud(string profile, bool fastEcho) =>
+        !fastEcho && SupportsFastEcho(profile) ? 9600 : 0;
+
+    /// <summary>
+    /// Whether swapping the line editor for the console's cooked input means anything here.
+    /// </summary>
+    /// <remarks>
+    /// Only pwsh has an editor expensive enough to be worth removing. cmd and bash already
+    /// echo one byte per keystroke, so there is nothing to trade away and nothing to gain.
+    /// </remarks>
+    public static bool SupportsFastEcho(string profile) =>
+        profile.StartsWith("pwsh", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// What to send a running shell to change its line discipline, without restarting it
+    /// and so without losing its history or working directory.
+    /// </summary>
+    /// <remarks>
+    /// PSReadLine works by supplying a <c>PSConsoleHostReadLine</c> function that the host
+    /// calls instead of its own line reader. Removing the module removes that function and
+    /// the host falls back to the console's cooked input; importing it puts the function
+    /// back. Neither touches the session itself.
+    /// </remarks>
+    public static string[] FastEchoCommands(bool on) =>
+        on
+            ? ["Remove-Module PSReadLine -ErrorAction SilentlyContinue"]
+            : ["Import-Module PSReadLine", "Set-PSReadLineOption -PredictionSource None"];
+
     /// <summary>
     /// Builds a launch for a profile name. <c>wsl</c> may name a distribution after a
     /// colon, as in <c>wsl:Ubuntu</c>; without one, WSL picks its default.

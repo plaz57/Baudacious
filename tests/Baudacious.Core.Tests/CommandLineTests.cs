@@ -162,12 +162,15 @@ public class CommandCompleterTests
     [Fact]
     public void SeveralMatchesExtendToWhatTheyAgreeOn()
     {
-        // framing, flush and fontsize share only "f", so nothing is added and all three
-        // are offered.
+        // The f verbs share only "f", so nothing is added and every one is offered.
         var completion = Complete("f");
 
         Assert.Equal("f", completion.Line);
-        Assert.Equal(3, completion.Candidates.Count);
+        Assert.All(completion.Candidates, c => Assert.StartsWith("f", c, StringComparison.Ordinal));
+        Assert.Contains("framing", completion.Candidates);
+        Assert.Contains("flush", completion.Candidates);
+        Assert.Contains("fontsize", completion.Candidates);
+        Assert.Contains("fastecho", completion.Candidates);
     }
 
     [Fact]

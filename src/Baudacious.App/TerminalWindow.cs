@@ -73,6 +73,11 @@ internal sealed class TerminalWindow : IDisposable
     private MenuKind _menu;
     private int _menuIndex;
 
+    /// <summary>A notice over the grid, shown until the next keystroke or its deadline.</summary>
+    private IReadOnlyList<string>? _panel;
+    private long _panelUntil;
+    private bool _floorWarned;
+
     /// <summary>Kept for the life of the window so its history outlives one visit.</summary>
     private readonly CommandLine _commandLine = new();
     private CommandVocabulary _vocabulary = CommandVocabulary.Empty;
@@ -88,7 +93,11 @@ internal sealed class TerminalWindow : IDisposable
 
         public string Profile { get; init; } = "pwsh";
 
-        public bool FastEcho { get; init; } = true;
+        /// <summary>
+        /// Null asks for the rate to decide, which is the default: below the threshold the
+        /// rich editor cannot keep up, above it there is nothing to gain by removing it.
+        /// </summary>
+        public bool? FastEcho { get; init; }
 
         public Phosphor Phosphor { get; init; } = Phosphor.Green;
 
@@ -188,7 +197,7 @@ internal sealed class TerminalWindow : IDisposable
         try
         {
             session = TerminalSession.Start(
-                _nextNumber, profile, _options.FastEcho, rate, columns, rows, Invalidate);
+                _nextNumber, profile, FastEchoFor(profile, rate), rate, columns, rows, Invalidate);
         }
         catch (Exception ex) when (ex is FileNotFoundException or InvalidOperationException)
         {
@@ -208,6 +217,38 @@ internal sealed class TerminalWindow : IDisposable
         _active = _sessions.Count - 1;
         _repeatKey = Key.Unknown;
         _needsPresent = true;
+
+        if (session.FastEcho && _options.FastEcho is null)
+        {
+            Notify("rich editor off at this rate: ^] fastecho off restores it");
+        }
+
+        WarnIfBelowFloor();
+    }
+
+    /// <summary>
+    /// Starts the current session's profile again, in its place.
+    /// </summary>
+    /// <remarks>
+    /// A new shell rather than a resurrected one: the old process is gone, and pretending
+    /// otherwise would mean showing a screen that no longer describes anything.
+    /// </remarks>
+    private void RestartSession()
+    {
+        var profile = Current.Profile;
+        var rate = Current.Governor.Rate;
+        var columns = Current.Screen.Columns;
+        var rows = Current.Screen.RowCount;
+
+        CloseSession(_active);
+
+        if (_sessions.Count == 0)
+        {
+            _active = 0;
+        }
+
+        OpenSession(profile, rate, columns, rows);
+        Notify($"restarted {profile}");
     }
 
     /// <summary>Shows the next session, wrapping round.</summary>
@@ -247,6 +288,69 @@ internal sealed class TerminalWindow : IDisposable
 
     /// <summary>Handed to each session so anything it does can wake the frame loop.</summary>
     private void Invalidate() => _needsPresent = true;
+
+    // ---- Line discipline -----------------------------------------------------------
+
+    /// <summary>
+    /// Whether a new session should use the console's cooked line input.
+    /// </summary>
+    /// <remarks>
+    /// The rate decides unless the user said otherwise. Fast echo trades away syntax
+    /// coloring, prediction, history search and probably tab completion, so it is not
+    /// something to turn on silently where the rich editor is comfortable.
+    /// </remarks>
+    private bool FastEchoFor(string profile, LineRate rate) =>
+        _options.FastEcho
+        ?? (ShellProfiles.SupportsFastEcho(profile)
+            && !rate.IsUnlimited
+            && rate.Baud < ShellProfiles.FastEchoThresholdBaud);
+
+    /// <summary>
+    /// Warns, once for the life of the window, that the rate is below what the line
+    /// discipline in force can keep up with.
+    /// </summary>
+    /// <remarks>
+    /// Worth spelling out rather than reducing to "slow", because the cost is not a fixed
+    /// delay: every keystroke generates its own echo, so at these rates the queue grows for
+    /// as long as the typing continues and only drains once it stops.
+    /// </remarks>
+    private void WarnIfBelowFloor()
+    {
+        var rate = Current.Governor.Rate;
+        var floor = ShellProfiles.UsableFloorBaud(Current.Profile, Current.FastEcho);
+
+        if (_floorWarned || floor == 0 || rate.IsUnlimited || rate.Baud >= floor)
+        {
+            return;
+        }
+
+        _floorWarned = true;
+
+        // Seconds of wire generated per second spent typing. Above 1.0 the backlog can
+        // only grow.
+        var load = ShellProfiles.RichEchoBytesPerKeystroke
+                   * ShellProfiles.TypingCharsPerSecond
+                   / rate.BytesPerSecond;
+
+        ShowPanel(
+            [
+                string.Create(CultureInfo.InvariantCulture, $"the rich line editor at {rate}"),
+                string.Empty,
+                string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"each keypress echoes about {ShellProfiles.RichEchoBytesPerKeystroke:F1} bytes,"),
+                string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"which at this rate is {load:F2} seconds of wire for"),
+                "every second of typing. The backlog grows for as",
+                "long as you keep typing, rather than settling at a",
+                "fixed delay.",
+                string.Empty,
+                "ctrl+] then 'fastecho on' hands the line back to",
+                "the console, at 1 byte per keypress.",
+            ],
+            12);
+    }
 
     // ---- Option menus --------------------------------------------------------------
 
@@ -431,7 +535,7 @@ internal sealed class TerminalWindow : IDisposable
 
             if (_sessions.Count == 1)
             {
-                Notify($"shell exited ({code}) - close the window");
+                // The bar says so from here on; there is nowhere else to go.
                 continue;
             }
 
@@ -465,7 +569,26 @@ internal sealed class TerminalWindow : IDisposable
         ?? (_menu != MenuKind.None
             ? OptionMenu.Render(_menu, _menuIndex, Current.Governor.Rate, _settings.Phosphor)
             : null)
+        ?? (Environment.TickCount64 < _panelUntil ? _panel : null)
         ?? (_helpVisible ? Help.Lines : null);
+
+    /// <summary>Puts a notice over the grid. The next keystroke takes it away.</summary>
+    private void ShowPanel(IReadOnlyList<string> lines, int seconds)
+    {
+        _panel = lines;
+        _panelUntil = Environment.TickCount64 + (seconds * 1000L);
+        _needsPresent = true;
+    }
+
+    private void DismissPanel()
+    {
+        if (_panelUntil != 0)
+        {
+            _panel = null;
+            _panelUntil = 0;
+            _needsPresent = true;
+        }
+    }
 
     /// <summary>
     /// Which session is in front, or nothing at all when there is only the one. A count
@@ -487,6 +610,13 @@ internal sealed class TerminalWindow : IDisposable
 
         // specs/terminal-emulation: while scrolled back, say so, and say that the live view
         // has moved on — otherwise a static screen looks like a hung shell.
+        if (Current.IsFinished)
+        {
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $" {Current.Governor.Rate}  [{backlog}]  shell exited ({Current.ExitCode}) - enter restarts, alt+X quits");
+        }
+
         if (Current.Screen.IsScrolledBack)
         {
             return string.Create(
@@ -845,6 +975,8 @@ internal sealed class TerminalWindow : IDisposable
 
         var shifted = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
 
+        DismissPanel();
+
         // While the prompt is up it has the whole keyboard, Alt chords included. Escape
         // gives it back, and nothing typed at it ever reaches the shell.
         if (_promptOpen)
@@ -862,6 +994,18 @@ internal sealed class TerminalWindow : IDisposable
         if (control && key == Key.RightBracket)
         {
             OpenPrompt();
+            return;
+        }
+
+        // Nothing to type at once the shell has gone. Enter starts another; the local
+        // layer still works, so the window is not a dead end.
+        if (Current.IsFinished && !alt)
+        {
+            if (key is Key.Enter or Key.KeypadEnter)
+            {
+                RestartSession();
+            }
+
             return;
         }
 
@@ -1379,6 +1523,21 @@ internal sealed class TerminalWindow : IDisposable
             case LocalCommand.SetFontSize size:
                 ClosePrompt();
                 SetFontScale(size.Scale);
+                return;
+
+            case LocalCommand.SetFastEcho fast:
+                var wanted = fast.On ?? !Current.FastEcho;
+                if (!Current.SetFastEcho(wanted))
+                {
+                    Refuse($"{Current.Profile} already uses a minimal line discipline", line);
+                    return;
+                }
+
+                _floorWarned = false;
+                Finish(wanted
+                    ? "fast echo on: 1 byte per keypress, no prediction"
+                    : "rich editor back: prediction, coloring, ~29 bytes");
+                WarnIfBelowFloor();
                 return;
 
             case LocalCommand.SetCrt crt:

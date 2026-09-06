@@ -49,6 +49,12 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     /// <summary>The profile name it was started from, as typed.</summary>
     public string Profile { get; }
 
+    /// <summary>
+    /// Whether the shell is using the console's cooked line input rather than its own
+    /// editor. Meaningless, and always false, where the profile has no editor to replace.
+    /// </summary>
+    public bool FastEcho { get; private set; }
+
     public Screen Screen { get; }
 
     public TerminalEmulator Emulator { get; }
@@ -80,7 +86,10 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         Action invalidate)
     {
         var (start, setup) = ShellProfiles.Build(profile, fastEcho);
-        var session = new TerminalSession(number, profile, rate, columns, rows, invalidate);
+        var session = new TerminalSession(number, profile, rate, columns, rows, invalidate)
+        {
+            FastEcho = fastEcho && ShellProfiles.SupportsFastEcho(profile),
+        };
 
         session._pty = PtySession.Start(
             start with { Columns = (short)columns, Rows = (short)rows }, session);
@@ -98,6 +107,26 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         new(number, profile, rate, columns, rows, invalidate);
 
     public void Write(ReadOnlySpan<byte> bytes) => _pty?.Write(bytes);
+
+    /// <summary>
+    /// Changes the line discipline on the running shell. False when the profile has no
+    /// editor worth replacing, in which case nothing is sent.
+    /// </summary>
+    public bool SetFastEcho(bool on)
+    {
+        if (!ShellProfiles.SupportsFastEcho(Profile))
+        {
+            return false;
+        }
+
+        foreach (var command in ShellProfiles.FastEchoCommands(on))
+        {
+            Write(Encoding.UTF8.GetBytes(command + "\r"));
+        }
+
+        FastEcho = on;
+        return true;
+    }
 
     public void Resize(int columns, int rows)
     {

@@ -37,7 +37,8 @@ public static class CommandParser
             "flush" => NoArguments(arguments, verb) ?? new LocalCommand.Flush(),
             "phosphor" => ParsePhosphor(arguments, vocabulary),
             "fontsize" => ParseFontSize(arguments),
-            "crt" => ParseCrt(arguments),
+            "crt" => ParseCrt(arguments, "crt"),
+            "fastecho" => ParseFastEcho(arguments),
             "session" => ParseSession(arguments, vocabulary),
             "help" => NoArguments(arguments, verb) ?? new LocalCommand.ShowHelp(),
             _ => NoArguments(arguments, verb) ?? new LocalCommand.Quit(),
@@ -158,23 +159,38 @@ public static class CommandParser
             : new LocalCommand.Failed($"fontsize is 1 to {MaxFontScale}; {scale} is outside it");
     }
 
-    private static LocalCommand ParseCrt(List<string> arguments)
+    private static LocalCommand ParseCrt(List<string> arguments, string verb)
+    {
+        var (on, failure) = ParseSwitch(arguments, verb);
+        return failure ?? new LocalCommand.SetCrt(on);
+    }
+
+    private static LocalCommand ParseFastEcho(List<string> arguments)
+    {
+        var (on, failure) = ParseSwitch(arguments, "fastecho");
+        return failure ?? new LocalCommand.SetFastEcho(on);
+    }
+
+    /// <summary>
+    /// A bare verb toggles; <c>on</c> and <c>off</c> say which way.
+    /// </summary>
+    private static (bool? On, LocalCommand? Failure) ParseSwitch(List<string> arguments, string verb)
     {
         if (arguments.Count == 0)
         {
-            return new LocalCommand.SetCrt(null);
+            return (null, null);
         }
 
         if (arguments.Count > 1)
         {
-            return new LocalCommand.Failed("crt [on|off]");
+            return (null, new LocalCommand.Failed($"{verb} [on|off]"));
         }
 
         return arguments[0].ToLowerInvariant() switch
         {
-            "on" => new LocalCommand.SetCrt(true),
-            "off" => new LocalCommand.SetCrt(false),
-            _ => new LocalCommand.Failed($"'{arguments[0]}' is not on or off"),
+            "on" => (true, null),
+            "off" => (false, null),
+            _ => (null, new LocalCommand.Failed($"'{arguments[0]}' is not on or off")),
         };
     }
 
