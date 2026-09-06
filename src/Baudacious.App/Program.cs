@@ -88,7 +88,8 @@ static int RunWindow(string[] args)
     // unusable, so fast echo becomes the default unless the user asked otherwise.
     if (!options.Rate.IsUnlimited
         && options.Rate.Baud < ShellProfiles.FastEchoThresholdBaud
-        && options.FastEcho)
+        && options.FastEcho
+        && options.Profile.StartsWith("pwsh", StringComparison.OrdinalIgnoreCase))
     {
         Console.Error.WriteLine(
             $"{options.Rate}: using fast echo (no PSReadLine) so typing keeps up. --rich-editor to override.");
@@ -114,7 +115,8 @@ static int Help()
           baudacious [options]              open the terminal window
 
             -b, --baud <rate>               line rate, or 'unlimited' (default 1200)
-            -s, --shell <pwsh|cmd>          which shell to host
+            -s, --shell <name>              pwsh (default), cmd, or wsl.
+                                            wsl:Ubuntu picks a distribution
             -p, --phosphor <name>           green (default), amber, white, color
                 --scale <n>                 whole-number magnification of the 8x16 cell
                 --rich-editor               keep PSReadLine; ~29 bytes per keystroke

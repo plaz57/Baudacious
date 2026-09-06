@@ -19,6 +19,9 @@ Needs .NET 10, Windows 10 1809 or later, and a GPU with OpenGL 3.3.
 dotnet run -c Release --project src/Baudacious.App -- --baud 1200 --shell cmd
 ```
 
+Three shells: `--shell pwsh` (default), `cmd`, or `wsl`. Name a distribution with
+`--shell wsl:Ubuntu`, or leave it off and WSL picks its own default.
+
 | Key | |
 |---|---|
 | `Alt+B` | step through 110 → 300 → 1200 → … → 115200 |
@@ -103,8 +106,9 @@ BAUDACIOUS_CONFORMANCE_SECONDS=60 dotnet test --filter Category=Timing
 Recorded in [phase-0-findings.md](openspec/changes/baudacious-v1/phase-0-findings.md):
 
 - **ConPTY is silent at rest** — zero bytes over five seconds at an idle prompt.
-- **`cmd.exe` echoes 1.0 bytes per keystroke** and is comfortable at every rate,
-  including 300 baud. It is a genuinely 1980s-grade line discipline.
+- **`cmd.exe` and WSL's bash both echo 1.0 bytes per keystroke** and are
+  comfortable at every rate, including 300 baud. bash's readline repaints the
+  input line only for history and completion, not for ordinary typing.
 - **PowerShell echoes 96.9** by default, because PSReadLine repaints the whole
   input line on every keystroke. Tuning its options gets that to ~28; *removing*
   PSReadLine gets it to exactly 1.0, matching cmd, because PowerShell then falls

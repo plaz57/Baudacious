@@ -417,7 +417,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
             usage: Baudacious.App shell [options]
 
               -b, --baud <rate>      line rate, or 'unlimited' (default 1200)
-              -s, --shell <name>     pwsh (default) or cmd
+              -s, --shell <name>     pwsh (default), cmd, or wsl (wsl:Ubuntu picks one)
               -p, --phosphor <name>  green (default), amber, white, color
                   --rich-editor      keep PSReadLine; costs ~29 bytes per keystroke
                                      instead of 1, so typing lags below 9600 baud

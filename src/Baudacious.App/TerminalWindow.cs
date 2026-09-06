@@ -173,6 +173,11 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             Notify(ex.Message);
             return;
         }
+        catch (InvalidOperationException ex)
+        {
+            Notify(ex.Message);
+            return;
+        }
 
         _session = PtySession.Start(start with { Columns = (short)columns, Rows = (short)rows }, this);
 

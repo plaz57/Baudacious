@@ -170,6 +170,33 @@ Tab in *both* configurations, including the one where completion certainly works
 so the test was faulty and the question is recorded as **unverified**. It should be
 answered by hand in Phase 3, when there is a real terminal to type into.
 
+### 4c. WSL, added later, needs no taming at all
+
+WSL was added as a third backend after Phase 5. Measured on the same rig by the same
+probe:
+
+| Configuration | Bytes/key | min | max |
+|---|---|---|---|
+| **wsl bash** | **1.0** | 1 | 1 |
+| wsl bash, plain PS1 | 1.0 | 1 | 1 |
+| cmd.exe | 1.0 | 1 | 1 |
+| pwsh, PSReadLine removed | 1.0 | 1 | 1 |
+
+bash's readline repaints the input line only for operations that need it — history
+recall, completion — and not for ordinary insertion, which is exactly where PSReadLine
+differs. So WSL is comfortable to type into at every supported rate, 300 baud included,
+with nothing injected at startup.
+
+Worth stating plainly because the opposite was assumed: the first version of this code
+carried a comment guessing that readline "redraws the input line much as PSReadLine
+does". It does not, and the guess was in the tree for about an hour before the
+measurement removed it.
+
+`wsl.exe` is an ordinary Windows console program, so ConPTY hosts it with no special
+handling. Its UTF-8 output decodes through the existing parser — box drawing and accented
+characters arrive intact — and bash's `PROMPT_COMMAND` sets the window title through the
+OSC handler already in place.
+
 ### 4b. Why the per-keystroke number matters more than it looks
 
 The figure is not a fixed latency on one key; it is wire time *generated* per key,

@@ -67,6 +67,7 @@ indicator (7.9).
 - [x] 4.7 Implement the frame loop with vsync, wall-clock governor ticks, and the idle drop to 10 Hz when nothing is pending or changing
 - [x] 4.8 Implement the PTY reader and writer threads and wire ConPTY → ring → governor → parser → grid → renderer
 - [x] 4.9 Propagate grid size to ConPTY via `ResizePseudoConsole` on launch and on resize, without disturbing queued bytes
+- [x] 4.10b Host a Linux shell under WSL, with an optional distribution name. Measured at 1.0 bytes per keystroke, so no taming is applied
 - [x] 4.10 Implement shell profiles, the pwsh and cmd defaults, and the pwsh readline taming with its per-profile opt-out
 - [x] 4.10a Implement fast echo: `Remove-Module PSReadLine` for pwsh, default below the 4800 baud threshold, toggleable on a live session, no-op for cmd
 - [ ] 4.10b Verify by hand whether tab completion survives fast echo, and record the answer in phase-0-findings.md §4a (the Phase 0 probe was faulty)

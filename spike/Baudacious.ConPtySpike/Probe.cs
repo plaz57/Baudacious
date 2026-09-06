@@ -65,6 +65,19 @@ internal static class Probe
                  "function prompt { 'PS> ' }"]),
 
             ("cmd (reference)", ShellProfiles.Cmd(), []),
+
+            // bash under WSL. Measured at 1.0 bytes per keystroke — readline repaints the
+            // line only for history and completion, not for ordinary insertion, which is
+            // where it parts company with PSReadLine.
+            ("wsl bash", new PtyStartInfo
+            {
+                Executable = Path.Combine(Environment.SystemDirectory, "wsl.exe"),
+            }, []),
+
+            ("wsl bash, plain PS1", new PtyStartInfo
+            {
+                Executable = Path.Combine(Environment.SystemDirectory, "wsl.exe"),
+            }, ["PS1='$ '", "unset PROMPT_COMMAND"]),
         };
 
         Console.WriteLine($"{"configuration",-22}{"bytes/key",10}{"min",6}{"max",6}   vs cmd");

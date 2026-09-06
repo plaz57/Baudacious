@@ -27,10 +27,13 @@ is in use.
 
 ### Requirement: v1 shell backends
 
-The system SHALL ship with working profiles for PowerShell 7 (`pwsh`) and the
-Windows command processor (`cmd.exe`), and SHALL make the hosting mechanism
-replaceable so that additional backends can be added without changes above
-this capability.
+The system SHALL ship with working profiles for PowerShell 7 (`pwsh`), the Windows
+command processor (`cmd.exe`), and a Linux shell under the Windows Subsystem for
+Linux (`wsl`). It SHALL make the hosting mechanism replaceable so that additional
+backends can be added without changes above this capability.
+
+The WSL profile SHALL accept an optional distribution name, and SHALL use WSL's own
+default when none is given.
 
 #### Scenario: Launching pwsh
 
@@ -44,12 +47,32 @@ this capability.
 - **THEN** a `cmd.exe` process is running, its version banner and prompt arrive,
   and typed commands execute
 
+#### Scenario: Launching a Linux shell
+
+- **WHEN** the user starts a session with the wsl profile
+- **THEN** a Linux shell is running under the Windows Subsystem for Linux, its
+  prompt arrives, and typed commands execute
+- **AND** UTF-8 output from that shell — box drawing, accented characters — is
+  displayed correctly rather than as substitution glyphs
+
+#### Scenario: Choosing a distribution
+
+- **WHEN** the user names a distribution alongside the wsl profile
+- **THEN** that distribution is launched rather than WSL's default
+
 #### Scenario: pwsh is absent
 
 - **WHEN** the pwsh profile is selected on a machine where `pwsh` is not on the
   PATH and not at its default install location
 - **THEN** the system reports that the executable could not be found, names the
   path it looked for, and does not terminate the application
+
+#### Scenario: WSL is absent
+
+- **WHEN** the wsl profile is selected on a machine without the Windows Subsystem
+  for Linux installed
+- **THEN** the system says so and says how to install it, and does not terminate
+  the application
 
 ### Requirement: Shell profiles are user-definable
 
@@ -167,8 +190,8 @@ long as the user keeps typing.
 
 #### Scenario: No warning where there is no problem
 
-- **WHEN** the user selects 300 baud with a cmd.exe profile, or with a pwsh profile
-  in fast echo mode
+- **WHEN** the user selects 300 baud with a cmd.exe or wsl profile, or with a pwsh
+  profile in fast echo mode
 - **THEN** no warning is shown
 
 #### Scenario: The warning does not nag
