@@ -6,6 +6,46 @@ character grid, independent of which shell or hosting mechanism is used.
 
 ## ADDED Requirements
 
+### Requirement: A window can hold several sessions
+
+The system SHALL allow more than one shell session in a window, showing one at a
+time, and SHALL meter every session whether or not it is the one on screen. Each
+session SHALL keep its own line rate, scrollback and selection; the palette,
+magnification and CRT pass SHALL be shared by the window.
+
+#### Scenario: Starting another shell
+
+- **WHEN** the user asks for a new session
+- **THEN** a second shell starts, becomes the one on screen, and the first keeps
+  running
+
+#### Scenario: Switching between them
+
+- **WHEN** the user switches sessions
+- **THEN** the other session's screen, scrollback and line rate are shown, and
+  typing goes to that shell
+
+#### Scenario: A background session keeps receiving
+
+- **WHEN** a session that is not on screen produces output
+- **THEN** that output is metered at that session's rate as it arrives, so
+  switching to it shows a screen that kept pace rather than a backlog
+
+#### Scenario: One session's shell exits
+
+- **WHEN** a session's shell exits and everything it sent has been shown
+- **THEN** that session closes, another is shown, and the window stays open
+
+#### Scenario: The last session's shell exits
+
+- **WHEN** the only session's shell exits
+- **THEN** the window stays open showing its final output and the exit code
+
+#### Scenario: The window closes
+
+- **WHEN** the window is closed
+- **THEN** every session's shell is terminated
+
 ### Requirement: Shell sessions are byte streams
 
 The system SHALL present each hosted shell as a session exposing an outbound

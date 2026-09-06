@@ -87,7 +87,7 @@ indicator (7.9).
 - [x] 5.4 Implement Ctrl+C: interrupt the shell, discard the backlog, reset the parser to ground while preserving SGR state
 - [x] 5.5 Verify no plain Ctrl+letter chord other than Ctrl+C is consumed locally, with a test over the full alphabet
 - [x] 5.6 Implement the Alt chord dispatcher, with unbound chords falling through to the shell as ESC + key
-- [x] 5.7 Alt bindings B, F, Shift+F (held 10x), P, G, C, Z, X and font scale. **N and S deferred with 5.18** — no multi-session support yet
+- [x] 5.7 Alt bindings B, F, Shift+F (held 10x), P, G, C, Z, X, N, S and font scale
 - [x] 5.7a Require two presses of the quit chord within a short window, since one press kills a live shell and Alt+X sits beside bindings pressed casually (done early in the window; the console harness still quits on one press)
 - [ ] 5.8 Implement the overlay menus for baud rate, framing, and phosphor palette — currently these cycle on their Alt key and report through the status bar, which works but does not show the options
 - [x] 5.9 Alt+Z help overlay listing every binding and its effect (the config file path arrives with the config file in Phase 6)
@@ -99,7 +99,7 @@ indicator (7.9).
 - [x] 5.15 Implement Ctrl+C as copy when a selection is active, sending nothing and preserving the backlog
 - [x] 5.16 Mouse reporting passthrough for modes 1000/1002/1003 in both the legacy and SGR encodings, with shift+drag taking the mouse back for local selection
 - [x] 5.17 Scrollback by wheel and shift+pgup/pgdn/home/end; the view stays put as output arrives, and the status bar shows how far back it is
-- [ ] 5.18 Implement multiple sessions with Alt+N and Alt+S
+- [x] 5.18 Implement multiple sessions with Alt+N and Alt+S
 - [ ] 5.19 Manual acceptance: a full working session at 2400 baud using only the keyboard
 
 ## 6. Phase 5 — The CRT pass

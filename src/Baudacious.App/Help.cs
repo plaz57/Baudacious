@@ -15,6 +15,7 @@ public static class Help
         "  alt+B  line rate         alt+G  framing",
         "  alt+F  fast-forward      alt+shift+F  10x while held",
         "  alt+P  phosphor          alt+C  CRT pass",
+        "  alt+N  new session       alt+S  next session",
         "  alt+- / alt+=  scale     alt+Z  this help",
         "  alt+X  quit (press twice within three seconds)",
         "  ctrl+]  local command prompt (tab completes)",

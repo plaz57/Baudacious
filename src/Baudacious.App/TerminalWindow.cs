@@ -26,10 +26,12 @@ namespace Baudacious.App;
 /// the whole point of keeping the grid a plain data structure with no idea how it is drawn.
 /// </remarks>
 [SupportedOSPlatform("windows")]
-internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposable
+internal sealed class TerminalWindow : IDisposable
 {
-    private readonly ByteRing _ring = new();
     private readonly Stopwatch _clock = Stopwatch.StartNew();
+
+    /// <summary>Every hosted shell, oldest first. Never empty once the window has loaded.</summary>
+    private readonly List<TerminalSession> _sessions = [];
     private readonly Options _options;
 
     private IWindow _window = null!;
@@ -38,14 +40,10 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private TextRenderer _renderer = null!;
     private GlyphAtlas _atlas = null!;
 
-    private Screen _screen = null!;
-    private TerminalEmulator _emulator = null!;
-    private VtParser _parser = null!;
-    private BaudGovernor _governor = null!;
-    private PtySession? _session;
+    private int _active;
+    private int _nextNumber = 1;
 
     private DisplaySettings _settings;
-    private string _title = string.Empty;
     private string _notice = string.Empty;
     private long _noticeUntil;
     private bool _needsPresent = true;
@@ -65,7 +63,6 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// </summary>
     private long _quitArmedUntil;
 
-    private Selection? _selection;
     private bool _dragging;
     private bool _mouseButtonDown;
     private (int Row, int Column) _lastReported = (-1, -1);
@@ -82,7 +79,6 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private bool _repeatToPrompt;
 
     private double _idleSeconds;
-    private int? _exitCode;
 
     internal sealed record Options
     {
@@ -98,6 +94,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         public CrtSettings Crt { get; init; } = new();
     }
+
+    /// <summary>The session the window is showing and the keyboard is talking to.</summary>
+    private TerminalSession Current => _sessions[_active];
 
     private TerminalWindow(Options options)
     {
@@ -172,60 +171,80 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         }
 
         var (columns, rows) = GridFor(_window.FramebufferSize);
-        _screen = new Screen(columns, rows);
-        _emulator = new TerminalEmulator(_screen, this);
-        _parser = new VtParser(_emulator);
-        _governor = new BaudGovernor(_ring, SystemTimeSource.Instance, _options.Rate);
-
-        StartShell(columns, rows);
+        OpenSession(_options.Profile, _options.Rate, columns, rows);
     }
 
-    private void StartShell(int columns, int rows)
+    // ---- Sessions ------------------------------------------------------------------
+
+    /// <summary>
+    /// Starts a shell and shows it. A profile that names something not installed leaves a
+    /// grid behind with the reason on it, rather than a window with nothing in it at all.
+    /// </summary>
+    private void OpenSession(string profile, LineRate rate, int columns, int rows)
     {
-        PtyStartInfo start;
-        string[] setup;
+        TerminalSession session;
         try
         {
-            (start, setup) = ShellProfiles.Build(_options.Profile, _options.FastEcho);
+            session = TerminalSession.Start(
+                _nextNumber, profile, _options.FastEcho, rate, columns, rows, Invalidate);
         }
-        catch (FileNotFoundException ex)
+        catch (Exception ex) when (ex is FileNotFoundException or InvalidOperationException)
         {
-            Notify(ex.Message);
-            return;
-        }
-        catch (InvalidOperationException ex)
-        {
-            Notify(ex.Message);
-            return;
-        }
-
-        _session = PtySession.Start(start with { Columns = (short)columns, Rows = (short)rows }, this);
-
-        if (setup.Length == 0)
-        {
-            return;
-        }
-
-        // Off the render thread, because the shell has to come up before it will read: a
-        // startup command delivered too early is simply lost.
-        var session = _session;
-        _ = Task.Run(async () =>
-        {
-            var deadline = Environment.TickCount64 + 3000;
-            while (Environment.TickCount64 < deadline && _ring.IsEmpty)
+            if (_sessions.Count > 0)
             {
-                await Task.Delay(10).ConfigureAwait(false);
+                // There is somewhere to say this. Leave the user where they were.
+                Notify(ex.Message);
+                return;
             }
 
-            await Task.Delay(250).ConfigureAwait(false);
+            session = TerminalSession.Detached(_nextNumber, profile, rate, columns, rows, Invalidate);
+            Notify(ex.Message);
+        }
 
-            foreach (var command in setup)
-            {
-                session.Write(Encoding.UTF8.GetBytes(command + "\r"));
-                await Task.Delay(120).ConfigureAwait(false);
-            }
-        });
+        _nextNumber++;
+        _sessions.Add(session);
+        _active = _sessions.Count - 1;
+        _repeatKey = Key.Unknown;
+        _needsPresent = true;
     }
+
+    /// <summary>Shows the next session, wrapping round.</summary>
+    private void NextSession()
+    {
+        if (_sessions.Count < 2)
+        {
+            Notify("only one session - alt+N starts another");
+            return;
+        }
+
+        _active = (_active + 1) % _sessions.Count;
+        _repeatKey = Key.Unknown;
+        Notify($"session {Current.Number} - {Current.Governor.Rate}");
+        _needsPresent = true;
+    }
+
+    /// <summary>
+    /// Drops a finished session. The window itself outlives the last one, because closing
+    /// out from under someone still reading a shell's final output would be worse than a
+    /// window they have to close.
+    /// </summary>
+    private void CloseSession(int index)
+    {
+        var session = _sessions[index];
+        _sessions.RemoveAt(index);
+        session.Dispose();
+
+        if (index < _active)
+        {
+            _active--;
+        }
+
+        _active = Math.Clamp(_active, 0, Math.Max(0, _sessions.Count - 1));
+        _needsPresent = true;
+    }
+
+    /// <summary>Handed to each session so anything it does can wake the frame loop.</summary>
+    private void Invalidate() => _needsPresent = true;
 
     private (int Columns, int Rows) GridFor(Vector2D<int> framebuffer)
     {
@@ -244,7 +263,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     {
         PumpKeyRepeat();
 
-        var released = _governor.Tick(_parser);
+        // Every session, not just the visible one: a wire does not stop carrying because
+        // nobody is watching, and a paused background session would dump its whole backlog
+        // the instant it was switched to.
+        var released = 0;
+        foreach (var session in _sessions)
+        {
+            released += session.Tick();
+        }
+
         if (released > 0)
         {
             _needsPresent = true;
@@ -255,14 +282,10 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             _idleSeconds += delta;
         }
 
-        if (_exitCode is null && _session?.TryGetExitCode() is { } code && _governor.PendingBytes == 0)
-        {
-            _exitCode = code;
-            Notify($"shell exited ({code}) - close the window");
-        }
+        ReapFinishedSessions();
 
         // A blinking cursor is a reason to repaint even when nothing arrived.
-        if (_settings.CursorBlink && _screen.CursorVisible)
+        if (_settings.CursorBlink && Current.Screen.CursorVisible)
         {
             _needsPresent = true;
         }
@@ -276,7 +299,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             var (status, caret) = StatusView();
             _renderer.RenderToTarget(
-                _screen, _settings, _clock.Elapsed, status, _selection, Overlay(), caret);
+                Current.Screen, _settings, _clock.Elapsed, status, Current.Selection, Overlay(), caret);
             _renderer.Present(_window.FramebufferSize.X, _window.FramebufferSize.Y, _settings);
             _window.Title = BuildTitle();
             _needsPresent = false;
@@ -284,9 +307,41 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         // Idle: stop spinning the GPU when nothing is happening. specs/display-rendering
         // asks for at most 10 Hz once the screen has been static for a second.
-        if (_idleSeconds > 1.0 && _governor.PendingBytes == 0)
+        if (_idleSeconds > 1.0 && _sessions.All(s => s.Governor.PendingBytes == 0))
         {
             Thread.Sleep(90);
+        }
+    }
+
+    /// <summary>
+    /// Notices shells that have exited and whose backlog has finished arriving.
+    /// </summary>
+    /// <remarks>
+    /// The backlog matters: at 300 baud a shell can be gone for a minute while its parting
+    /// words are still on the wire, and closing then would swallow them.
+    /// </remarks>
+    private void ReapFinishedSessions()
+    {
+        for (var i = _sessions.Count - 1; i >= 0; i--)
+        {
+            var session = _sessions[i];
+            if (session.IsFinished
+                || session.PtyExitCode is not { } code
+                || session.Governor.PendingBytes != 0)
+            {
+                continue;
+            }
+
+            session.ExitCode = code;
+
+            if (_sessions.Count == 1)
+            {
+                Notify($"shell exited ({code}) - close the window");
+                continue;
+            }
+
+            CloseSession(i);
+            Notify($"session {session.Number} exited ({code})");
         }
     }
 
@@ -310,34 +365,45 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     private IReadOnlyList<string>? Overlay() =>
         _promptMessage ?? (_helpVisible ? Help.Lines : null);
 
+    /// <summary>
+    /// Which session is in front, or nothing at all when there is only the one. A count
+    /// that never changes is noise on a bar that has 80 columns to spend.
+    /// </summary>
+    private string SessionMark =>
+        _sessions.Count < 2
+            ? string.Empty
+            : string.Create(CultureInfo.InvariantCulture, $"  #{_active + 1}/{_sessions.Count}");
+
     private string StatusLine()
     {
-        var pending = _governor.PendingBytes;
+        var pending = Current.Governor.PendingBytes;
         var backlog = pending == 0
             ? "idle"
             : string.Create(
                 CultureInfo.InvariantCulture,
-                $"{pending} pending, {_governor.EstimatedDrain.TotalSeconds:F1}s");
+                $"{pending} pending, {Current.Governor.EstimatedDrain.TotalSeconds:F1}s");
 
         // specs/terminal-emulation: while scrolled back, say so, and say that the live view
         // has moved on — otherwise a static screen looks like a hung shell.
-        if (_screen.IsScrolledBack)
+        if (Current.Screen.IsScrolledBack)
         {
             return string.Create(
                 CultureInfo.InvariantCulture,
-                $" {_governor.Rate}  [{backlog}]  -- HISTORY, {_screen.ViewOffset} lines back; shift+end for live --");
+                $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  -- HISTORY, {Current.Screen.ViewOffset} lines back; shift+end for live --");
         }
 
         if (Environment.TickCount64 < _noticeUntil)
         {
-            return string.Create(CultureInfo.InvariantCulture, $" {_governor.Rate}  [{backlog}]  {_notice}");
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  {_notice}");
         }
 
         return string.Create(
             CultureInfo.InvariantCulture,
             // Kept under 80 columns: the bar is truncated, not wrapped, so anything longer
             // is simply lost on a default-width window.
-            $" {_governor.Rate}  [{backlog}]  alt: B=baud F=flush P=phosphor X=quit  ^]=cmd");
+            $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  alt: B=baud F=flush P=phosphor N=new  ^]=cmd");
     }
 
     // ---- Mouse, selection and scrollback ----------------------------------------
@@ -355,9 +421,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         var column = (int)((position.X - originX) / (_atlas.CellWidth * scale));
         var row = (int)((position.Y - originY) / (_atlas.CellHeight * scale));
 
-        return column < 0 || row < 0 || column > _screen.Columns || row >= _screen.RowCount
+        return column < 0 || row < 0 || column > Current.Screen.Columns || row >= Current.Screen.RowCount
             ? null
-            : (row, Math.Min(column, _screen.Columns));
+            : (row, Math.Min(column, Current.Screen.Columns));
     }
 
     /// <summary>
@@ -368,8 +434,8 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// mouse-aware program can still be selected and copied.
     /// </remarks>
     private bool MouseGoesToShell =>
-        _emulator.MouseReporting
-        && !_screen.IsScrolledBack
+        Current.Emulator.MouseReporting
+        && !Current.Screen.IsScrolledBack
         && !_input.Keyboards.Any(k => k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
 
     private void SendMouse(TerminalButton button, bool pressed, bool motion, int row, int column)
@@ -377,8 +443,8 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         var keyboard = _input.Keyboards.FirstOrDefault();
 
         var report = MouseReport.Encode(
-            _emulator.MouseTracking,
-            _emulator.MouseEncoding,
+            Current.Emulator.MouseTracking,
+            Current.Emulator.MouseEncoding,
             button,
             pressed,
             motion,
@@ -390,7 +456,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         if (report is not null)
         {
-            _session?.Write(Encoding.UTF8.GetBytes(report));
+            Current.Write(Encoding.UTF8.GetBytes(report));
         }
     }
 
@@ -408,12 +474,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         var column = (int)((position.X - originX) / (_atlas.CellWidth * scale));
         var row = (int)((position.Y - originY) / (_atlas.CellHeight * scale));
 
-        if (column < 0 || row < 0 || column > _screen.Columns || row >= _screen.RowCount)
+        if (column < 0 || row < 0 || column > Current.Screen.Columns || row >= Current.Screen.RowCount)
         {
             return null;
         }
 
-        return new GridPoint(_screen.AbsoluteRowOf(row), Math.Min(column, _screen.Columns));
+        return new GridPoint(Current.Screen.AbsoluteRowOf(row), Math.Min(column, Current.Screen.Columns));
     }
 
     private void OnMouseDown(IMouse mouse, Silk.NET.Input.MouseButton button)
@@ -447,9 +513,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         var shift = _input.Keyboards.Any(k => k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
 
-        _selection = shift && _selection is not null
-            ? _selection with { Focus = point }          // extend what is already there
-            : Selection.Expand(_screen, point, mode);
+        Current.Selection = shift && Current.Selection is not null
+            ? Current.Selection with { Focus = point }          // extend what is already there
+            : Selection.Expand(Current.Screen, point, mode);
 
         _dragging = mode == SelectionMode.Character;
         _needsPresent = true;
@@ -461,7 +527,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             // Drag tracking wants motion only while a button is down; motion tracking wants
             // it either way. The encoder drops what the level does not ask for.
-            if ((_mouseButtonDown || _emulator.MouseTracking == MouseTracking.Motion)
+            if ((_mouseButtonDown || Current.Emulator.MouseTracking == MouseTracking.Motion)
                 && CellAt(position) is { } moved
                 && (moved.Row, moved.Column) != _lastReported)
             {
@@ -472,12 +538,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;
         }
 
-        if (!_dragging || _selection is null || PointAt(position) is not { } point)
+        if (!_dragging || Current.Selection is null || PointAt(position) is not { } point)
         {
             return;
         }
 
-        _selection = _selection with { Focus = point };
+        Current.Selection = Current.Selection with { Focus = point };
         _needsPresent = true;
     }
 
@@ -498,9 +564,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         _dragging = false;
 
-        if (_selection is { IsEmpty: true })
+        if (Current.Selection is { IsEmpty: true })
         {
-            _selection = null;
+            Current.Selection = null;
             _needsPresent = true;
         }
     }
@@ -526,7 +592,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;
         }
 
-        _screen.ScrollView(lines);
+        Current.Screen.ScrollView(lines);
         _needsPresent = true;
     }
 
@@ -539,12 +605,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private void Copy()
     {
-        if (_selection is null || _selection.IsEmpty)
+        if (Current.Selection is null || Current.Selection.IsEmpty)
         {
             return;
         }
 
-        var text = _selection.GetText(_screen);
+        var text = Current.Selection.GetText(Current.Screen);
         Notify(Clipboard.SetText(text)
             ? $"copied {text.Length} characters"
             : "could not open the clipboard");
@@ -562,15 +628,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
         // Bracketed paste tells the shell this arrived as a paste rather than as typing, so
         // a multi-line paste is not run line by line as it lands.
-        if (_emulator.BracketedPaste)
+        if (Current.Emulator.BracketedPaste)
         {
-            _session?.Write("\u001b[200~"u8);
-            _session?.Write(Encoding.UTF8.GetBytes(text));
-            _session?.Write("\u001b[201~"u8);
+            Current.Write("\u001b[200~"u8);
+            Current.Write(Encoding.UTF8.GetBytes(text));
+            Current.Write("\u001b[201~"u8);
         }
         else
         {
-            _session?.Write(Encoding.UTF8.GetBytes(text));
+            Current.Write(Encoding.UTF8.GetBytes(text));
         }
 
         // Never metered: input travels at full speed, and it is the echo coming back that
@@ -580,18 +646,18 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     private string BuildTitle()
     {
-        var pending = _governor.PendingBytes;
+        var pending = Current.Governor.PendingBytes;
         var backlog = pending == 0
             ? string.Empty
             : string.Create(
                 CultureInfo.InvariantCulture,
-                $"  [{pending} pending, {_governor.EstimatedDrain.TotalSeconds:F1}s]");
+                $"  [{pending} pending, {Current.Governor.EstimatedDrain.TotalSeconds:F1}s]");
 
         var notice = Environment.TickCount64 < _noticeUntil ? "  " + _notice : string.Empty;
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"Baudacious — {_governor.Rate}{backlog}{notice}  {_title}");
+            $"Baudacious — {Current.Governor.Rate}{SessionMark}{backlog}{notice}  {Current.Title}");
     }
 
     private void OnResize(Vector2D<int> size)
@@ -604,16 +670,17 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         _gl.Viewport(size);
 
         var (columns, rows) = GridFor(size);
-        if (columns == _screen.Columns && rows == _screen.RowCount)
+        if (columns == Current.Screen.Columns && rows == Current.Screen.RowCount)
         {
             _needsPresent = true;
             return;
         }
 
-        // Reflow first, then tell ConPTY: the queued bytes are neither discarded nor
-        // reordered by either step.
-        _screen.Resize(columns, rows);
-        _session?.Resize((short)columns, (short)rows);
+        foreach (var session in _sessions)
+        {
+            session.Resize(columns, rows);
+        }
+
         _needsPresent = true;
     }
 
@@ -622,8 +689,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         // GL resources have to go here, not in Dispose. Closing fires with the context
         // still current; by the time Run() returns and Dispose is reached, GLFW has torn
         // the context down and every glDelete* throws NoContext.
-        _session?.Dispose();
-        _session = null;
+        DisposeSessions();
 
         _renderer?.Dispose();
         _renderer = null!;
@@ -661,7 +727,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             return;   // control codes arrive through OnKeyDown
         }
 
-        _session?.Write(Encoding.UTF8.GetBytes(character.ToString()));
+        Current.Write(Encoding.UTF8.GetBytes(character.ToString()));
     }
 
     private void OnKeyDown(IKeyboard keyboard, Key key, int _)
@@ -703,7 +769,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
             // on Alt at all: it can hand back anything it does not claim.
             if (GlKeyEncoder.MetaByte(key) is { } meta)
             {
-                _session?.Write([0x1B, meta]);
+                Current.Write([0x1B, meta]);
                 return;
             }
 
@@ -729,15 +795,15 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             // With a selection up, Ctrl+C copies and sends nothing — interrupting the shell
             // because you wanted the text would be a poor trade.
-            if (_selection is { IsEmpty: false })
+            if (Current.Selection is { IsEmpty: false })
             {
                 Copy();
                 return;
             }
 
-            var dropped = _governor.Flush();
-            _parser.Reset();
-            _session?.Write([0x03]);
+            var dropped = Current.Governor.Flush();
+            Current.Parser.Reset();
+            Current.Write([0x03]);
             Notify(dropped > 0 ? $"interrupted, {dropped} queued bytes dropped" : "interrupted");
             return;
         }
@@ -749,30 +815,30 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         }
 
         // Typing returns to the live view; reading history should not silently swallow input.
-        if (_screen.IsScrolledBack && !control)
+        if (Current.Screen.IsScrolledBack && !control)
         {
-            _screen.ScrollToLive();
+            Current.Screen.ScrollToLive();
             _needsPresent = true;
         }
 
-        var bytes = GlKeyEncoder.Encode(key, control, _emulator.ApplicationCursorKeys);
+        var bytes = GlKeyEncoder.Encode(key, control, Current.Emulator.ApplicationCursorKeys);
         if (!bytes.IsEmpty)
         {
-            _session?.Write(bytes.Span);
+            Current.Write(bytes.Span);
             BeginRepeat(key, bytes);
         }
     }
 
     private bool HandleScrollback(Key key)
     {
-        var page = Math.Max(1, _screen.RowCount - 2);
+        var page = Math.Max(1, Current.Screen.RowCount - 2);
 
         switch (key)
         {
-            case Key.PageUp: _screen.ScrollView(page); break;
-            case Key.PageDown: _screen.ScrollView(-page); break;
-            case Key.Home: _screen.SetViewOffset(int.MaxValue); break;
-            case Key.End: _screen.ScrollToLive(); break;
+            case Key.PageUp: Current.Screen.ScrollView(page); break;
+            case Key.PageDown: Current.Screen.ScrollView(-page); break;
+            case Key.Home: Current.Screen.SetViewOffset(int.MaxValue); break;
+            case Key.End: Current.Screen.ScrollToLive(); break;
             default: return false;
         }
 
@@ -788,9 +854,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         }
 
         // Letting go of either half of Alt+Shift+F ends the skim.
-        if (key is Key.F or Key.ShiftLeft or Key.ShiftRight && _governor.SpeedMultiplier != 1)
+        if (key is Key.F or Key.ShiftLeft or Key.ShiftRight && Current.Governor.SpeedMultiplier != 1)
         {
-            _governor.SpeedMultiplier = 1;
+            Current.Governor.SpeedMultiplier = 1;
         }
     }
 
@@ -800,19 +866,19 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// </summary>
     private void CycleFraming()
     {
-        if (_governor.Rate.IsUnlimited)
+        if (Current.Governor.Rate.IsUnlimited)
         {
             Notify("framing has no effect at an unlimited rate");
             return;
         }
 
         Framing[] order = [Framing.N81, Framing.E71, Framing.N82, Framing.E81];
-        var next = order[(Array.IndexOf(order, _governor.Rate.Framing) + 1) % order.Length];
+        var next = order[(Array.IndexOf(order, Current.Governor.Rate.Framing) + 1) % order.Length];
 
-        _governor.Rate = LineRate.Of(_governor.Rate.Baud, next);
+        Current.Governor.Rate = LineRate.Of(Current.Governor.Rate.Baud, next);
         Notify(string.Create(
             CultureInfo.InvariantCulture,
-            $"framing {next} - {_governor.Rate.BytesPerSecond:F1} chars/sec"));
+            $"framing {next} - {Current.Governor.Rate.BytesPerSecond:F1} chars/sec"));
     }
 
     /// <summary>Windows' own defaults: about half a second before the first repeat, then ~30 a second.</summary>
@@ -855,13 +921,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 return;
             }
         }
-        else if (_session is null)
-        {
-            return;
-        }
         else
         {
-            _session.Write(_repeatBytes);
+            Current.Write(_repeatBytes);
         }
 
         _repeatNextAt = now + RepeatIntervalMs;
@@ -875,9 +937,9 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
         {
             case Key.B:
                 var rates = LineRate.StandardBauds;
-                var current = Array.IndexOf(rates, _governor.Rate.Baud);
-                _governor.Rate = LineRate.Of(rates[(current + 1) % rates.Length]);
-                Notify($"line rate now {_governor.Rate}");
+                var current = Array.IndexOf(rates, Current.Governor.Rate.Baud);
+                Current.Governor.Rate = LineRate.Of(rates[(current + 1) % rates.Length]);
+                Notify($"line rate now {Current.Governor.Rate}");
                 return true;
 
             case Key.F:
@@ -888,18 +950,28 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 {
                     // Held, not toggled: released in OnKeyUp. Skimming is something you do
                     // while watching, not a mode you enter.
-                    _governor.SpeedMultiplier = 10;
+                    Current.Governor.SpeedMultiplier = 10;
                     Notify("10x while held");
                     return true;
                 }
 
-                var pending = _governor.PendingBytes;
-                _governor.FastForward();
+                var pending = Current.Governor.PendingBytes;
+                Current.Governor.FastForward();
                 Notify(pending > 0 ? $"fast-forwarding {pending} bytes" : "nothing queued");
                 return true;
 
             case Key.G:
                 CycleFraming();
+                return true;
+
+            case Key.N:
+                // The same profile as the one in front: a second window on the same kind of
+                // thing is what "another one" nearly always means.
+                OpenSession(Current.Profile, Current.Governor.Rate, Current.Screen.Columns, Current.Screen.RowCount);
+                return true;
+
+            case Key.S:
+                NextSession();
                 return true;
 
             case Key.Z:
@@ -973,7 +1045,7 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
     /// <summary>The bar while the prompt is open, and the column its cursor sits in.</summary>
     private (string Status, int Caret) PromptStatus()
     {
-        var width = Math.Max(8, _screen.Columns - PromptPrefix.Length - 1);
+        var width = Math.Max(8, Current.Screen.Columns - PromptPrefix.Length - 1);
         var text = _commandLine.Text;
         var caret = _commandLine.Caret;
 
@@ -1187,26 +1259,26 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 return;
 
             case LocalCommand.SetRate rate:
-                _governor.Rate = rate.Rate;
-                Finish($"line rate now {_governor.Rate}");
+                Current.Governor.Rate = rate.Rate;
+                Finish($"line rate now {Current.Governor.Rate}");
                 return;
 
             case LocalCommand.SetFraming framing:
-                if (_governor.Rate.IsUnlimited)
+                if (Current.Governor.Rate.IsUnlimited)
                 {
                     Refuse("framing has no effect at an unlimited rate", line);
                     return;
                 }
 
-                _governor.Rate = LineRate.Of(_governor.Rate.Baud, framing.Framing);
+                Current.Governor.Rate = LineRate.Of(Current.Governor.Rate.Baud, framing.Framing);
                 Finish(string.Create(
                     CultureInfo.InvariantCulture,
-                    $"framing {framing.Framing} - {_governor.Rate.BytesPerSecond:F1} chars/sec"));
+                    $"framing {framing.Framing} - {Current.Governor.Rate.BytesPerSecond:F1} chars/sec"));
                 return;
 
             case LocalCommand.Flush:
-                var pending = _governor.PendingBytes;
-                _governor.FastForward();
+                var pending = Current.Governor.PendingBytes;
+                Current.Governor.FastForward();
                 Finish(pending > 0 ? $"fast-forwarding {pending} bytes" : "nothing queued");
                 return;
 
@@ -1232,9 +1304,12 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
                 Finish(on ? "CRT on" : "CRT off");
                 return;
 
-            case LocalCommand.NewSession:
-                // Parsed, understood, and honestly not there yet: one shell per window.
-                Refuse("a second session is not available yet - one shell per window", line);
+            case LocalCommand.NewSession fresh:
+                var columns = Current.Screen.Columns;
+                var rows = Current.Screen.RowCount;
+                var inherited = Current.Governor.Rate;
+                ClosePrompt();
+                OpenSession(fresh.Profile, inherited, columns, rows);
                 return;
         }
     }
@@ -1276,26 +1351,21 @@ internal sealed class TerminalWindow : IPtyOutputSink, ITerminalHost, IDisposabl
 
     // ---- Plumbing ----------------------------------------------------------------
 
-    public void OnBytes(ReadOnlySpan<byte> bytes, long timestamp) => _ring.Write(bytes);
-
-    public void OnClosed() => _needsPresent = true;
-
-    public void Reply(ReadOnlySpan<byte> bytes) => _session?.Write(bytes);
-
-    public void SetTitle(string title)
+    private void DisposeSessions()
     {
-        _title = title;
-        _needsPresent = true;
-    }
+        foreach (var session in _sessions)
+        {
+            session.Dispose();
+        }
 
-    public void Bell() => _needsPresent = true;
+        _sessions.Clear();
+    }
 
     public void Dispose()
     {
         // Everything GL-shaped was already released in OnClosing, while the context was
         // still current. Only the window itself is left.
-        _session?.Dispose();
-        _session = null;
+        DisposeSessions();
         _window?.Dispose();
     }
 }
