@@ -23,6 +23,7 @@ internal static class ShotCommand
         var rows = 25;
         var crt = true;
         var bench = false;
+        double? bloom = null, scanline = null, vignette = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -42,6 +43,23 @@ internal static class ShotCommand
 
                 case "--bench":
                     bench = true;
+                    break;
+
+                case "--bloom" or "--scanline" or "--vignette" when i + 1 < args.Length:
+                    var knob = args[i];
+                    if (!double.TryParse(args[++i], CultureInfo.InvariantCulture, out var level) || level < 0)
+                    {
+                        Console.Error.WriteLine($"{knob} wants a number from 0 upwards, not '{args[i]}'");
+                        return 1;
+                    }
+
+                    switch (knob)
+                    {
+                        case "--bloom": bloom = level; break;
+                        case "--scanline": scanline = level; break;
+                        default: vignette = level; break;
+                    }
+
                     break;
 
                 case "--no-crt":
@@ -84,11 +102,19 @@ internal static class ShotCommand
             parser.Consume(Encoding.UTF8.GetBytes(TestPattern()));
         }
 
+        var defaults = new CrtSettings();
         var settings = new DisplaySettings
         {
             Phosphor = phosphor,
             CursorBlink = false,
-            Crt = crt ? new CrtSettings() : CrtSettings.Off,
+            Crt = crt
+                ? defaults with
+                {
+                    Bloom = bloom ?? defaults.Bloom,
+                    Scanline = scanline ?? defaults.Scanline,
+                    Vignette = vignette ?? defaults.Vignette,
+                }
+                : CrtSettings.Off,
         };
 
         if (bench)

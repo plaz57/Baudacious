@@ -115,6 +115,51 @@ Recorded in [phase-0-findings.md](openspec/changes/baudacious-v1/phase-0-finding
   end-of-input and exits with status 0 about 100 ms in — after printing a banner
   and a prompt, so it looks like it worked.
 
+## The CRT pass
+
+Three effects over the text, each with its own intensity, all switchable with `Alt+C`.
+
+| Flag | Default | What it does |
+|---|---|---|
+| `--bloom` | `0.55` | Phosphor bleed. **Additive and unbounded**, so values above 1 keep going. Its effect is almost entirely on the black around glyphs — the glyph cores are already near maximum. At 2.5 the halo spreads far enough to roughly triple how much of the screen reads as lit. |
+| `--scanline` | `0.30` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. |
+| `--vignette` | `0.35` | Corner falloff. Untouched through the middle 60% of the width; darkening starts in the outer 20% each side and the outer 15% top and bottom. At the extreme corner the darkening is about `vignette x 0.82`. |
+
+Both `scanline` and `vignette` are fractions of brightness *removed*, so 0–1 is the whole
+useful range. Bloom is not — it adds light, and washes out somewhere past 2.
+
+**Scanlines need `--scale 2` or more.** At scale 1 there is one output pixel per source
+pixel row, so every row samples the same scanline phase: the effect degrades to a slight
+uniform dimming with no banding at all.
+
+A fourth knob is not on the command line: a small ambient glow (0.02) keeps unlit phosphor
+from being pure black, which is why measured luminances sit a little above the arithmetic.
+
+Render stills without starting a session, which is how these numbers were measured:
+
+```
+... shot --vignette 0.7 --bloom 0.9 --scanline 0.45 --magnify 3 --out frame.png
+... shot --bench --size 200x60 --magnify 2
+```
+
+## Scale
+
+`--scale` is how many screen pixels go to one glyph pixel. The atlas cell is 8x16, so
+`--scale 3` draws each character in a 24x48 block. It sets the initial window size to fit
+80x25, and thereafter decides how much text fits rather than how big the window is:
+
+```
+columns = windowWidth  / (8 x scale)
+rows    = windowHeight / (16 x scale) - 1      the spare row is the status bar
+```
+
+Bigger scale means bigger characters and fewer of them — at 1280 wide, scale 2 gives 80
+columns, scale 3 gives 53. `Alt+-` and `Alt+=` change it live.
+
+Always a whole number: a fractional scale resamples glyph pixels unevenly, making some
+stems a pixel wider than others, and would put the scanline period out of step with the
+pixel grid it is meant to describe. Leftover pixels become a centred margin.
+
 ## Fonts
 
 Text is drawn from **unscii-16** by Viznut, an 8x16 bitmap face in the **public domain**,
