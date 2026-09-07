@@ -632,12 +632,19 @@ internal sealed class TerminalWindow : IDisposable
                 $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  {_notice}");
         }
 
-        return string.Create(
+        var head = string.Create(
             CultureInfo.InvariantCulture,
-            // Kept under 80 columns: the bar is truncated, not wrapped, so anything longer
-            // is simply lost on a default-width window.
-            $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  alt: B=baud F=flush P=phosphor N=new  ^]=cmd");
+            $" {Current.Governor.Rate}{SessionMark}  [{backlog}]  ");
+
+        // The bar is truncated, not wrapped, so a hint that does not fit is worse than no
+        // hint: it ends mid-word. A wide rate, a session mark and a draining backlog
+        // together can eat forty columns, which is exactly when that happens.
+        return head + (head.Length + Hints.Length <= Current.Screen.Columns ? Hints : ShortHints);
     }
+
+    private const string Hints = "alt: B=baud F=flush P=phosphor N=new  ctrl+]=commands";
+
+    private const string ShortHints = "alt+Z for keys";
 
     // ---- Mouse, selection and scrollback ----------------------------------------
 
