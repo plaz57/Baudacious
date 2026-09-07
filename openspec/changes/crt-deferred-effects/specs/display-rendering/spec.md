@@ -109,10 +109,18 @@ frame at each pixel, not a blend of them: a phosphor emits light, so a newly lit
 pixel SHALL NOT be dimmed by a dark history, and a pixel that has gone dark
 SHALL fade rather than cut.
 
-#### Scenario: A trail follows arriving text
+#### Scenario: Light that goes away fades
+
+- **WHEN** persistence is on and a lit area of the screen is cleared, scrolled or
+  overwritten
+- **THEN** what was there fades over several frames rather than vanishing in one
+
+#### Scenario: Text arriving leaves no trail
 
 - **WHEN** persistence is on and text is arriving at a low line rate
-- **THEN** each character leaves a briefly fading trail behind the cursor
+- **THEN** no trail follows the cursor, because writing a character lights pixels
+  rather than darkening them, and the cell the cursor leaves has the new glyph
+  drawn into it in the same frame
 
 #### Scenario: Decay is bounded
 

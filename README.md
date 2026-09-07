@@ -251,9 +251,13 @@ pass entirely.
 `scanline`, `vignette`, `curvature`, `persistence` and `mask` all run 0–1. Bloom does not —
 it adds light, and washes out somewhere past 2.
 
-**Persistence is the one a baud rate makes worth having.** In an instant terminal, decay is
-only visible when the screen scrolls. At 300 baud characters arrive one at a time, so the
-trail follows the cursor *as the text is written*.
+**Persistence acts on light going away**, not on light arriving. What it renders is the
+fading of everything that went dark: a cleared screen, a scrolled one, the blinking cursor,
+text overwritten in place. A pixel that stays lit shows nothing, and one that has just been
+lit is at full brightness — so no trail follows text as it is written, however slowly it
+arrives. That was the theory this was built on and watching it live disproved it; the cell
+the cursor leaves has the new glyph drawn into it in the same frame, so its ghost is hidden
+under the glyph.
 
 The dial maps to 0.9 survival a frame at the top rather than straight through, because 1.0
 meaning "never fades" is a bug however it is spelled. Measured by presenting blank frames

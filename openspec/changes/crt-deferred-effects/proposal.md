@@ -3,14 +3,24 @@
 Three CRT effects were named in the v1 proposal and cut from it: barrel
 distortion, aperture-grille masking, and phosphor persistence. The cut was
 deliberate — v1 needed a legible screen before it needed a convincing one — but
-the pipeline was built expecting them, and one of them is worth more to
-Baudacious than to any other terminal.
+the pipeline was built expecting them, and between them they are most of what
+separates a filter over a screenshot from a photograph of a tube.
 
-**Persistence is the effect this product was asking for.** In an instant
-terminal, decay is only visible when the screen scrolls. At 300 baud characters
-arrive one at a time, so a trail follows the cursor *as text is written*. The
-feature that makes Baudacious what it is — metering onto the screen a character
-at a time — is exactly the feature that makes a decaying phosphor visible.
+**Persistence is what a phosphor actually did**, and the pipeline was built
+expecting it. It acts on light going *away*: a cleared screen, a scrolled one,
+the blinking cursor, text overwritten in place. A pixel that stays lit shows
+nothing and a newly lit one is at full brightness, so the effect is entirely
+about what fades.
+
+> **Corrected after building it.** This section originally argued that a baud
+> rate is what makes persistence worth having — that at 300 baud a trail would
+> follow the cursor as text arrived. Watching it live showed otherwise: writing
+> a character lights pixels rather than darkening them, and the cell the cursor
+> just left has the new glyph drawn into it in the same frame, so its ghost sits
+> under the glyph where the maximum hides it. Metering makes *fewer* pixels
+> change per frame than an instant terminal does, so it produces less visible
+> persistence, not more. The effect earns its place on its own merits; the
+> argument for it was wrong.
 
 Barrel distortion and the aperture grille are the two things that most separate
 "a filter over a screenshot" from "a photograph of a tube": glass curvature, and

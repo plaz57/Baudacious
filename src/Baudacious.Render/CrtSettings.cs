@@ -83,10 +83,19 @@ public sealed record CrtSettings
     /// How long light lingers after the pixel that made it has gone. 0 is no persistence.
     /// </summary>
     /// <remarks>
-    /// The effect this product was asking for. In an instant terminal decay is only visible
-    /// when the screen scrolls; at 300 baud characters arrive one at a time, so the trail
-    /// follows the cursor as the text is written. Metering onto the screen a character at a
-    /// time is exactly what makes a decaying phosphor worth having.
+    /// Persistence acts on light going <em>away</em>. A pixel that stays lit shows nothing,
+    /// and a pixel that has just been lit is at full brightness by construction, so what the
+    /// effect actually renders is the fading of everything that went dark: a cleared screen,
+    /// a scrolled one, the blinking cursor, text overwritten in place.
+    /// <para>
+    /// It was designed here on the theory that a trail would follow the cursor as text
+    /// arrived at 300 baud. <b>It does not</b>, and watching it live is what settled that.
+    /// Writing a character lights pixels rather than darkening them, and the one cell that
+    /// does go dark — the one the cursor just left — has the new glyph drawn into it in the
+    /// same frame, so its ghost is under the glyph and the maximum hides it. If anything,
+    /// metering makes fewer pixels change per frame than an instant terminal does, so it
+    /// produces less visible persistence rather than more.
+    /// </para>
     /// <para>
     /// Scaled to 0.9 survival a frame at the top of the dial — about a third of a second of
     /// tail — rather than mapped straight through, because 1.0 meaning "never fades" is a
