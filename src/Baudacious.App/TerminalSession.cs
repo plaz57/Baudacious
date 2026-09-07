@@ -31,13 +31,19 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     private PtySession? _pty;
 
     private TerminalSession(
-        int number, string profile, LineRate rate, int columns, int rows, Action invalidate)
+        int number,
+        string profile,
+        LineRate rate,
+        int columns,
+        int rows,
+        int scrollback,
+        Action invalidate)
     {
         Number = number;
         Profile = profile;
         _invalidate = invalidate;
 
-        Screen = new Screen(columns, rows);
+        Screen = new Screen(columns, rows, scrollback);
         Emulator = new TerminalEmulator(Screen, this);
         Parser = new VtParser(Emulator);
         Governor = new BaudGovernor(_ring, SystemTimeSource.Instance, rate);
@@ -83,10 +89,11 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         LineRate rate,
         int columns,
         int rows,
+        int scrollback,
         Action invalidate)
     {
         var (start, setup) = ShellProfiles.Build(profile, fastEcho);
-        var session = new TerminalSession(number, profile, rate, columns, rows, invalidate)
+        var session = new TerminalSession(number, profile, rate, columns, rows, scrollback, invalidate)
         {
             FastEcho = fastEcho && ShellProfiles.SupportsFastEcho(profile),
         };
@@ -103,8 +110,14 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     /// installed. It exists so the window has somewhere to say so.
     /// </summary>
     public static TerminalSession Detached(
-        int number, string profile, LineRate rate, int columns, int rows, Action invalidate) =>
-        new(number, profile, rate, columns, rows, invalidate);
+        int number,
+        string profile,
+        LineRate rate,
+        int columns,
+        int rows,
+        int scrollback,
+        Action invalidate) =>
+        new(number, profile, rate, columns, rows, scrollback, invalidate);
 
     public void Write(ReadOnlySpan<byte> bytes) => _pty?.Write(bytes);
 

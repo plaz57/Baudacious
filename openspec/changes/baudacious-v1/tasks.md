@@ -120,14 +120,14 @@ indicator (7.9).
 - [x] 7.1 Implement the INI reader and writer with comment preservation
 - [x] 7.2 Define the config schema covering every setting the spec requires, and generate the commented default file on first run
 - [x] 7.3 Implement per-setting validation with fallback to defaults, reporting the offending value and its location without overwriting the file
-- [ ] 7.4 Implement `state.ini`: persist rate, framing, phosphor, font scale, CRT settings, and window geometry on exit; restore on start; never write to `baudacious.ini`
+- [x] 7.4 Implement `state.ini`: persist rate, framing, phosphor, font scale, CRT settings, and window geometry on exit; restore on start; never write to `baudacious.ini`. Fullscreen is remembered separately from the windowed geometry, since the fullscreen grid is a property of the monitor rather than a size anyone chose
 - [x] 7.5 Implement precedence: `state.ini` over `baudacious.ini` over built-in defaults, with a setting the user edits in the file taking it back from the state for the rest of the run — otherwise hot-reloading a persisted setting could never do anything
-- [ ] 7.6 Implement hot reload with debounce, applying changes within one second and leaving running shells undisturbed
-- [ ] 7.7 Implement broken-edit handling: keep the last good settings in effect and report the error
-- [ ] 7.8 Make the local key bindings configurable
+- [x] 7.6 Implement hot reload with debounce, applying changes within one second and leaving running shells undisturbed. Only the differences an edit actually made are applied, because a re-read also resolves `state.ini` — which still holds the previous session's values until this one exits
+- [x] 7.7 Implement broken-edit handling: keep the last good settings in effect and report the error. Unknown sections and misplaced keys are reported too — a `scanline` under `[display]` used to do nothing and say nothing
+- [x] 7.8 Make the local key bindings configurable, with shift part of the chord, `none` to unbind, and conflicts reported rather than resolved. The status bar builds its hints from the bindings in force rather than advertising the defaults
 - [ ] 7.8a Bundle more than one bitmap typeface and make the choice a setting, applied live and persisted. unscii-16 reads as too heavy at 8x16 — its capitals have 2px stems. There is **no lighter face inside unscii**: the thin/alt/tall styles exist only at 8x8, and `unscii-8-tall` is the 8x8 with every row doubled, so it is bolder still. Candidates to evaluate, lightest first: Spleen 8x16 (BSD-2), Terminus `ter-u16n` (OFL 1.1), Tamsyn 8x16 (permissive custom), and VileR's Px437 IBM VGA 8x16 (CC BY-SA 4.0 — the authentic 1px-stem VGA look, but the only candidate that puts a share-alike asset in the tree). `HexFont`/`GlyphAtlas` already abstract the source, so the plumbing is a parameter, not a rewrite
 - [ ] 7.9 Implement the backlog indicator, resolving Open Question 4 by how the drain estimate reads at low rates
-- [ ] 7.10 Implement window geometry persistence and fullscreen toggling with grid recalculation
+- [x] 7.10 Implement window geometry persistence and fullscreen toggling with grid recalculation. The opening size is clamped to the screen: a geometry saved on a larger display otherwise puts the status bar behind the taskbar
 - [ ] 7.11 Resolve Open Question 1 and record the font attribution in the about text
 - [ ] 7.12 Package as a self-contained single-file Windows executable and verify a clean-machine launch
 - [ ] 7.13 Write the README with the baud-rate story, the key bindings, and the config file reference

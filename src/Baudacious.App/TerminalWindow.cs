@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text;
 using Baudacious.Core.Baud;
+using Baudacious.App.Config;
 using Baudacious.Core.Commands;
 using Baudacious.Core.Terminal;
 using TerminalButton = Baudacious.Core.Terminal.MouseButton;
@@ -32,7 +33,21 @@ internal sealed class TerminalWindow : IDisposable
 
     /// <summary>Every hosted shell, oldest first. Never empty once the window has loaded.</summary>
     private readonly List<TerminalSession> _sessions = [];
-    private readonly Options _options;
+    /// <summary>The settings this window opened with, and the layers they came from.</summary>
+    private readonly ConfigStore _store;
+
+    /// <summary>
+    /// The resolved settings as last applied.
+    /// </summary>
+    /// <remarks>
+    /// Kept so a hot reload can tell what an edit actually changed. Applying everything a
+    /// re-read produces would undo whatever the user had set with a key or the prompt since
+    /// the last time state was written, because state.ini is only written on exit and so
+    /// still holds the previous session's values.
+    /// </remarks>
+    private Settings _config;
+
+    private KeyBindings _bindings;
 
     private IWindow _window = null!;
     private GL _gl = null!;
@@ -87,42 +102,39 @@ internal sealed class TerminalWindow : IDisposable
 
     private double _idleSeconds;
 
-    internal sealed record Options
-    {
-        public LineRate Rate { get; init; } = LineRate.Of(1200);
+    /// <summary>Set by the file watcher, acted on by the frame loop once it goes quiet.</summary>
+    private long _reloadAt;
+    private FileSystemWatcher? _watcher;
+    private bool _fullscreen;
 
-        public string Profile { get; init; } = "pwsh";
-
-        /// <summary>
-        /// Null asks for the rate to decide, which is the default: below the threshold the
-        /// rich editor cannot keep up, above it there is nothing to gain by removing it.
-        /// </summary>
-        public bool? FastEcho { get; init; }
-
-        public Phosphor Phosphor { get; init; } = Phosphor.Green;
-
-        public int FontScale { get; init; } = 2;
-
-        public CrtSettings Crt { get; init; } = new();
-    }
+    /// <summary>
+    /// The grid as it was the last time the window was not filling the screen.
+    /// </summary>
+    /// <remarks>
+    /// Kept separately because the fullscreen grid is a property of the monitor, not a size
+    /// anyone chose. Saving it as the window geometry would mean that one press of
+    /// alt+enter loses the size the user had picked, and the next windowed start opens at
+    /// whatever the screen happened to be.
+    /// </remarks>
+    private (int Columns, int Rows) _windowed;
 
     /// <summary>The session the window is showing and the keyboard is talking to.</summary>
     private TerminalSession Current => _sessions[_active];
 
-    private TerminalWindow(Options options)
+    private TerminalWindow(Settings settings, ConfigStore store)
     {
-        _options = options;
-        _settings = new DisplaySettings
-        {
-            Phosphor = options.Phosphor,
-            FontScale = options.FontScale,
-            Crt = options.Crt,
-        };
+        _config = settings;
+        _store = store;
+        _settings = settings.Display;
+        _bindings = settings.Keys;
+        _fullscreen = settings.Window.Fullscreen;
+        _windowed = (settings.Window.Columns, settings.Window.Rows);
+        BuildHints();
     }
 
-    public static int Run(Options options)
+    public static int Run(Settings settings, ConfigStore store)
     {
-        using var terminal = new TerminalWindow(options);
+        using var terminal = new TerminalWindow(settings, store);
         return terminal.Execute();
     }
 
@@ -130,7 +142,10 @@ internal sealed class TerminalWindow : IDisposable
     {
         var windowOptions = WindowOptions.Default with
         {
-            Size = new Vector2D<int>(80 * 8 * _options.FontScale, (25 * 16 * _options.FontScale) + 20),
+            // In cells, because the magnification is a setting too. The extra row is the
+            // status bar, which lives below the grid rather than inside it.
+            Size = OpeningSize(),
+            WindowState = _fullscreen ? WindowState.Fullscreen : WindowState.Normal,
             Title = "Baudacious",
             VSync = true,
             API = new GraphicsAPI(
@@ -148,6 +163,33 @@ internal sealed class TerminalWindow : IDisposable
 
         _window.Run();
         return 0;
+    }
+
+    /// <summary>
+    /// The window's opening size in pixels, from the remembered size in cells.
+    /// </summary>
+    /// <remarks>
+    /// Clamped to what the screen can actually show. A geometry saved on a larger display,
+    /// or at a smaller magnification, otherwise opens a window taller than the desktop and
+    /// puts the status bar behind the taskbar — where the whole point of it is that it is
+    /// always visible.
+    /// </remarks>
+    private Vector2D<int> OpeningSize()
+    {
+        var scale = Math.Max(1, _settings.FontScale);
+        var width = _config.Window.Columns * 8 * scale;
+        var height = (_config.Window.Rows + 1) * 16 * scale;
+
+        var screen = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size;
+        if (screen.X > 0 && screen.Y > 0)
+        {
+            // Room left for the title bar and the taskbar, neither of which is ours to
+            // measure.
+            width = Math.Min(width, (int)(screen.X * 0.98));
+            height = Math.Min(height, (int)(screen.Y * 0.88));
+        }
+
+        return new Vector2D<int>(width, height);
     }
 
     private void OnLoad()
@@ -182,8 +224,168 @@ internal sealed class TerminalWindow : IDisposable
         }
 
         var (columns, rows) = GridFor(_window.FramebufferSize);
-        OpenSession(_options.Profile, _options.Rate, columns, rows);
+        OpenSession(_config.Profile, _config.Rate, columns, rows);
+
+        if (_store.Problems.Count > 0)
+        {
+            // Reported rather than fatal, and reported where it will be seen: a settings
+            // file with a mistake in it should not be discovered weeks later.
+            ShowPanel(["settings", string.Empty, .. _store.Problems.Take(12)], 20);
+        }
+
+        WatchSettings();
     }
+
+    // ---- Hot reload ----------------------------------------------------------------
+
+    /// <summary>How long after the last write to believe the file has finished changing.</summary>
+    private const long ReloadDebounceMs = 250;
+
+    /// <summary>
+    /// Notices edits to the configuration file.
+    /// </summary>
+    /// <remarks>
+    /// Events arrive on a thread-pool thread and only set a deadline; the frame loop does
+    /// the reading. Editors write in two or three bursts and some save by atomic replace,
+    /// so a debounce is not a nicety — reading on the first event lands on a half-written
+    /// file about as often as not.
+    /// </remarks>
+    private void WatchSettings()
+    {
+        try
+        {
+            _watcher = new FileSystemWatcher(_store.Directory, "baudacious.ini")
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+                EnableRaisingEvents = true,
+            };
+
+            _watcher.Changed += OnSettingsTouched;
+            _watcher.Created += OnSettingsTouched;
+            _watcher.Renamed += OnSettingsTouched;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            // No watcher, no hot reload. Everything else still works, and saying so once is
+            // better than failing to start.
+            Notify("settings will not reload automatically");
+        }
+    }
+
+    private void OnSettingsTouched(object sender, FileSystemEventArgs e) =>
+        _reloadAt = Environment.TickCount64 + ReloadDebounceMs;
+
+    /// <summary>
+    /// Applies what an edit to the configuration file actually changed.
+    /// </summary>
+    /// <remarks>
+    /// Only the differences, because a re-read resolves the persisted state as well, and
+    /// state.ini still holds the previous session's values until this one exits. Applying
+    /// everything would undo a rate set with alt+B twenty minutes ago on the strength of an
+    /// unrelated edit to the palette.
+    /// </remarks>
+    private void ReloadSettings()
+    {
+        _reloadAt = 0;
+
+        var problems = new List<string>();
+        if (_store.Reread(problems) is not { } fresh)
+        {
+            return;
+        }
+
+        var old = _config;
+        _config = fresh;
+
+        if (fresh.Display.Phosphor != old.Display.Phosphor)
+        {
+            _settings = _settings with { Phosphor = fresh.Display.Phosphor };
+        }
+
+        if (fresh.Display.CursorShape != old.Display.CursorShape)
+        {
+            _settings = _settings with { CursorShape = fresh.Display.CursorShape };
+        }
+
+        if (fresh.Display.CursorBlink != old.Display.CursorBlink
+            || fresh.Display.CursorBlinkInterval != old.Display.CursorBlinkInterval)
+        {
+            _settings = _settings with
+            {
+                CursorBlink = fresh.Display.CursorBlink,
+                CursorBlinkInterval = fresh.Display.CursorBlinkInterval,
+            };
+        }
+
+        if (fresh.Display.Crt != old.Display.Crt)
+        {
+            _settings = _settings with { Crt = fresh.Display.Crt };
+        }
+
+        if (fresh.Keys != old.Keys)
+        {
+            _bindings = fresh.Keys;
+            BuildHints();
+        }
+
+        if (fresh.Scrollback != old.Scrollback)
+        {
+            foreach (var session in _sessions)
+            {
+                session.Screen.ScrollbackCapacity = fresh.Scrollback;
+            }
+        }
+
+        if (fresh.Rate != old.Rate)
+        {
+            // Sessions the user has since retuned by hand keep their own rate; the rest
+            // follow the file.
+            foreach (var session in _sessions.Where(x => x.Governor.Rate == old.Rate))
+            {
+                session.Governor.Rate = fresh.Rate;
+            }
+        }
+
+        // Deliberately not the window geometry: resizing the window under someone who is
+        // editing a file is startling, and the setting has already done its job at startup.
+        if (fresh.Display.FontScale != old.Display.FontScale)
+        {
+            SetFontScale(fresh.Display.FontScale);
+        }
+
+        if (problems.Count > 0)
+        {
+            // The previously loaded settings stay in effect for whatever was wrong, and the
+            // reason is on screen rather than in a log nobody reads.
+            ShowPanel(["settings", string.Empty, .. problems.Take(12)], 20);
+        }
+        else
+        {
+            Notify("settings reloaded");
+        }
+
+        _needsPresent = true;
+    }
+
+    /// <summary>
+    /// The settings as they now stand, for writing out on exit.
+    /// </summary>
+    /// <remarks>
+    /// Read from what is live rather than tracked as it changes, so there is no second copy
+    /// to keep in step. The rate is the visible session's: with several open, the one being
+    /// looked at is the one worth coming back to.
+    /// </remarks>
+    private Settings CurrentSettings() => _config with
+    {
+        Rate = Current.Governor.Rate,
+        Display = _settings,
+        Window = _config.Window with
+        {
+            Columns = _windowed.Columns,
+            Rows = _windowed.Rows,
+            Fullscreen = _fullscreen,
+        },
+    };
 
     // ---- Sessions ------------------------------------------------------------------
 
@@ -197,7 +399,8 @@ internal sealed class TerminalWindow : IDisposable
         try
         {
             session = TerminalSession.Start(
-                _nextNumber, profile, FastEchoFor(profile, rate), rate, columns, rows, Invalidate);
+                _nextNumber, profile, FastEchoFor(profile, rate), rate, columns, rows,
+                _config.Scrollback, Invalidate);
         }
         catch (Exception ex) when (ex is FileNotFoundException or InvalidOperationException)
         {
@@ -208,7 +411,8 @@ internal sealed class TerminalWindow : IDisposable
                 return;
             }
 
-            session = TerminalSession.Detached(_nextNumber, profile, rate, columns, rows, Invalidate);
+            session = TerminalSession.Detached(
+                _nextNumber, profile, rate, columns, rows, _config.Scrollback, Invalidate);
             Notify(ex.Message);
         }
 
@@ -218,7 +422,7 @@ internal sealed class TerminalWindow : IDisposable
         _repeatKey = Key.Unknown;
         _needsPresent = true;
 
-        if (session.FastEcho && _options.FastEcho is null)
+        if (session.FastEcho && _config.FastEcho is null)
         {
             Notify("rich editor off at this rate: ^] fastecho off restores it");
         }
@@ -301,7 +505,7 @@ internal sealed class TerminalWindow : IDisposable
     /// is comfortable.
     /// </remarks>
     private bool FastEchoFor(string profile, LineRate rate) =>
-        _options.FastEcho
+        _config.FastEcho
         ?? (ShellProfiles.SupportsFastEcho(profile)
             && !rate.IsUnlimited
             && rate.Baud < ShellProfiles.FastEchoThresholdBaud);
@@ -463,6 +667,11 @@ internal sealed class TerminalWindow : IDisposable
     {
         PumpKeyRepeat();
 
+        if (_reloadAt != 0 && Environment.TickCount64 >= _reloadAt)
+        {
+            ReloadSettings();
+        }
+
         // Every session, not just the visible one: a wire does not stop carrying because
         // nobody is watching, and a paused background session would dump its whole backlog
         // the instant it was switched to.
@@ -571,7 +780,7 @@ internal sealed class TerminalWindow : IDisposable
             ? OptionMenu.Render(_menu, _menuIndex, Current.Governor.Rate, _settings.Phosphor)
             : null)
         ?? (Environment.TickCount64 < _panelUntil ? _panel : null)
-        ?? (_helpVisible ? Help.Lines : null);
+        ?? (_helpVisible ? Help.For(_store.Directory) : null);
 
     /// <summary>Puts a notice over the grid. The next keystroke takes it away.</summary>
     private void ShowPanel(IReadOnlyList<string> lines, int seconds)
@@ -639,12 +848,39 @@ internal sealed class TerminalWindow : IDisposable
         // The bar is truncated, not wrapped, so a hint that does not fit is worse than no
         // hint: it ends mid-word. A wide rate, a session mark and a draining backlog
         // together can eat forty columns, which is exactly when that happens.
-        return head + (head.Length + Hints.Length <= Current.Screen.Columns ? Hints : ShortHints);
+        return head + (head.Length + _hints.Length <= Current.Screen.Columns ? _hints : _shortHints);
     }
 
-    private const string Hints = "alt: B=baud F=flush P=phosphor N=new  ctrl+]=commands";
+    /// <summary>
+    /// The chord hints on the bar, built from the bindings in force.
+    /// </summary>
+    /// <remarks>
+    /// Not a constant, because the bindings are configurable: a bar that keeps advertising
+    /// alt+B after someone has moved or unbound it is worse than a bar with no hints. Built
+    /// once per binding change rather than per frame, and unbound actions drop out.
+    /// </remarks>
+    private string _hints = string.Empty;
+    private string _shortHints = string.Empty;
 
-    private const string ShortHints = "alt+Z for keys";
+    private void BuildHints()
+    {
+        (LocalAction Action, string Label)[] wanted =
+        [
+            (LocalAction.LineRate, "rate"),
+            (LocalAction.FastForward, "flush"),
+            (LocalAction.Phosphor, "phosphor"),
+            (LocalAction.Commands, "commands"),
+        ];
+
+        _hints = string.Join(
+            "  ",
+            wanted
+                .Where(w => !_bindings[w.Action].IsNone)
+                .Select(w => $"{_bindings[w.Action]} {w.Label}"));
+
+        var help = _bindings[LocalAction.Help];
+        _shortHints = help.IsNone ? string.Empty : $"{help} for keys";
+    }
 
     // ---- Mouse, selection and scrollback ----------------------------------------
 
@@ -910,6 +1146,14 @@ internal sealed class TerminalWindow : IDisposable
         _gl.Viewport(size);
 
         var (columns, rows) = GridFor(size);
+
+        // Recorded before the early return, because the opening size is clamped to the
+        // screen and so may already differ from what was asked for.
+        if (!_fullscreen)
+        {
+            _windowed = (columns, rows);
+        }
+
         if (columns == Current.Screen.Columns && rows == Current.Screen.RowCount)
         {
             _needsPresent = true;
@@ -926,6 +1170,16 @@ internal sealed class TerminalWindow : IDisposable
 
     private void OnClosing()
     {
+        // Before anything is torn down, while there is still a session to read the rate
+        // and a grid to read the geometry from.
+        if (_sessions.Count > 0)
+        {
+            _store.SaveState(CurrentSettings());
+        }
+
+        _watcher?.Dispose();
+        _watcher = null;
+
         // GL resources have to go here, not in Dispose. Closing fires with the context
         // still current; by the time Run() returns and Dispose is reached, GLFW has torn
         // the context down and every glDelete* throws NoContext.
@@ -974,14 +1228,18 @@ internal sealed class TerminalWindow : IDisposable
     {
         var alt = keyboard.IsKeyPressed(Key.AltLeft) || keyboard.IsKeyPressed(Key.AltRight);
         var control = keyboard.IsKeyPressed(Key.ControlLeft) || keyboard.IsKeyPressed(Key.ControlRight);
+        var shifted = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
 
-        if (_quitArmedUntil != 0 && !(alt && key == Key.X))
+        // Any other key means they did not mean to quit — but a modifier is not another
+        // key, it is the first half of the chord. Without this, pressing Alt for the second
+        // Alt+X disarmed the confirmation Alt+X had just armed, and the two-press quit could
+        // never fire at all.
+        if (_quitArmedUntil != 0
+            && !IsModifier(key)
+            && !_bindings[LocalAction.Quit].Matches(key, alt, control, shifted))
         {
-            // Any other key means they did not mean to quit.
             _quitArmedUntil = 0;
         }
-
-        var shifted = keyboard.IsKeyPressed(Key.ShiftLeft) || keyboard.IsKeyPressed(Key.ShiftRight);
 
         DismissPanel();
 
@@ -999,9 +1257,12 @@ internal sealed class TerminalWindow : IDisposable
             return;
         }
 
-        if (control && key == Key.RightBracket)
+        // Bindings first, so a chord the user has moved is looked up rather than assumed.
+        // Ctrl+C, Ctrl+V and the shifted history keys are deliberately not bindable: those
+        // are terminal conventions, not local commands.
+        if (_bindings.Find(key, alt, control, shifted) is { } bound)
         {
-            OpenPrompt();
+            HandleLocalAction(bound);
             return;
         }
 
@@ -1019,18 +1280,12 @@ internal sealed class TerminalWindow : IDisposable
 
         if (alt)
         {
-            if (HandleLocalCommand(key))
-            {
-                return;
-            }
-
             // Unbound Alt chords are the shell's. Sending ESC + the key is what an
             // xterm-compatible terminal does with Meta, and it is why the local layer lives
             // on Alt at all: it can hand back anything it does not claim.
             if (GlKeyEncoder.MetaByte(key) is { } meta)
             {
                 Current.Write([0x1B, meta]);
-                return;
             }
 
             return;
@@ -1089,6 +1344,12 @@ internal sealed class TerminalWindow : IDisposable
         }
     }
 
+    private static bool IsModifier(Key key) =>
+        key is Key.ShiftLeft or Key.ShiftRight
+            or Key.AltLeft or Key.AltRight
+            or Key.ControlLeft or Key.ControlRight
+            or Key.SuperLeft or Key.SuperRight;
+
     private bool HandleScrollback(Key key)
     {
         var page = Math.Max(1, Current.Screen.RowCount - 2);
@@ -1113,10 +1374,15 @@ internal sealed class TerminalWindow : IDisposable
             _repeatKey = Key.Unknown;
         }
 
-        // Letting go of either half of Alt+Shift+F ends the skim.
-        if (key is Key.F or Key.ShiftLeft or Key.ShiftRight && Current.Governor.SpeedMultiplier != 1)
+        // Letting go of any part of the skim chord ends it. Every session is reset, not
+        // just the one in front, in case the view changed while the key was down.
+        var skim = _bindings[LocalAction.Skim];
+        if (key == skim.Key || IsModifier(key))
         {
-            Current.Governor.SpeedMultiplier = 1;
+            foreach (var session in _sessions)
+            {
+                session.Governor.SpeedMultiplier = 1;
+            }
         }
     }
 
@@ -1170,70 +1436,77 @@ internal sealed class TerminalWindow : IDisposable
         _ = _repeatStarted;
     }
 
-    private bool HandleLocalCommand(Key key)
+    private void HandleLocalAction(LocalAction action)
     {
-        switch (key)
+        switch (action)
         {
-            case Key.B:
+            case LocalAction.LineRate:
                 OpenMenu(MenuKind.Baud);
-                return true;
+                return;
 
-            case Key.F:
-                var shiftHeld = _input.Keyboards.Any(k =>
-                    k.IsKeyPressed(Key.ShiftLeft) || k.IsKeyPressed(Key.ShiftRight));
+            case LocalAction.Framing:
+                OpenMenu(MenuKind.Framing);
+                return;
 
-                if (shiftHeld)
-                {
-                    // Held, not toggled: released in OnKeyUp. Skimming is something you do
-                    // while watching, not a mode you enter.
-                    Current.Governor.SpeedMultiplier = 10;
-                    Notify("10x while held");
-                    return true;
-                }
+            case LocalAction.Phosphor:
+                OpenMenu(MenuKind.Phosphor);
+                return;
 
+            case LocalAction.FastForward:
                 var pending = Current.Governor.PendingBytes;
                 Current.Governor.FastForward();
                 Notify(pending > 0 ? $"fast-forwarding {pending} bytes" : "nothing queued");
-                return true;
+                return;
 
-            case Key.G:
-                OpenMenu(MenuKind.Framing);
-                return true;
+            case LocalAction.Skim:
+                // Held, not toggled: released in OnKeyUp. Skimming is something you do while
+                // watching, not a mode you enter.
+                Current.Governor.SpeedMultiplier = 10;
+                Notify("10x while held");
+                return;
 
-            case Key.N:
-                // The same profile as the one in front: a second window on the same kind of
-                // thing is what "another one" nearly always means.
-                OpenSession(Current.Profile, Current.Governor.Rate, Current.Screen.Columns, Current.Screen.RowCount);
-                return true;
-
-            case Key.S:
-                NextSession();
-                return true;
-
-            case Key.Z:
-                _helpVisible = !_helpVisible;
-                _needsPresent = true;
-                return true;
-
-            case Key.P:
-                OpenMenu(MenuKind.Phosphor);
-                return true;
-
-            case Key.C:
+            case LocalAction.Crt:
                 var on = !_settings.Crt.Enabled;
                 _settings = _settings with { Crt = _settings.Crt with { Enabled = on } };
                 Notify(on ? "CRT on" : "CRT off");
-                return true;
+                return;
 
-            case Key.Equal or Key.KeypadAdd:
+            case LocalAction.ScaleUp:
                 SetFontScale(_settings.FontScale + 1);
-                return true;
+                return;
 
-            case Key.Minus or Key.KeypadSubtract:
+            case LocalAction.ScaleDown:
                 SetFontScale(_settings.FontScale - 1);
-                return true;
+                return;
 
-            case Key.X:
+            case LocalAction.Fullscreen:
+                ToggleFullscreen();
+                return;
+
+            case LocalAction.NewSession:
+                // The same profile as the one in front: another window on the same kind of
+                // thing is what "another one" nearly always means.
+                OpenSession(
+                    Current.Profile,
+                    Current.Governor.Rate,
+                    Current.Screen.Columns,
+                    Current.Screen.RowCount);
+                return;
+
+            case LocalAction.NextSession:
+                NextSession();
+                return;
+
+            case LocalAction.Commands:
+                OpenPrompt();
+                return;
+
+            case LocalAction.Help:
+                _helpVisible = !_helpVisible;
+                _needsPresent = true;
+                return;
+
+            case LocalAction.Quit:
                 if (Environment.TickCount64 < _quitArmedUntil)
                 {
                     _window.Close();
@@ -1241,14 +1514,25 @@ internal sealed class TerminalWindow : IDisposable
                 else
                 {
                     _quitArmedUntil = Environment.TickCount64 + QuitConfirmMs;
-                    Notify("press Alt+X again to quit");
+                    Notify($"press {_bindings[LocalAction.Quit]} again to quit");
                 }
 
-                return true;
-
-            default:
-                return false;
+                return;
         }
+    }
+
+    /// <summary>
+    /// Fills the screen, or stops.
+    /// </summary>
+    /// <remarks>
+    /// The grid follows from the drawable area, so the resize handler recalculates it and
+    /// tells every shell; nothing here has to work out how many columns fit.
+    /// </remarks>
+    private void ToggleFullscreen()
+    {
+        _fullscreen = !_fullscreen;
+        _window.WindowState = _fullscreen ? WindowState.Fullscreen : WindowState.Normal;
+        Notify(_fullscreen ? "fullscreen" : "windowed");
     }
 
     // ---- The local command prompt -------------------------------------------------

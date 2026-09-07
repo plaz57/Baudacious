@@ -27,6 +27,28 @@ public static class SettingsReader
     /// <summary>The names a cursor shape may be given, lowercase.</summary>
     public static readonly string[] CursorNames = [.. Enum.GetNames<CursorShape>().Select(n => n.ToLowerInvariant())];
 
+    /// <summary>The keys a custom shell profile understands.</summary>
+    private static readonly string[] ProfileKeys = ["command", "arguments", "like"];
+
+    /// <summary>
+    /// Every section and the settings it holds, for telling a typo from a setting.
+    /// </summary>
+    /// <remarks>
+    /// A second list of the same names, which is a thing to keep in step — so a test walks
+    /// the generated default file against it and fails if either side gains a name the
+    /// other has not. Worth that, because a misplaced key is the one mistake the reader
+    /// would otherwise pass over in silence: putting <c>scanline</c> under <c>[display]</c>
+    /// instead of <c>[crt]</c> does exactly nothing and says exactly nothing.
+    /// </remarks>
+    private static readonly (string Section, string[] Keys)[] Schema =
+    [
+        ("line", ["baud", "framing"]),
+        ("shell", ["default", "fast-echo"]),
+        ("display", ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"]),
+        ("crt", ["enabled", "bloom", "scanline", "vignette", "ambient-glow"]),
+        ("window", ["columns", "rows", "fullscreen"]),
+    ];
+
     /// <summary>
     /// Applies a file to a baseline.
     /// </summary>
@@ -40,6 +62,8 @@ public static class SettingsReader
         ArgumentNullException.ThrowIfNull(baseline);
         ArgumentNullException.ThrowIfNull(ini);
         ArgumentNullException.ThrowIfNull(problems);
+
+        ReportUnknown(ini, source, problems);
 
         var reader = new Layer(ini, source, problems);
         var settings = baseline;
@@ -58,6 +82,67 @@ public static class SettingsReader
         };
 
         return settings;
+    }
+
+    /// <summary>
+    /// Names a setting or section that nothing will ever read.
+    /// </summary>
+    /// <remarks>
+    /// Reported, never fatal, and never a reason to change the file. Unknown sections and
+    /// keys are exactly what a hand-edited file collects, and the useful thing to do about
+    /// one is to say where it is.
+    /// </remarks>
+    private static void ReportUnknown(IniDocument ini, string source, List<string> problems)
+    {
+        foreach (var key in ini.Keys(string.Empty))
+        {
+            problems.Add($"{source} line {ini.LineOf(string.Empty, key)}: " +
+                         $"'{key}' is above every section, so nothing reads it");
+        }
+
+        foreach (var section in ini.Sections())
+        {
+            var known = KeysOf(section);
+
+            if (known is null)
+            {
+                problems.Add($"{source}: no such section as [{section}]");
+                continue;
+            }
+
+            foreach (var key in ini.Keys(section))
+            {
+                if (!known.Contains(key, StringComparer.OrdinalIgnoreCase))
+                {
+                    problems.Add($"{source} line {ini.LineOf(section, key)}: " +
+                                 $"[{section}] has no setting called '{key}'");
+                }
+            }
+        }
+    }
+
+    /// <summary>What a section may contain, or null if there is no such section.</summary>
+    private static IReadOnlyList<string>? KeysOf(string section)
+    {
+        if (section.StartsWith("profile.", StringComparison.OrdinalIgnoreCase))
+        {
+            return ProfileKeys;
+        }
+
+        if (section.Equals("keys", StringComparison.OrdinalIgnoreCase))
+        {
+            return [.. KeyBindings.Actions.Select(KeyBindings.NameOf)];
+        }
+
+        foreach (var (name, keys) in Schema)
+        {
+            if (name.Equals(section, StringComparison.OrdinalIgnoreCase))
+            {
+                return keys;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>One file's worth of reading, with somewhere to put the complaints.</summary>

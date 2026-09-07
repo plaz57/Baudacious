@@ -259,6 +259,45 @@ public class SettingsReaderTests
     }
 
     [Fact]
+    public void AMisplacedSettingIsReported()
+    {
+        // scanline belongs to [crt]. Under [display] it does nothing, and without this it
+        // said nothing either — the one mistake the reader used to pass over in silence.
+        var (settings, problems) = Read("[display]\nscanline = 0\n");
+
+        Assert.Equal(Settings.Defaults.Display.Crt.Scanline, settings.Display.Crt.Scanline);
+
+        var problem = Assert.Single(problems);
+        Assert.Contains("no setting called 'scanline'", problem, StringComparison.Ordinal);
+        Assert.Contains("line 2", problem, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnUnknownSectionIsReported()
+    {
+        var (_, problems) = Read("[displya]\nphosphor = amber\n");
+
+        Assert.Contains("no such section as [displya]", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ASettingAboveEverySectionIsReported()
+    {
+        var (_, problems) = Read("baud = 300\n[line]\nframing = 8N1\n");
+
+        Assert.Contains("above every section", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AProfileSectionAcceptsOnlyItsOwnKeys()
+    {
+        var (_, problems) = Read(
+            "[profile.x]\ncommand = a.exe\narguments = -y\nlike = pwsh\ncolour = red\n");
+
+        Assert.Contains("no setting called 'colour'", Assert.Single(problems), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void LayersOnlyReplaceWhatTheySay()
     {
         // This is the whole precedence rule: state over config over defaults, expressed as
@@ -362,6 +401,21 @@ public class SettingsTemplateTests
 
         Assert.Empty(problems);
         Assert.Equal(Settings.Defaults, settings);
+    }
+
+    [Fact]
+    public void TheGeneratedFileNamesNothingTheReaderDoesNotKnow()
+    {
+        // The unknown-key check keeps a second list of every setting name. This is what
+        // stops the two from drifting apart.
+        var problems = new List<string>();
+        SettingsReader.Apply(
+            Settings.Defaults,
+            IniDocument.Parse(SettingsTemplate.Build()),
+            "baudacious.ini",
+            problems);
+
+        Assert.Empty(problems);
     }
 
     [Fact]

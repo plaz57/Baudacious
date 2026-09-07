@@ -27,8 +27,9 @@ public static class SettingsTemplate
         Line("; setting applies, or the default if there is none. Delete the file to");
         Line("; have this one written again.");
         Line(";");
-        Line("; Anything set here is overridden by what the last session left in state.ini,");
-        Line("; and by an option on the command line.");
+        Line("; A setting left untouched here follows what the last session saved in");
+        Line("; state.ini. Change one and this file owns it again. An option on the");
+        Line("; command line wins over both, for that run only.");
         Line();
 
         Line("[line]");

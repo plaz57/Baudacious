@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text;
+using Baudacious.App.Config;
 using Baudacious.Core.Terminal;
 using Baudacious.Render;
 
@@ -142,7 +143,7 @@ internal static class ShotCommand
 
             return 0;
         }
-        OffscreenRenderer.CaptureToPng(screen, settings, output, magnify, overlay: overlay ? Help.Lines : null);
+        OffscreenRenderer.CaptureToPng(screen, settings, output, magnify, overlay: overlay ? Help.For(ConfigStore.DefaultDirectory()) : null);
 
         Console.Error.WriteLine(string.Create(
             CultureInfo.InvariantCulture,

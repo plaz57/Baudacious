@@ -1,4 +1,5 @@
 using Baudacious.App;
+using Baudacious.App.Config;
 using Baudacious.Core.Commands;
 using Baudacious.Render;
 
@@ -19,7 +20,7 @@ public class ChromeGlyphTests
     {
         var data = new TheoryData<string, string>();
 
-        foreach (var line in Help.Lines)
+        foreach (var line in Help.For(ConfigStore.DefaultDirectory()))
         {
             data.Add("help overlay", line);
         }
