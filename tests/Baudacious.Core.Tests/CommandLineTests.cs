@@ -8,6 +8,7 @@ public class CommandLineTests
     {
         Phosphors = ["color", "green", "amber", "white"],
         Profiles = ["pwsh", "cmd", "wsl"],
+        Fonts = ["unscii", "terminus", "spleen"],
     };
 
     private static CommandLine Typed(string text)
@@ -144,6 +145,7 @@ public class CommandCompleterTests
     {
         Phosphors = ["color", "green", "amber", "white"],
         Profiles = ["pwsh", "cmd", "wsl"],
+        Fonts = ["unscii", "terminus", "spleen"],
     };
 
     private static Completion Complete(string line) =>

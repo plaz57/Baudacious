@@ -28,6 +28,9 @@ public abstract record LocalCommand
     /// <summary>The palette by name; the window owns the enum it belongs to.</summary>
     public sealed record SetPhosphor(string Name) : LocalCommand;
 
+    /// <summary>The bitmap face by name, likewise.</summary>
+    public sealed record SetFont(string Name) : LocalCommand;
+
     public sealed record SetFontSize(int Scale) : LocalCommand;
 
     /// <summary>Null means toggle, which is what a bare <c>crt</c> asks for.</summary>

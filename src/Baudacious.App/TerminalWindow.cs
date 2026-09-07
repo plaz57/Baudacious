@@ -195,7 +195,7 @@ internal sealed class TerminalWindow : IDisposable
     private void OnLoad()
     {
         _gl = GL.GetApi(_window);
-        _atlas = GlyphAtlas.Build();
+        _atlas = GlyphAtlas.BuildFace(_config.Font);
 
         // The prompt cannot invent these: palettes belong to the renderer and profiles to
         // the application, so it is told about both rather than keeping a second copy.
@@ -203,6 +203,7 @@ internal sealed class TerminalWindow : IDisposable
         {
             Phosphors = [.. Enum.GetNames<Phosphor>().Select(n => n.ToLowerInvariant())],
             Profiles = ShellProfiles.Names,
+            Fonts = [.. FontCatalog.Names],
         };
 
         _renderer = new TextRenderer(_gl, _atlas);
@@ -351,6 +352,11 @@ internal sealed class TerminalWindow : IDisposable
         if (fresh.Display.FontScale != old.Display.FontScale)
         {
             SetFontScale(fresh.Display.FontScale);
+        }
+
+        if (!fresh.Font.Equals(old.Font, StringComparison.OrdinalIgnoreCase))
+        {
+            SetFont(fresh.Font);
         }
 
         if (problems.Count > 0)
@@ -1807,6 +1813,11 @@ internal sealed class TerminalWindow : IDisposable
                 _needsPresent = true;
                 return;
 
+            case LocalCommand.SetFont font:
+                ClosePrompt();
+                SetFont(font.Name);
+                return;
+
             case LocalCommand.ShowAbout:
                 ClosePrompt();
                 ShowPanel(About.For(_store.Directory), 30);
@@ -1900,6 +1911,35 @@ internal sealed class TerminalWindow : IDisposable
     {
         _commandLine.Insert(line);
         _promptMessage = [message];
+        _needsPresent = true;
+    }
+
+    /// <summary>
+    /// Changes the bitmap face, between two frames.
+    /// </summary>
+    /// <remarks>
+    /// Every bundled face is 8x16, so nothing but the atlas texture has to change: no
+    /// resize, no reflow, and the shells never know. That is the whole reason the choice
+    /// could be a live setting rather than something to restart for.
+    /// </remarks>
+    private void SetFont(string name)
+    {
+        if (FontCatalog.Find(name) is not { } face)
+        {
+            Notify($"no font called '{name}'");
+            return;
+        }
+
+        if (face.Name.Equals(_config.Font, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _atlas = GlyphAtlas.BuildFace(face.Name);
+        _renderer.ReplaceGlyphs(_atlas);
+        _config = _config with { Font = face.Name };
+
+        Notify($"font: {face.Name}, {face.Stem}px stems");
         _needsPresent = true;
     }
 

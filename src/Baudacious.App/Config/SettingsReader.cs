@@ -73,7 +73,7 @@ public static class SettingsReader
             Rate = reader.Rate("line", "baud", "framing", settings.Rate),
             Profile = reader.Text("shell", "default", settings.Profile),
             FastEcho = reader.FastEcho("shell", "fast-echo", settings.FastEcho),
-            Font = reader.Text("display", "font", settings.Font),
+            Font = reader.Face("display", "font", settings.Font),
             Scrollback = reader.Integer("display", "scrollback", 100, 1_000_000, settings.Scrollback),
             Display = reader.Display(settings.Display),
             Window = reader.Window(settings.Window),
@@ -150,6 +150,23 @@ public static class SettingsReader
     {
         public string Text(string section, string key, string current) =>
             ini.Get(section, key) is { Length: > 0 } value ? value : current;
+
+        /// <summary>A bundled typeface by name.</summary>
+        public string Face(string section, string key, string current)
+        {
+            if (ini.Get(section, key) is not { Length: > 0 } value)
+            {
+                return current;
+            }
+
+            if (FontCatalog.Find(value) is { } face)
+            {
+                return face.Name;
+            }
+
+            Complain(section, key, value, $"no such font, try {string.Join(", ", FontCatalog.Names)}");
+            return current;
+        }
 
         public LineRate Rate(string section, string baudKey, string framingKey, LineRate current)
         {

@@ -12,8 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- unscii-16 by Viznut, public domain. See assets/README.md. -->
+    <!-- Three 8x16 faces, all permissively licensed. Provenance, licences and the BDF
+         conversion are recorded in assets/README.md and assets/licenses/. -->
     <EmbeddedResource Include="..\..\assets\unscii-16.hex" LogicalName="Baudacious.Render.unscii-16.hex" />
+    <EmbeddedResource Include="..\..\assets\terminus-16.hex" LogicalName="Baudacious.Render.terminus-16.hex" />
+    <EmbeddedResource Include="..\..\assets\spleen-16.hex" LogicalName="Baudacious.Render.spleen-16.hex" />
   </ItemGroup>
 
   <ItemGroup>

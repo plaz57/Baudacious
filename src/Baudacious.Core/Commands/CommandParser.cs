@@ -36,6 +36,7 @@ public static class CommandParser
             "framing" => ParseFraming(arguments),
             "flush" => NoArguments(arguments, verb) ?? new LocalCommand.Flush(),
             "phosphor" => ParsePhosphor(arguments, vocabulary),
+            "font" => ParseFont(arguments, vocabulary),
             "fontsize" => ParseFontSize(arguments),
             "crt" => ParseCrt(arguments, "crt"),
             "fastecho" => ParseFastEcho(arguments),
@@ -144,6 +145,30 @@ public static class CommandParser
             known.Count == 0
                 ? $"no phosphor named '{arguments[0]}'"
                 : $"no phosphor named '{arguments[0]}' - {string.Join(", ", known)}");
+    }
+
+    private static LocalCommand ParseFont(List<string> arguments, CommandVocabulary vocabulary)
+    {
+        var known = vocabulary.Fonts;
+
+        if (arguments.Count != 1)
+        {
+            return new LocalCommand.Failed(
+                known.Count == 0 ? "font <name>" : $"font <{string.Join('|', known)}>");
+        }
+
+        foreach (var name in known)
+        {
+            if (name.Equals(arguments[0], StringComparison.OrdinalIgnoreCase))
+            {
+                return new LocalCommand.SetFont(name);
+            }
+        }
+
+        return new LocalCommand.Failed(
+            known.Count == 0
+                ? $"no font named '{arguments[0]}'"
+                : $"no font named '{arguments[0]}' - {string.Join(", ", known)}");
     }
 
     private static LocalCommand ParseFontSize(List<string> arguments)

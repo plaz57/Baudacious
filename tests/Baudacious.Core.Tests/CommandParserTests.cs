@@ -9,6 +9,7 @@ public class CommandParserTests
     {
         Phosphors = ["color", "green", "amber", "white"],
         Profiles = ["pwsh", "cmd", "wsl"],
+        Fonts = ["unscii", "terminus", "spleen"],
     };
 
     [Fact]
@@ -135,13 +136,35 @@ public class CommandParserTests
     }
 
     [Fact]
-    public void TheSecondLetterSettlesEveryFVerb()
+    public void TheSecondLetterSettlesMostFVerbs()
     {
-        // fastecho, flush, fontsize and framing all begin with f and diverge at once.
+        // fastecho, flush and framing diverge at the second letter; font and fontsize do
+        // not, so "fo" is genuinely ambiguous and says so.
         Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fa"));
         Assert.IsType<LocalCommand.Flush>(CommandParser.Parse("fl"));
-        Assert.IsType<LocalCommand.SetFontSize>(CommandParser.Parse("fo 3"));
         Assert.IsType<LocalCommand.SetFraming>(CommandParser.Parse("fr 8N1"));
+
+        var failure = Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("fo 3"));
+        Assert.Contains("font", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("fontsize", failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnExactNameBeatsBeingAPrefixOfAnother()
+    {
+        // "font" is a prefix of "fontsize", so without exact-match-first it would be
+        // ambiguous with itself.
+        Assert.IsType<LocalCommand.SetFont>(CommandParser.Parse("font terminus", Vocabulary));
+        Assert.IsType<LocalCommand.SetFontSize>(CommandParser.Parse("fontsize 3"));
+    }
+
+    [Fact]
+    public void AnUnknownFontNamesTheRealOnes()
+    {
+        var failure = Assert.IsType<LocalCommand.Failed>(
+            CommandParser.Parse("font comic", Vocabulary));
+
+        Assert.Contains("unscii", failure.Message, StringComparison.Ordinal);
     }
 
     [Fact]

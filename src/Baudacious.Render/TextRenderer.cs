@@ -26,7 +26,7 @@ public sealed class TextRenderer : IDisposable
     private const int MaxInstances = 200 * 80;
 
     private readonly GL _gl;
-    private readonly GlyphAtlas _atlas;
+    private GlyphAtlas _atlas;
     private readonly CrtPass _crt;
 
     private uint _program;
@@ -288,6 +288,46 @@ public sealed class TextRenderer : IDisposable
         _gl.BindVertexArray(0);
 
         _blitVao = _gl.GenVertexArray();
+    }
+
+    /// <summary>
+    /// Swaps the bitmap face for another of the same cell size.
+    /// </summary>
+    /// <remarks>
+    /// Only the texture changes. The instance format, the shader uniforms and the offscreen
+    /// target are all functions of the cell size, and every bundled face is 8x16 — which is
+    /// why changing typeface can happen between two frames instead of on restart.
+    /// </remarks>
+    public unsafe void ReplaceGlyphs(GlyphAtlas atlas)
+    {
+        ArgumentNullException.ThrowIfNull(atlas);
+
+        if (atlas.CellWidth != _atlas.CellWidth || atlas.CellHeight != _atlas.CellHeight)
+        {
+            throw new ArgumentException(
+                $"the atlas is {atlas.CellWidth}x{atlas.CellHeight}, not " +
+                $"{_atlas.CellWidth}x{_atlas.CellHeight}; a different cell size needs a new renderer",
+                nameof(atlas));
+        }
+
+        _atlas = atlas;
+
+        _gl.BindTexture(TextureTarget.Texture2D, _glyphTexture);
+        _gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+
+        fixed (byte* pixels = atlas.Pixels)
+        {
+            _gl.TexImage2D(
+                TextureTarget.Texture2D,
+                0,
+                InternalFormat.R8,
+                (uint)atlas.Width,
+                (uint)atlas.Height,
+                0,
+                PixelFormat.Red,
+                PixelType.UnsignedByte,
+                pixels);
+        }
     }
 
     private unsafe void CreateGlyphTexture()

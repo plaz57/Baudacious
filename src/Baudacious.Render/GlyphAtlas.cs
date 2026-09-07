@@ -10,7 +10,8 @@ namespace Baudacious.Render;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Glyphs come from <b>unscii-16</b>, a hand-drawn 8x16 bitmap face in the public domain
+/// Glyphs come from one of the bundled 8x16 bitmap faces — by default <b>unscii-16</b>,
+/// a hand-drawn face in the public domain
 /// (see <see cref="HexFont"/>). A bitmap font is the right tool here: an outline typeface
 /// rasterised to eight pixels wide has no room to make good decisions and comes out
 /// mushy, whereas a bitmap face has every stem placed deliberately — and its box drawing
@@ -48,6 +49,17 @@ public sealed class GlyphAtlas
 
     /// <summary>Single-channel coverage, row-major, <see cref="Width"/> x <see cref="Height"/>.</summary>
     public byte[] Pixels { get; }
+
+    /// <summary>
+    /// Builds the atlas for a named bundled face. 8x16 is the VGA text cell.
+    /// </summary>
+    /// <remarks>
+    /// A name that is not in the catalogue falls back to the default face rather than
+    /// throwing: it arrives from a settings file, and a typo there should cost a message
+    /// and not a window.
+    /// </remarks>
+    public static GlyphAtlas BuildFace(string? faceName) =>
+        Build(font: HexFont.LoadEmbedded((FontCatalog.Find(faceName) ?? FontCatalog.Default).Resource));
 
     /// <summary>Builds the atlas. 8x16 is the VGA text cell and the default everywhere.</summary>
     public static GlyphAtlas Build(

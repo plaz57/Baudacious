@@ -34,10 +34,18 @@ public sealed class HexFont
 
     public bool Contains(uint codepoint) => _glyphs.ContainsKey((int)codepoint);
 
-    /// <summary>Loads the font compiled into this assembly, or null if it is absent.</summary>
-    public static HexFont? LoadEmbedded()
+    /// <summary>
+    /// Loads one of the faces compiled into this assembly, or null if it is absent.
+    /// </summary>
+    /// <param name="resource">
+    /// The logical resource name, from <see cref="FontCatalog"/>. Omitted means the default
+    /// face, which is what everything did before there was a choice.
+    /// </param>
+    public static HexFont? LoadEmbedded(string? resource = null)
     {
-        using var stream = typeof(HexFont).Assembly.GetManifestResourceStream(ResourceName);
+        using var stream = typeof(HexFont).Assembly.GetManifestResourceStream(
+            resource ?? ResourceName);
+
         if (stream is null)
         {
             return null;

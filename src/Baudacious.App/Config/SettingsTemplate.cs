@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Baudacious.Render;
 
 namespace Baudacious.App.Config;
 
@@ -57,7 +58,10 @@ public static class SettingsTemplate
         Line($"; {string.Join(", ", SettingsReader.PhosphorNames)}. 'color' means no transform at all.");
         Line($"phosphor = {d.Display.Phosphor.ToString().ToLowerInvariant()}");
         Line();
-        Line("; Bitmap typeface. See the about text for what each one is and who made it.");
+        Line($"; Bitmap typeface: {string.Join(", ", FontCatalog.Names)}. All 8x16,");
+        Line("; all permissively licensed; 'about' at the local prompt says whose each");
+        Line("; one is. terminus draws one-pixel stems where the others draw two, so it");
+        Line("; reads lighter at every magnification.");
         Line($"font = {d.Font}");
         Line();
         Line("; Whole-number magnification of the 8x16 cell. Never fractional: a bitmap face");

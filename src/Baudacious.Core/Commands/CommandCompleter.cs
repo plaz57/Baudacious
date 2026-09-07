@@ -86,6 +86,7 @@ public static class CommandCompleter
                 "baud" => Rates(),
                 "framing" => Framings,
                 "phosphor" => vocabulary.Phosphors,
+                "font" => vocabulary.Fonts,
                 "crt" or "fastecho" => OnOff,
                 "fontsize" => FontSizes(),
                 "session" => ["new"],
