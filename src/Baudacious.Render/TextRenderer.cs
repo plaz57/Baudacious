@@ -27,6 +27,9 @@ public sealed class TextRenderer : IDisposable
 
     private readonly GL _gl;
     private GlyphAtlas _atlas;
+
+    /// <summary>Source texels the status bar occupies, or 0 when there is no bar.</summary>
+    private int _statusRowHeight;
     private readonly CrtPass _crt;
 
     private uint _program;
@@ -433,6 +436,7 @@ public sealed class TextRenderer : IDisposable
         ArgumentNullException.ThrowIfNull(settings);
 
         var totalRows = screen.RowCount + (status is null ? 0 : 1);
+        _statusRowHeight = status is null ? 0 : _atlas.CellHeight;
         ResizeTarget(screen.Columns, totalRows);
         BuildInstances(screen, settings, elapsed, status, selection, overlay, statusCaret);
 
@@ -526,7 +530,7 @@ public sealed class TextRenderer : IDisposable
                 _colorTarget, _targetWidth, _targetHeight,
                 destinationFramebuffer,
                 originX, originY, drawWidth, drawHeight,
-                settings.Crt, settings.Phosphor);
+                settings.Crt, settings.Phosphor, _statusRowHeight);
             return;
         }
 

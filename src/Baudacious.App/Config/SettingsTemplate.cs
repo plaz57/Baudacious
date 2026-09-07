@@ -93,6 +93,11 @@ public static class SettingsTemplate
         Line("; Darkening towards the corners.");
         Line(Number("vignette", c.Vignette));
         Line();
+        Line("; How much the glass bulges toward you. The text area only: the status bar");
+        Line("; is chrome, and bending the one line that has to stay legible is a poor");
+        Line("; trade. At 1.0 it reads as a fisheye and the corners fall off the glass.");
+        Line(Number("curvature", c.Curvature));
+        Line();
         Line("; A tube in a lit room is never quite black.");
         Line(Number("ambient-glow", c.AmbientGlow));
         Line();

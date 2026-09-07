@@ -103,14 +103,48 @@ public sealed class CrtPass : IDisposable
         uniform float uScanline;
         uniform float uVignette;
         uniform float uAmbient;
+        uniform float uCurvature;
+        uniform float uBar;          // the status bar's share of the source height
         uniform vec3  uTint;
 
         out vec4 fragColor;
 
         void main() {
-            vec3 base  = texture(uText, vUv).rgb;
-            vec3 bloom = texture(uBloomHalf, vUv).rgb * 0.6
-                       + texture(uBloomQuarter, vUv).rgb * 0.4;
+            vec2 uv = vUv;
+
+            // Screen curvature. The glass bulges toward the viewer, so each output pixel
+            // reads from a little farther out than it would on a flat screen — which makes
+            // a straight row of text bow outward in the middle, where a row nearer the
+            // edge bows more.
+            //
+            // The text area only: uBar is the slice the status bar occupies, and that is
+            // chrome, not screen. Bending the one line that must stay legible at all times
+            // would be a poor trade for the look.
+            //
+            // The bar is at the LOW end of v, not the high one. The text vertex shader
+            // negates y so that grid row 0 lands at the top of clip space, which puts it at
+            // v = 1 in the target and the last row — the bar — down at v = 0. Guarding the
+            // wrong end curves the bar and leaves the top row of text flat, which is exactly
+            // how this was caught.
+            if (uCurvature > 0.0 && uv.y > uBar) {
+                float screen = 1.0 - uBar;
+                vec2 c = vec2(uv.x, (uv.y - uBar) / screen) * 2.0 - 1.0;
+                c *= 1.0 + (uCurvature * 0.20 * dot(c, c));
+
+                if (abs(c.x) > 1.0 || abs(c.y) > 1.0) {
+                    // Past the edge of the glass. Unlit phosphor, not a smear of whatever
+                    // pixel happened to be nearest — the smear is what makes curvature read
+                    // as a stretched border instead of as depth.
+                    fragColor = vec4(uTint * uAmbient, 1.0);
+                    return;
+                }
+
+                uv = vec2((c.x + 1.0) * 0.5, uBar + ((c.y + 1.0) * 0.5 * screen));
+            }
+
+            vec3 base  = texture(uText, uv).rgb;
+            vec3 bloom = texture(uBloomHalf, uv).rgb * 0.6
+                       + texture(uBloomQuarter, uv).rgb * 0.4;
 
             vec3 color = base + bloom * uBloom;
 
@@ -121,7 +155,7 @@ public sealed class CrtPass : IDisposable
             // output rows of a source row land on phases 0.25 and 0.75, and any function of
             // |phase - 0.5| gives them the same value — that is, no scanline at all where
             // scanlines are wanted most.
-            float phase = fract(vUv.y * uSourceSize.y);
+            float phase = fract(uv.y * uSourceSize.y);
             float gap = smoothstep(0.45, 0.55, phase);
             color *= 1.0 - (uScanline * gap);
 
@@ -142,6 +176,10 @@ public sealed class CrtPass : IDisposable
     /// Applies the pass, reading <paramref name="sourceTexture"/> and drawing into
     /// <paramref name="destinationFramebuffer"/> (0 for the window).
     /// </summary>
+    /// <param name="statusRowHeight">
+    /// Height in source texels of the status bar at the bottom, or 0 if there is none.
+    /// Curvature leaves it alone, so the pass has to be told where it starts.
+    /// </param>
     public void Render(
         uint sourceTexture,
         int sourceWidth,
@@ -152,7 +190,8 @@ public sealed class CrtPass : IDisposable
         int viewportWidth,
         int viewportHeight,
         CrtSettings crt,
-        Phosphor phosphor)
+        Phosphor phosphor,
+        int statusRowHeight = 0)
     {
         ArgumentNullException.ThrowIfNull(crt);
 
@@ -180,6 +219,10 @@ public sealed class CrtPass : IDisposable
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uScanline"), (float)crt.Scanline);
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uVignette"), (float)crt.Vignette);
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uAmbient"), (float)crt.AmbientGlow);
+        _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uCurvature"), (float)crt.Curvature);
+        _gl.Uniform1(
+            _gl.GetUniformLocation(_compositeProgram, "uBar"),
+            sourceHeight > 0 ? statusRowHeight / (float)sourceHeight : 0f);
 
         var (r, g, b) = PhosphorMap.Tint(phosphor);
         _gl.Uniform3(_gl.GetUniformLocation(_compositeProgram, "uTint"), (float)r, (float)g, (float)b);

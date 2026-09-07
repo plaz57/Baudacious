@@ -437,7 +437,7 @@ public class SettingsTemplateTests
             ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"],
             ini.Keys("display"));
         Assert.Equal(
-            ["enabled", "bloom", "scanline", "vignette", "ambient-glow"],
+            ["enabled", "bloom", "scanline", "vignette", "curvature", "ambient-glow"],
             ini.Keys("crt"));
         Assert.Equal(["columns", "rows", "fullscreen"], ini.Keys("window"));
     }

@@ -104,6 +104,11 @@ static int RunWindow(string[] args)
                 options = Crt(options, c => c with { Vignette = vignette });
                 break;
 
+            case "--curvature" when i + 1 < args.Length:
+                var curvature = Number(args[++i]);
+                options = Crt(options, c => c with { Curvature = curvature });
+                break;
+
             case "-h" or "--help":
                 return Help();
 
@@ -151,6 +156,7 @@ static int Help()
                 --scanline <n>              raster gap depth; needs 2x magnification
                                             or more to be visible at all
                 --vignette <n>              corner darkening
+                --curvature <n>             screen bulge; 0 is flat glass
                 --settings <directory>      read baudacious.ini and state.ini from here
                                             instead of %APPDATA%\Baudacious
 

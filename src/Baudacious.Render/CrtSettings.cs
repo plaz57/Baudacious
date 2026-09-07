@@ -32,6 +32,22 @@ public sealed record CrtSettings
     /// <summary>Darkening towards the corners.</summary>
     public double Vignette { get; init; } = 0.35;
 
+    /// <summary>
+    /// How much the screen bulges toward the viewer. 0 is flat glass.
+    /// </summary>
+    /// <remarks>
+    /// Applied to the text area only. The status bar is chrome rather than screen content,
+    /// and bending the one line that has to stay legible would be a poor trade.
+    /// <para>
+    /// The default was chosen by looking at 0.18, 0.40 and 1.00 over the glyph-check screen
+    /// at 80x25 and 100x30. At 0.18 the bow has to be hunted for, and an effect nobody
+    /// notices is not worth a shader branch. At 0.40 it is obvious at a glance and costs
+    /// nothing in legibility — no glyph is deformed and nothing falls off the glass. At 1.00
+    /// it reads as a fisheye and the corners go dark.
+    /// </para>
+    /// </remarks>
+    public double Curvature { get; init; } = 0.40;
+
     /// <summary>A tube in a lit room is never quite black.</summary>
     public double AmbientGlow { get; init; } = 0.02;
 }

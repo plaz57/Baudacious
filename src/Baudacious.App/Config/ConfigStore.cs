@@ -41,6 +41,7 @@ public sealed class ConfigStore
         ("crt", "bloom"),
         ("crt", "scanline"),
         ("crt", "vignette"),
+        ("crt", "curvature"),
         ("crt", "ambient-glow"),
         ("window", "columns"),
         ("window", "rows"),
@@ -173,6 +174,7 @@ public sealed class ConfigStore
             ini.Set("crt", "bloom", Fraction(crt.Bloom));
             ini.Set("crt", "scanline", Fraction(crt.Scanline));
             ini.Set("crt", "vignette", Fraction(crt.Vignette));
+            ini.Set("crt", "curvature", Fraction(crt.Curvature));
             ini.Set("crt", "ambient-glow", Fraction(crt.AmbientGlow));
             ini.Set("window", "columns", settings.Window.Columns.ToString(CultureInfo.InvariantCulture));
             ini.Set("window", "rows", settings.Window.Rows.ToString(CultureInfo.InvariantCulture));
