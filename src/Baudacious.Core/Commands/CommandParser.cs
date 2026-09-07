@@ -40,6 +40,7 @@ public static class CommandParser
             "crt" => ParseCrt(arguments, "crt"),
             "fastecho" => ParseFastEcho(arguments),
             "session" => ParseSession(arguments, vocabulary),
+            "about" => NoArguments(arguments, verb) ?? new LocalCommand.ShowAbout(),
             "help" => NoArguments(arguments, verb) ?? new LocalCommand.ShowHelp(),
             _ => NoArguments(arguments, verb) ?? new LocalCommand.Quit(),
         };

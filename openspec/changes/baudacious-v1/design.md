@@ -528,6 +528,10 @@ if it does not meet the legibility bar in time.
   purist option. Reconsider only if a fourth or fifth effect arrives and the space of
   useful settings stops being obvious.
 
-- **Whether the backlog indicator should show a progress bar or just a marker.**
-  Depends on how the drain-time estimate reads in practice at low rates; the
-  spec requires only that pending output is visible.
+- ~~**Whether the backlog indicator should show a progress bar or just a marker.**~~
+  **DECIDED (Phase 6): a count and a time, no bar.** The arithmetic settles it. A bar
+  needs a denominator, and the denominator is still growing — output arrives while the
+  queue drains, so the bar would slide backwards exactly when someone is waiting on it.
+  `[881 pending, 29s]` is stable and answers the question they actually have. Long waits
+  are quoted in minutes, because at 110 baud a pasted paragraph really is minutes away.
+  Unlimited and fast-forward say `draining` rather than quoting a wait of zero.

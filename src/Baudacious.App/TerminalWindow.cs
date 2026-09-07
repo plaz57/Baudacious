@@ -809,14 +809,52 @@ internal sealed class TerminalWindow : IDisposable
             ? string.Empty
             : string.Create(CultureInfo.InvariantCulture, $"  #{_active + 1}/{_sessions.Count}");
 
+    /// <summary>
+    /// What is still on the wire, and how long until it is not.
+    /// </summary>
+    /// <remarks>
+    /// A count and a time rather than a progress bar. Open Question 4 asked which, and the
+    /// answer is in the arithmetic: a bar needs a denominator, and the denominator here is
+    /// still growing — output arrives while the queue drains, so the bar would slide
+    /// backwards exactly when the user is waiting on it. "29s" is stable, answers the
+    /// question they actually have, and costs no pixels.
+    /// </remarks>
+    private static string Backlog(BaudGovernor governor)
+    {
+        var pending = governor.PendingBytes;
+        if (pending == 0)
+        {
+            return "idle";
+        }
+
+        var drain = governor.EstimatedDrain;
+        if (drain == TimeSpan.Zero)
+        {
+            // Unlimited, or fast-forwarding: there is a queue but no wait worth quoting.
+            return string.Create(CultureInfo.InvariantCulture, $"{pending} pending, draining");
+        }
+
+        return string.Create(CultureInfo.InvariantCulture, $"{pending} pending, {Duration(drain)}");
+    }
+
+    /// <summary>
+    /// A wait, in the units someone would say it in.
+    /// </summary>
+    /// <remarks>
+    /// "1234.5s" is a number to be decoded; at 110 baud a pasted paragraph really is
+    /// minutes away, and minutes is how long it is.
+    /// </remarks>
+    private static string Duration(TimeSpan span) => span.TotalSeconds switch
+    {
+        < 10 => string.Create(CultureInfo.InvariantCulture, $"{span.TotalSeconds:F1}s"),
+        < 60 => string.Create(CultureInfo.InvariantCulture, $"{(int)span.TotalSeconds}s"),
+        < 3600 => string.Create(CultureInfo.InvariantCulture, $"{(int)span.TotalMinutes}m {span.Seconds:00}s"),
+        _ => string.Create(CultureInfo.InvariantCulture, $"{(int)span.TotalHours}h {span.Minutes:00}m"),
+    };
+
     private string StatusLine()
     {
-        var pending = Current.Governor.PendingBytes;
-        var backlog = pending == 0
-            ? "idle"
-            : string.Create(
-                CultureInfo.InvariantCulture,
-                $"{pending} pending, {Current.Governor.EstimatedDrain.TotalSeconds:F1}s");
+        var backlog = Backlog(Current.Governor);
 
         // specs/terminal-emulation: while scrolled back, say so, and say that the live view
         // has moved on — otherwise a static screen looks like a hung shell.
@@ -1122,12 +1160,9 @@ internal sealed class TerminalWindow : IDisposable
 
     private string BuildTitle()
     {
-        var pending = Current.Governor.PendingBytes;
-        var backlog = pending == 0
+        var backlog = Current.Governor.PendingBytes == 0
             ? string.Empty
-            : string.Create(
-                CultureInfo.InvariantCulture,
-                $"  [{pending} pending, {Current.Governor.EstimatedDrain.TotalSeconds:F1}s]");
+            : $"  [{Backlog(Current.Governor)}]";
 
         var notice = Environment.TickCount64 < _noticeUntil ? "  " + _notice : string.Empty;
 
@@ -1770,6 +1805,11 @@ internal sealed class TerminalWindow : IDisposable
             case LocalCommand.ShowHelp:
                 _promptMessage = PromptHelp();
                 _needsPresent = true;
+                return;
+
+            case LocalCommand.ShowAbout:
+                ClosePrompt();
+                ShowPanel(About.For(_store.Directory), 30);
                 return;
 
             case LocalCommand.Quit:

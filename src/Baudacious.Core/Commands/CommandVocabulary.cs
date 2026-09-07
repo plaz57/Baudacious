@@ -12,7 +12,10 @@ public sealed record CommandVocabulary
 {
     /// <summary>Every verb, in the order help should list them.</summary>
     public static readonly string[] Verbs =
-        ["baud", "framing", "flush", "phosphor", "fontsize", "crt", "fastecho", "session", "help", "quit"];
+    [
+        "baud", "framing", "flush", "phosphor", "fontsize", "crt", "fastecho", "session",
+        "about", "help", "quit",
+    ];
 
     /// <summary>One line of help per verb, in the same order.</summary>
     public static readonly string[] Usage =
@@ -25,6 +28,7 @@ public sealed record CommandVocabulary
         "crt [on|off]            the CRT pass; bare toggles",
         "fastecho [on|off]       cheap line editing; bare toggles",
         "session new <profile>   a second shell",
+        "about                   version, licence, typeface",
         "help                    this list",
         "quit                    close Baudacious",
     ];

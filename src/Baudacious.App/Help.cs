@@ -38,7 +38,7 @@ public static class Help
         "  B, G and P open a menu; the chord again steps it on.",
         "  Any other alt chord goes to the shell as ESC + key.",
         "",
-        "  settings: " + directory,
+        "  settings: " + Paths.Shorten(directory, 42),
         "  alt+Z or escape to close",
     ];
 }

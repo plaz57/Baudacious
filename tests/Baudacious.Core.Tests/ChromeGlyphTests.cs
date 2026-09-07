@@ -25,6 +25,11 @@ public class ChromeGlyphTests
             data.Add("help overlay", line);
         }
 
+        foreach (var line in About.For(ConfigStore.DefaultDirectory()))
+        {
+            data.Add("about panel", line);
+        }
+
         foreach (var line in CommandVocabulary.Usage)
         {
             data.Add("command usage", line);

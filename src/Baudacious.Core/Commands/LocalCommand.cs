@@ -40,6 +40,9 @@ public abstract record LocalCommand
 
     public sealed record ShowHelp : LocalCommand;
 
+    /// <summary>The version, the licence, and whose typeface this is.</summary>
+    public sealed record ShowAbout : LocalCommand;
+
     public sealed record Quit : LocalCommand;
 
     /// <summary>Nothing happens and the prompt stays open carrying this message.</summary>
