@@ -26,7 +26,7 @@
 
 ## 4. Together
 
-- [ ] 4.1 Choose the combined defaults by eye against all three at once, and record why each number is what it is
-- [ ] 4.2 Confirm every CP437 glyph is still individually distinguishable at the combined defaults
-- [ ] 4.3 Update the README's CRT table and the settings reference
+- [x] 4.1 Combined defaults chosen against all three at once over the glyph-check screen: **curvature 0.40** (obvious at a glance, no legibility cost), **persistence 0.45** (a four-frame tail, three or four characters of trail at 300 baud), **mask 0** (a colour-tube artifact, so not a more faithful monochrome). Each number and its reasoning is on the property in `CrtSettings`
+- [x] 4.2 Confirmed at the combined defaults, magnified three times with the status bar drawn. The groups that differ only in fine detail all separate: `ILil1|`, `00Qo`, the sixteen accents, the shade blocks, single against double box joins, and bold/faint/underline/reverse/struck as five distinguishable attributes
+- [x] 4.3 README CRT section rewritten for six effects with the measured numbers, and the settings reference updated
 - [ ] 4.4 Manual acceptance: a session at 1200 baud that looks like a tube and reads like a terminal

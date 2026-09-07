@@ -100,7 +100,7 @@ Baudacious comes back the way it was closed. Baudacious writes only that file;
 | | `cursor-blink` | Milliseconds; `0` for a steady cursor |
 | | `scrollback` | Lines kept per session |
 | `[crt]` | `enabled` | The whole pass |
-| | `bloom` `scanline` `vignette` `ambient-glow` | Intensities, 0 to 1 |
+| | `bloom` `scanline` `vignette` `curvature` `mask` `persistence` `ambient-glow` | Intensities, 0 to 1 — see [the CRT pass](#the-crt-pass) |
 | `[window]` | `columns` `rows` | Opening size in cells, not pixels |
 | | `fullscreen` | |
 | `[keys]` | `line-rate` `framing` `fast-forward` `skim` `phosphor` `crt` `scale-up` `scale-down` `fullscreen` `new-session` `next-session` `commands` `help` `quit` | A chord such as `alt+B`, `alt+shift+F` or `ctrl+]`, or `none` to unbind |
@@ -235,30 +235,59 @@ Recorded in [phase-0-findings.md](openspec/changes/baudacious-v1/phase-0-finding
 
 ## The CRT pass
 
-Three effects over the text, each with its own intensity, all switchable with `Alt+C`.
+Six effects over the text, each with its own intensity, all switchable together with
+`Alt+C`. Everything here is also a `--flag` on the command line, and `--no-crt` skips the
+pass entirely.
 
 | Setting | Default | What it does |
 |---|---|---|
 | `bloom` | `0.55` | Phosphor bleed. **Additive and unbounded**, so values above 1 keep going. Its effect is almost entirely on the black around glyphs — the glyph cores are already near maximum. At 2.5 the halo spreads far enough to roughly triple how much of the screen reads as lit. |
-| `scanline` | `0.50` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. |
+| `scanline` | `0.50` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. Follows the curvature, because raster lines were on the phosphor rather than over it. |
 | `vignette` | `0.35` | Corner falloff. Untouched through the middle 60% of the width; darkening starts in the outer 20% each side and the outer 15% top and bottom. At the extreme corner the darkening is about `vignette x 0.82`. |
+| `curvature` | `0.40` | The glass bulges toward you, so straight rows of text bow outward in the middle. Past the edge of the glass the pixels are unlit phosphor, not a smear of the nearest one. At 1.0 it reads as a fisheye and the corners go dark. **The status bar is never curved** — it is chrome, and the one line that has to stay legible. |
+| `persistence` | `0.45` | How long light lingers after the pixel that made it has gone. The default is a four-frame tail, 65 ms at 60 Hz. |
+| `mask` | `0` | Aperture-grille stripes: output pixels weighted into repeating red, green and blue columns, phase fixed to the output pixel so the pattern cannot swim when the grid resizes. |
 
-Both `scanline` and `vignette` are fractions of brightness *removed*, so 0–1 is the whole
-useful range. Bloom is not — it adds light, and washes out somewhere past 2. All three are
-also `--bloom`, `--scanline` and `--vignette` on the command line, and `--no-crt` skips the
-pass entirely.
+`scanline`, `vignette`, `curvature`, `persistence` and `mask` all run 0–1. Bloom does not —
+it adds light, and washes out somewhere past 2.
 
-**Scanlines need a font scale of 2 or more.** At scale 1 there is one output pixel per
-source pixel row, so every row samples the same scanline phase: the effect degrades to a
-slight uniform dimming with no banding at all.
+**Persistence is the one a baud rate makes worth having.** In an instant terminal, decay is
+only visible when the screen scrolls. At 300 baud characters arrive one at a time, so the
+trail follows the cursor *as the text is written*.
 
-A fourth knob is settings-only: a small ambient glow (0.02) keeps unlit phosphor from being
+The dial maps to 0.9 survival a frame at the top rather than straight through, because 1.0
+meaning "never fades" is a bug however it is spelled. Measured by presenting blank frames
+through the pass and reading the luminance back, a cleared screen reaches unlit by frame 4
+at the default, frame 8 at 0.6 and frame 32 at 1.0.
+
+**The mask is off by default, and deliberately.** An aperture grille is a colour-tube
+artifact: a P1 green monochrome tube had a continuous phosphor coating and no grille at
+all, so switching it on under the monochrome palettes is a stylistic choice rather than a
+more faithful one. It comes into its own with `phosphor = color`, where 0.5 and up reads
+like a Trinitron under a loupe. Masking costs light by construction — two stripes in three
+are dimmed — so the weights are normalised to hold the level: measured mean luminance moves
+1.2% at 0.25 and 4.2% at 0.5, and past that the compensation runs into the top of the range
+and cannot recover what clipping takes.
+
+**Scanlines and the mask both want a font scale of 2 or more, for opposite reasons.**
+Scanlines need it to exist at all: at scale 1 there is one output pixel per source pixel
+row, so every row samples the same phase and the effect degrades to uniform dimming. The
+mask needs it to stay out of the way: at scale 1 a character is eight pixels wide against a
+three-pixel triad, and the mask breaks the glyphs up rather than texturing them.
+
+A seventh knob is settings-only: a small ambient glow (0.02) keeps unlit phosphor from being
 pure black, which is why measured luminances sit a little above the arithmetic.
 
-Render stills without starting a session, which is how these numbers were measured:
+All six together cost **0.09 ms a frame** — 1.06 ms against a 16.67 ms budget at a 200x60
+grid, magnified twice.
+
+Render stills without starting a session, which is how these numbers were measured.
+`--fade` presents blank frames through the same pass afterwards, which is the only way to
+see an effect that exists across frames rather than within one:
 
 ```
-baudacious shot --vignette 0.7 --bloom 0.9 --scanline 0.45 --magnify 3 --out frame.png
+baudacious shot --curvature 0.7 --mask 0.6 --magnify 3 --status --out frame.png
+baudacious shot --persistence 0.8 --fade 6 --out tail.png
 baudacious shot --bench --size 200x60 --magnify 2
 ```
 
