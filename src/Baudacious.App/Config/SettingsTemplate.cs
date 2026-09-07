@@ -98,6 +98,12 @@ public static class SettingsTemplate
         Line("; trade. At 1.0 it reads as a fisheye and the corners fall off the glass.");
         Line(Number("curvature", c.Curvature));
         Line();
+        Line("; Aperture-grille stripes: output pixels weighted into repeating red,");
+        Line("; green and blue columns. A colour-tube artifact — a monochrome tube had a");
+        Line("; continuous coating — so it pairs with phosphor = color and is a stylistic");
+        Line("; choice on the others. Off by default.");
+        Line(Number("mask", c.Mask));
+        Line();
         Line("; A tube in a lit room is never quite black.");
         Line(Number("ambient-glow", c.AmbientGlow));
         Line();

@@ -25,7 +25,7 @@ internal static class ShotCommand
         var crt = true;
         var bench = false;
         var overlay = false;
-        double? bloom = null, scanline = null, vignette = null, curvature = null;
+        double? bloom = null, scanline = null, vignette = null, curvature = null, mask = null;
         var status = false;
 
         for (var i = 0; i < args.Length; i++)
@@ -54,7 +54,7 @@ internal static class ShotCommand
                     status = true;
                     break;
 
-                case "--bloom" or "--scanline" or "--vignette" or "--curvature"
+                case "--bloom" or "--scanline" or "--vignette" or "--curvature" or "--mask"
                     when i + 1 < args.Length:
                     var knob = args[i];
                     if (!double.TryParse(args[++i], CultureInfo.InvariantCulture, out var level) || level < 0)
@@ -68,6 +68,7 @@ internal static class ShotCommand
                         case "--bloom": bloom = level; break;
                         case "--scanline": scanline = level; break;
                         case "--curvature": curvature = level; break;
+                        case "--mask": mask = level; break;
                         default: vignette = level; break;
                     }
 
@@ -129,6 +130,7 @@ internal static class ShotCommand
                     Scanline = scanline ?? defaults.Scanline,
                     Vignette = vignette ?? defaults.Vignette,
                     Curvature = curvature ?? defaults.Curvature,
+                    Mask = mask ?? defaults.Mask,
                 }
                 : CrtSettings.Off,
         };

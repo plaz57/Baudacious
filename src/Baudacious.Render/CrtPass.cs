@@ -104,6 +104,7 @@ public sealed class CrtPass : IDisposable
         uniform float uVignette;
         uniform float uAmbient;
         uniform float uCurvature;
+        uniform float uMask;
         uniform float uBar;          // the status bar's share of the source height
         uniform vec3  uTint;
 
@@ -163,6 +164,25 @@ public sealed class CrtPass : IDisposable
             float radius = length((vUv - 0.5) * vec2(1.0, 0.86));
             color *= 1.0 - (uVignette * smoothstep(0.30, 0.78, radius));
 
+            // Aperture grille. Vertical phosphor stripes in threes, phase taken from the
+            // output pixel so the triad is fixed to the physical screen — anchoring it to
+            // the character cell instead would make the pattern swim every time the grid
+            // resized.
+            //
+            // Two stripes in three are dimmed, so the mask costs light: the mean weight per
+            // channel across a triad is (1 + 2w)/3. Dividing by that restores the level and
+            // drives the lit stripe correspondingly harder, which is what a real grille did.
+            if (uMask > 0.0) {
+                float w = 1.0 - uMask;
+                int stripe = int(mod(gl_FragCoord.x, 3.0));
+
+                vec3 grille = stripe == 0 ? vec3(1.0, w, w)
+                            : stripe == 1 ? vec3(w, 1.0, w)
+                                          : vec3(w, w, 1.0);
+
+                color *= grille * (3.0 / (1.0 + (2.0 * w)));
+            }
+
             // Unlit phosphor in a lit room is never quite black.
             color += uTint * uAmbient;
 
@@ -220,6 +240,7 @@ public sealed class CrtPass : IDisposable
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uVignette"), (float)crt.Vignette);
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uAmbient"), (float)crt.AmbientGlow);
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uCurvature"), (float)crt.Curvature);
+        _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uMask"), (float)crt.Mask);
         _gl.Uniform1(
             _gl.GetUniformLocation(_compositeProgram, "uBar"),
             sourceHeight > 0 ? statusRowHeight / (float)sourceHeight : 0f);

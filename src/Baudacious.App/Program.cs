@@ -109,6 +109,11 @@ static int RunWindow(string[] args)
                 options = Crt(options, c => c with { Curvature = curvature });
                 break;
 
+            case "--mask" when i + 1 < args.Length:
+                var mask = Number(args[++i]);
+                options = Crt(options, c => c with { Mask = mask });
+                break;
+
             case "-h" or "--help":
                 return Help();
 
@@ -157,6 +162,7 @@ static int Help()
                                             or more to be visible at all
                 --vignette <n>              corner darkening
                 --curvature <n>             screen bulge; 0 is flat glass
+                --mask <n>                  aperture-grille stripes; 0 is none
                 --settings <directory>      read baudacious.ini and state.ini from here
                                             instead of %APPDATA%\Baudacious
 

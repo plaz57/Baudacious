@@ -70,8 +70,10 @@ fixed to the output pixel grid so that the mask does not move when the terminal
 grid is resized.
 
 Because masking removes light by construction, the system SHALL compensate for
-the brightness it costs, so that turning the mask on changes the character of
-the image rather than its overall level.
+the brightness it costs across the usable range of intensities, so that turning
+the mask on changes the character of the image rather than its overall level. At
+extreme intensities the compensation is bounded by the top of the output range,
+and the system is not required to recover light that clipping removes.
 
 #### Scenario: The mask is visible up close
 
@@ -81,8 +83,14 @@ the image rather than its overall level.
 
 #### Scenario: Brightness is preserved
 
-- **WHEN** masking is turned on at its default intensity
+- **WHEN** masking is turned on at a moderate intensity
 - **THEN** the mean luminance of a screen of text is substantially unchanged
+
+#### Scenario: Masking is not a more faithful monochrome
+
+- **WHEN** the phosphor palette is one of the monochrome ones
+- **THEN** masking is not applied unless the user asks for it, an aperture grille
+  being a colour-tube artifact rather than something a monochrome tube had
 
 #### Scenario: The mask does not swim
 

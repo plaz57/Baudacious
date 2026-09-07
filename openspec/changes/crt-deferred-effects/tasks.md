@@ -8,11 +8,11 @@
 
 ## 2. Aperture-grille masking
 
-- [ ] 2.1 Add `Mask` to `CrtSettings` and thread it through as above
-- [ ] 2.2 Implement the RGB stripe weighting, phase taken from the output pixel column so it stays fixed to the physical screen
-- [ ] 2.3 Compensate the brightness the mask removes, and state the arithmetic in the shader
-- [ ] 2.4 Verify: the stripes are visible at pixel level, mean luminance is substantially unchanged, and the pattern does not move when the grid resizes
-- [ ] 2.5 Confirm the mask reads as a grille and not as moiré at 1x, 2x and 4x magnification — and record what it does at 1x, where there may not be pixels to spare
+- [x] 2.1 Add `Mask` to `CrtSettings` and thread it through as above. **Defaults to 0** — an aperture grille is a colour-tube artifact, and a P1 monochrome tube had a continuous coating, so switching it on under the monochrome palettes is a stylistic choice rather than a more faithful one
+- [x] 2.2 Implement the RGB stripe weighting, phase from `gl_FragCoord.x` so it is fixed to the output pixel and cannot swim when the grid resizes
+- [x] 2.3 Compensate the brightness the mask removes: the mean weight per channel across a triad is `(1 + 2w)/3`, so the weights are divided by it. Stated in the shader
+- [x] 2.4 Verified. Stripes are unmistakable at pixel level — on `phosphor = color` at 1.00 the colour bars resolve into pure R/G/B columns and white text into triads. Mean luminance measured over the same screen: **13.625 at mask 0, 13.463 at 0.25 (-1.2%), 13.057 at 0.50 (-4.2%), 10.227 at 1.00 (-25%)** — the compensation holds across the usable range and is defeated by clipping at the top, which is recorded rather than hidden. The phase comes from `gl_FragCoord.x`, so being fixed to the output pixel is structural rather than something to test
+- [x] 2.5 At 4x it reads as a fine phosphor texture and at 2x it holds up at both 0.30 and 0.60 with no loss of legibility. **At 1x it interferes.** A character is eight pixels wide and the triad is three, so the mask period is close enough to the stroke width to break up the glyphs rather than texture them — "0123456789" is measurably less crisp side by side. Recorded as a magnification floor, the same shape of constraint as scanlines have but for the opposite reason: scanlines need 2x to be visible at all, the mask needs it to stay out of the way
 
 ## 3. Phosphor persistence
 
