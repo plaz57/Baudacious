@@ -104,6 +104,11 @@ public static class SettingsTemplate
         Line("; choice on the others. Off by default.");
         Line(Number("mask", c.Mask));
         Line();
+        Line("; How long light lingers after the pixel that made it has gone. The one");
+        Line("; effect a baud rate makes worth having: at 300 baud characters arrive one");
+        Line("; at a time, so the trail follows the cursor as the text is written.");
+        Line(Number("persistence", c.Persistence));
+        Line();
         Line("; A tube in a lit room is never quite black.");
         Line(Number("ambient-glow", c.AmbientGlow));
         Line();

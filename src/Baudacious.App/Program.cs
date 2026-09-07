@@ -114,6 +114,11 @@ static int RunWindow(string[] args)
                 options = Crt(options, c => c with { Mask = mask });
                 break;
 
+            case "--persistence" when i + 1 < args.Length:
+                var persistence = Number(args[++i]);
+                options = Crt(options, c => c with { Persistence = persistence });
+                break;
+
             case "-h" or "--help":
                 return Help();
 
@@ -163,6 +168,7 @@ static int Help()
                 --vignette <n>              corner darkening
                 --curvature <n>             screen bulge; 0 is flat glass
                 --mask <n>                  aperture-grille stripes; 0 is none
+                --persistence <n>           how long light lingers; 0 is none
                 --settings <directory>      read baudacious.ini and state.ini from here
                                             instead of %APPDATA%\Baudacious
 

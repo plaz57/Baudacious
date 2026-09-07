@@ -16,13 +16,13 @@
 
 ## 3. Phosphor persistence
 
-- [ ] 3.1 Add `Persistence` to `CrtSettings` and thread it through as above
-- [ ] 3.2 Add the retained output-resolution target and the ping-pong, using the destination parameter v1's task 6.1 put in place
-- [ ] 3.3 Composite as a maximum against the decayed history rather than a blend, so a lit pixel is never dimmed by a dark past
-- [ ] 3.4 Handle resize: the retained target follows the new size without leaving a stale or stretched image
-- [ ] 3.5 Verify the decay is bounded — a cleared screen reaches unlit in a small number of frames rather than asymptotically never
-- [ ] 3.6 Verify a trail actually follows arriving text at 300 baud, which is the whole reason for the effect
-- [ ] 3.7 Measure the frame cost, and check the idle path: a decaying screen is still changing, so the 10 Hz idle drop must not freeze a fade half-done
+- [x] 3.1 Add `Persistence` to `CrtSettings`, defaulting to **0.45**, threaded through as above. The dial maps to 0.9 survival a frame at the top rather than straight through, because 1.0 meaning "never fades" is a bug however it is spelled
+- [x] 3.2 Two retained output-resolution targets, ping-ponged, allocated only while persistence is on. v1's task 6.1 paid off exactly as intended: the composite already took its destination as a parameter, so this was an added target and a present, not a restructuring
+- [x] 3.3 Composite as a maximum against the decayed history. A blend would dim a newly lit pixel; a running sum would let the ambient term accumulate until the whole screen glowed. The maximum does neither
+- [x] 3.4 On a size change the pair is released, recreated and cleared rather than rescaled — a stretched copy of the old size is a visible artifact that then takes half a second to decay away. The clear is needed on the first frame too, since a fresh texture's contents are undefined
+- [x] 3.5 Verified, and it **was not bounded at first**. Measuring the mean luminance of the frame after N blank ones showed the tail plateauing at 4.109 against a blank-screen floor of 3.933 and staying there for ever. The cause is quantisation: the history is an 8-bit target, so a channel decays as `round(v * decay)`, and at 0.9 that lands back on `v` for any `v <= 5` — a permanent ghost worth 2% brightness. Fixed by taking a fixed 1/255 step as well as the proportional one, which guarantees progress in the quantised domain. After the fix: floor reached by frame 4 at 0.45, frame 8 at 0.6, frame 32 at 1.0
+- [ ] 3.6 Verify a trail actually follows arriving text at 300 baud, which is the whole reason for the effect. The decay itself is measured and the glyph fade looks right frame by frame offscreen, but watching it arrive live needs the window in front and is folded into 4.4
+- [x] 3.7 Frame cost at 200x60 magnify 2: **0.996 ms** with curvature and persistence, **1.060 ms** with the mask as well, against a 0.97 ms baseline and a 16.67 ms budget — so all three together cost 0.09 ms. The idle drop is safe as it stands: the loop already paints at full rate for a second after the last byte, and the longest tail the dial allows is 533 ms, so a fade always finishes before the 10 Hz drop can start
 
 ## 4. Together
 

@@ -45,7 +45,11 @@ public static class SettingsReader
         ("line", ["baud", "framing"]),
         ("shell", ["default", "fast-echo"]),
         ("display", ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"]),
-        ("crt", ["enabled", "bloom", "scanline", "vignette", "curvature", "mask", "ambient-glow"]),
+        ("crt",
+            [
+                "enabled", "bloom", "scanline", "vignette", "curvature", "mask",
+                "persistence", "ambient-glow",
+            ]),
         ("window", ["columns", "rows", "fullscreen"]),
     ];
 
@@ -253,6 +257,7 @@ public static class SettingsReader
                     Vignette = Fraction("crt", "vignette", current.Crt.Vignette),
                     Curvature = Fraction("crt", "curvature", current.Crt.Curvature),
                     Mask = Fraction("crt", "mask", current.Crt.Mask),
+                    Persistence = Fraction("crt", "persistence", current.Crt.Persistence),
                     AmbientGlow = Fraction("crt", "ambient-glow", current.Crt.AmbientGlow),
                 },
             };

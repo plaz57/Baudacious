@@ -42,6 +42,20 @@ public sealed class CrtPass : IDisposable
     private int _sourceWidth;
     private int _sourceHeight;
 
+    /// <summary>
+    /// The two retained frames, at output resolution, ping-ponged.
+    /// </summary>
+    /// <remarks>
+    /// Only allocated while persistence is switched on, so the effect costs nothing at all
+    /// when it is off — which is also what makes "off is identical to before" structural
+    /// rather than something to keep testing.
+    /// </remarks>
+    private Target _historyA;
+    private Target _historyB;
+    private bool _writeToB;
+    private int _outputWidth;
+    private int _outputHeight;
+
     private readonly record struct Target(uint Framebuffer, uint Texture, int Width, int Height);
 
     public CrtPass(GL gl)
@@ -97,6 +111,7 @@ public sealed class CrtPass : IDisposable
         uniform sampler2D uText;
         uniform sampler2D uBloomHalf;
         uniform sampler2D uBloomQuarter;
+        uniform sampler2D uHistory;    // the previous composited frame, when retained
 
         uniform vec2  uSourceSize;   // the text target, in texels
         uniform float uBloom;
@@ -105,6 +120,7 @@ public sealed class CrtPass : IDisposable
         uniform float uAmbient;
         uniform float uCurvature;
         uniform float uMask;
+        uniform float uDecay;        // per-frame survival of the retained frame; 0 is none
         uniform float uBar;          // the status bar's share of the source height
         uniform vec3  uTint;
 
@@ -186,6 +202,25 @@ public sealed class CrtPass : IDisposable
             // Unlit phosphor in a lit room is never quite black.
             color += uTint * uAmbient;
 
+            // Phosphor persistence. The brighter of this frame and the decayed last one,
+            // never a blend: a phosphor emits, so a pixel that has just been lit must not be
+            // dimmed by a dark history, and one that has gone dark should fade rather than
+            // cut. Taking a maximum also means the ambient term cannot accumulate, which a
+            // running sum would do until the whole screen glowed.
+            //
+            // The history is already composited — curved, masked, the lot — so it is read
+            // straight at the output position rather than through the distortion again.
+            if (uDecay > 0.0) {
+                // The subtraction is not decoration. The history is an 8-bit target, so a
+                // channel decays as round(v * decay): at decay 0.9 that lands back on v for
+                // any v <= 5, and a ghost worth 2% brightness then sits there for ever.
+                // Taking a fixed step as well as a proportional one guarantees the value
+                // keeps moving in the quantised domain, so the screen actually reaches
+                // unlit instead of nearly.
+                vec3 past = (texture(uHistory, vUv).rgb * uDecay) - (1.0 / 255.0);
+                color = max(color, past);
+            }
+
             fragColor = vec4(color, 1.0);
         }
         """;
@@ -226,6 +261,61 @@ public sealed class CrtPass : IDisposable
         Blur(_quarter, _quarterScratch, horizontal: true);
         Blur(_quarterScratch, _quarter, horizontal: false);
 
+        // Persistence needs somewhere to read last frame from and somewhere to leave this
+        // one, so the composite goes to a retained target and is then presented. Without it
+        // the composite draws straight to the destination exactly as it always did.
+        var decay = DecayFor(crt);
+
+        if (decay <= 0f)
+        {
+            ReleaseHistory();
+            Composite(
+                sourceTexture, sourceWidth, sourceHeight, destinationFramebuffer,
+                viewportX, viewportY, viewportWidth, viewportHeight,
+                crt, phosphor, statusRowHeight, history: 0, decay: 0f);
+            return;
+        }
+
+        EnsureHistory(viewportWidth, viewportHeight);
+
+        var read = _writeToB ? _historyA : _historyB;
+        var write = _writeToB ? _historyB : _historyA;
+        _writeToB = !_writeToB;
+
+        Composite(
+            sourceTexture, sourceWidth, sourceHeight, write.Framebuffer,
+            0, 0, write.Width, write.Height,
+            crt, phosphor, statusRowHeight, read.Texture, decay);
+
+        Present(write.Texture, destinationFramebuffer, viewportX, viewportY, viewportWidth, viewportHeight);
+    }
+
+    /// <summary>
+    /// Per-frame survival of the retained frame.
+    /// </summary>
+    /// <remarks>
+    /// Scaled so that the top of the dial is a long smear rather than an image that never
+    /// fades at all: at 1.0 the setting means 0.9 a frame, which is about 22 frames to a
+    /// tenth — a third of a second of tail. Mapping it straight through would make 1.0 mean
+    /// "never decays", and a screen that never clears is a bug however it is spelled.
+    /// </remarks>
+    private static float DecayFor(CrtSettings crt) => (float)(Math.Clamp(crt.Persistence, 0, 1) * 0.9);
+
+    private void Composite(
+        uint sourceTexture,
+        int sourceWidth,
+        int sourceHeight,
+        uint destinationFramebuffer,
+        int viewportX,
+        int viewportY,
+        int viewportWidth,
+        int viewportHeight,
+        CrtSettings crt,
+        Phosphor phosphor,
+        int statusRowHeight,
+        uint history,
+        float decay)
+    {
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, destinationFramebuffer);
         _gl.Viewport(viewportX, viewportY, (uint)viewportWidth, (uint)viewportHeight);
 
@@ -233,6 +323,8 @@ public sealed class CrtPass : IDisposable
         Bind(_compositeProgram, "uText", 0, sourceTexture);
         Bind(_compositeProgram, "uBloomHalf", 1, _half.Texture);
         Bind(_compositeProgram, "uBloomQuarter", 2, _quarter.Texture);
+        Bind(_compositeProgram, "uHistory", 3, history);
+        _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uDecay"), decay);
 
         _gl.Uniform2(_gl.GetUniformLocation(_compositeProgram, "uSourceSize"), (float)sourceWidth, (float)sourceHeight);
         _gl.Uniform1(_gl.GetUniformLocation(_compositeProgram, "uBloom"), (float)crt.Bloom);
@@ -286,6 +378,79 @@ public sealed class CrtPass : IDisposable
         _gl.ActiveTexture(TextureUnit.Texture0 + unit);
         _gl.BindTexture(TextureTarget.Texture2D, texture);
         _gl.Uniform1(_gl.GetUniformLocation(program, name), unit);
+    }
+
+    /// <summary>
+    /// A straight copy of a texture into a framebuffer and viewport.
+    /// </summary>
+    /// <remarks>
+    /// The blur program with a zero step is exactly a blit — the nine taps all land on the
+    /// same texel — so this needs no shader of its own.
+    /// </remarks>
+    private void Present(
+        uint texture, uint destinationFramebuffer, int x, int y, int width, int height)
+    {
+        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, destinationFramebuffer);
+        _gl.Viewport(x, y, (uint)width, (uint)height);
+
+        _gl.UseProgram(_blurProgram);
+        Bind(_blurProgram, "uSource", 0, texture);
+        _gl.Uniform2(_gl.GetUniformLocation(_blurProgram, "uStep"), 0f, 0f);
+
+        _gl.BindVertexArray(_vao);
+        _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+        _gl.BindVertexArray(0);
+    }
+
+    /// <summary>
+    /// Makes sure the retained pair matches the output size, clearing them if it does not.
+    /// </summary>
+    /// <remarks>
+    /// Cleared rather than rescaled on a resize: a stretched copy of the old size is a
+    /// visible artifact that then takes a second to decay away, and starting the history
+    /// empty costs nothing anyone can see. A freshly created texture has undefined contents,
+    /// so the clear is required on the first frame too, not only on resize.
+    /// </remarks>
+    private void EnsureHistory(int width, int height)
+    {
+        if (width == _outputWidth && height == _outputHeight && _historyA.Framebuffer != 0)
+        {
+            return;
+        }
+
+        ReleaseHistory();
+
+        _outputWidth = width;
+        _outputHeight = height;
+        _historyA = CreateTarget(Math.Max(1, width), Math.Max(1, height));
+        _historyB = CreateTarget(Math.Max(1, width), Math.Max(1, height));
+        _writeToB = false;
+
+        foreach (var target in new[] { _historyA, _historyB })
+        {
+            _gl.BindFramebuffer(FramebufferTarget.Framebuffer, target.Framebuffer);
+            _gl.ClearColor(0f, 0f, 0f, 1f);
+            _gl.Clear(ClearBufferMask.ColorBufferBit);
+        }
+
+        _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+    }
+
+    private void ReleaseHistory()
+    {
+        foreach (var target in new[] { _historyA, _historyB })
+        {
+            if (target.Framebuffer != 0)
+            {
+                _gl.DeleteFramebuffer(target.Framebuffer);
+                _gl.DeleteTexture(target.Texture);
+            }
+        }
+
+        _historyA = default;
+        _historyB = default;
+        _outputWidth = 0;
+        _outputHeight = 0;
     }
 
     private void EnsureTargets(int width, int height)
@@ -358,6 +523,8 @@ public sealed class CrtPass : IDisposable
         _halfScratch = default;
         _quarter = default;
         _quarterScratch = default;
+
+        ReleaseHistory();
     }
 
     private uint Link(string vertexSource, string fragmentSource)

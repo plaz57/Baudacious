@@ -28,7 +28,8 @@ public static class OffscreenRenderer
         string path,
         int magnify = 1,
         string? status = null,
-        IReadOnlyList<string>? overlay = null)
+        IReadOnlyList<string>? overlay = null,
+        int fadeFrames = 0)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
@@ -61,6 +62,21 @@ public static class OffscreenRenderer
         var (framebuffer, texture) = CreateOutputTarget(gl, width, height);
 
         renderer.Present(width, height, settings, framebuffer);
+
+        // Persistence is the one effect that exists only across frames, so a single render
+        // can never show it. Clear the screen and keep presenting through the same pass:
+        // what is left in the frame afterwards is the tail, and how much is left after N
+        // frames is the whole question.
+        if (fadeFrames > 0)
+        {
+            var blank = new Screen(screen.Columns, screen.RowCount) { CursorVisible = false };
+
+            for (var frame = 0; frame < fadeFrames; frame++)
+            {
+                renderer.RenderToTarget(blank, settings, TimeSpan.Zero, status);
+                renderer.Present(width, height, settings, framebuffer);
+            }
+        }
 
         var pixels = ReadBack(gl, framebuffer, width, height);
         gl.DeleteFramebuffer(framebuffer);

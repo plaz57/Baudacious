@@ -26,6 +26,8 @@ internal static class ShotCommand
         var bench = false;
         var overlay = false;
         double? bloom = null, scanline = null, vignette = null, curvature = null, mask = null;
+        double? persistence = null;
+        var fade = 0;
         var status = false;
 
         for (var i = 0; i < args.Length; i++)
@@ -48,6 +50,17 @@ internal static class ShotCommand
                     bench = true;
                     break;
 
+                case "--fade" when i + 1 < args.Length:
+                    // How many blank frames to present after the text, so the persistence
+                    // tail can be seen and measured offscreen.
+                    if (!int.TryParse(args[++i], CultureInfo.InvariantCulture, out fade) || fade < 0)
+                    {
+                        Console.Error.WriteLine($"--fade wants a frame count, not '{args[i]}'");
+                        return 1;
+                    }
+
+                    break;
+
                 case "--status":
                     // Worth having: curvature deliberately spares the status bar, and
                     // without a bar in the frame there is no way to see that offscreen.
@@ -55,7 +68,7 @@ internal static class ShotCommand
                     break;
 
                 case "--bloom" or "--scanline" or "--vignette" or "--curvature" or "--mask"
-                    when i + 1 < args.Length:
+                    or "--persistence" when i + 1 < args.Length:
                     var knob = args[i];
                     if (!double.TryParse(args[++i], CultureInfo.InvariantCulture, out var level) || level < 0)
                     {
@@ -69,6 +82,7 @@ internal static class ShotCommand
                         case "--scanline": scanline = level; break;
                         case "--curvature": curvature = level; break;
                         case "--mask": mask = level; break;
+                        case "--persistence": persistence = level; break;
                         default: vignette = level; break;
                     }
 
@@ -131,6 +145,7 @@ internal static class ShotCommand
                     Vignette = vignette ?? defaults.Vignette,
                     Curvature = curvature ?? defaults.Curvature,
                     Mask = mask ?? defaults.Mask,
+                    Persistence = persistence ?? defaults.Persistence,
                 }
                 : CrtSettings.Off,
         };
@@ -163,7 +178,8 @@ internal static class ShotCommand
             status: status
                 ? " 1200 8N1  [idle]  alt+B rate  alt+F flush  ctrl+] commands"
                 : null,
-            overlay: overlay ? Help.For(ConfigStore.DefaultDirectory()) : null);
+            overlay: overlay ? Help.For(ConfigStore.DefaultDirectory()) : null,
+            fadeFrames: fade);
 
         Console.Error.WriteLine(string.Create(
             CultureInfo.InvariantCulture,

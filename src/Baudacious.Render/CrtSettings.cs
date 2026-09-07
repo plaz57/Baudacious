@@ -79,6 +79,29 @@ public sealed record CrtSettings
     /// </remarks>
     public double Mask { get; init; }
 
+    /// <summary>
+    /// How long light lingers after the pixel that made it has gone. 0 is no persistence.
+    /// </summary>
+    /// <remarks>
+    /// The effect this product was asking for. In an instant terminal decay is only visible
+    /// when the screen scrolls; at 300 baud characters arrive one at a time, so the trail
+    /// follows the cursor as the text is written. Metering onto the screen a character at a
+    /// time is exactly what makes a decaying phosphor worth having.
+    /// <para>
+    /// Scaled to 0.9 survival a frame at the top of the dial — about a third of a second of
+    /// tail — rather than mapped straight through, because 1.0 meaning "never fades" is a
+    /// bug however it is spelled.
+    /// </para>
+    /// <para>
+    /// The default gives a tail of about four frames — 65 ms at 60 Hz. Measured by
+    /// presenting blank frames through the pass and reading the mean luminance back: the
+    /// tail is gone by frame 4 at this setting, by frame 8 at 0.6, and by frame 32 at 1.0.
+    /// At 300 baud a character arrives every other frame, so four frames of tail is three or
+    /// four characters of trail behind the cursor — which is the whole point of it.
+    /// </para>
+    /// </remarks>
+    public double Persistence { get; init; } = 0.45;
+
     /// <summary>A tube in a lit room is never quite black.</summary>
     public double AmbientGlow { get; init; } = 0.02;
 }
