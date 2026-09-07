@@ -117,11 +117,11 @@ indicator (7.9).
 
 ## 7. Phase 6 — Configuration and polish
 
-- [ ] 7.1 Implement the INI reader and writer with comment preservation
-- [ ] 7.2 Define the config schema covering every setting the spec requires, and generate the commented default file on first run
-- [ ] 7.3 Implement per-setting validation with fallback to defaults, reporting the offending value and its location without overwriting the file
+- [x] 7.1 Implement the INI reader and writer with comment preservation
+- [x] 7.2 Define the config schema covering every setting the spec requires, and generate the commented default file on first run
+- [x] 7.3 Implement per-setting validation with fallback to defaults, reporting the offending value and its location without overwriting the file
 - [ ] 7.4 Implement `state.ini`: persist rate, framing, phosphor, font scale, CRT settings, and window geometry on exit; restore on start; never write to `baudacious.ini`
-- [ ] 7.5 Implement precedence: `state.ini` over `baudacious.ini` over built-in defaults
+- [x] 7.5 Implement precedence: `state.ini` over `baudacious.ini` over built-in defaults, with a setting the user edits in the file taking it back from the state for the rest of the run — otherwise hot-reloading a persisted setting could never do anything
 - [ ] 7.6 Implement hot reload with debounce, applying changes within one second and leaving running shells undisturbed
 - [ ] 7.7 Implement broken-edit handling: keep the last good settings in effect and report the error
 - [ ] 7.8 Make the local key bindings configurable

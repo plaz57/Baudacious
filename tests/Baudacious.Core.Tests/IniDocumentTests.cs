@@ -221,6 +221,40 @@ public class IniDocumentTests
     }
 
     [Fact]
+    public void RemovingAKeyTakesItsWholeLine()
+    {
+        var ini = IniDocument.Parse("[a]\nj = 1\nk = 2  ; a note\nl = 3\n");
+
+        Assert.True(ini.Remove("a", "k"));
+        Assert.Null(ini.Get("a", "k"));
+
+        // The comment belonged to the setting, so it went with it.
+        Assert.Equal("[a]\nj = 1\nl = 3\n", ini.ToText());
+    }
+
+    [Fact]
+    public void RemovingWhatIsNotThereChangesNothing()
+    {
+        var ini = IniDocument.Parse("[a]\nk = v\n");
+
+        Assert.False(ini.Remove("a", "nonesuch"));
+        Assert.False(ini.Remove("nonesuch", "k"));
+        Assert.Equal("[a]\nk = v\n", ini.ToText());
+    }
+
+    [Fact]
+    public void RemovingTheLastKeyLeavesTheSectionHeader()
+    {
+        // It may carry the user's own commentary, and an empty section reads as a
+        // place to put things rather than as debris.
+        var ini = IniDocument.Parse("[a]\nk = v\n");
+        ini.Remove("a", "k");
+
+        Assert.Equal("[a]\n", ini.ToText());
+        Assert.Equal(["a"], ini.Sections());
+    }
+
+    [Fact]
     public void TheFilesOwnLineEndingIsKept()
     {
         var ini = IniDocument.Parse("[a]\r\nk = v\r\n");

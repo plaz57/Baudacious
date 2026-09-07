@@ -93,3 +93,17 @@ user's hand-edited configuration so that saving state never rewrites their file.
 
 - **WHEN** no persisted state exists but the configuration file sets values
 - **THEN** the configuration file's values are used
+
+#### Scenario: Editing a setting the state also holds
+
+- **WHEN** the user changes a setting in the configuration file that the persisted
+  state also has a value for
+- **THEN** the edited value takes effect and keeps precedence over the persisted
+  state for the rest of the run
+
+#### Scenario: Deleting a setting from the configuration file
+
+- **WHEN** the user deletes a setting from the configuration file
+- **THEN** the persisted state's value for it stays in effect, or the built-in
+  default where there is none, since removing a line withdraws an instruction
+  rather than issuing one

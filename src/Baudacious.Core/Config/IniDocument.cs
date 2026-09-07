@@ -198,6 +198,30 @@ public sealed class IniDocument
         Renumber();
     }
 
+    /// <summary>
+    /// Deletes every line setting a key. True if there was one.
+    /// </summary>
+    /// <remarks>
+    /// The whole line goes, comment and all, because a comment on a setting belongs to the
+    /// setting. Deleting the last key in a section leaves the section header behind: it may
+    /// carry the user's own commentary, and an empty section reads as a place to put things
+    /// rather than as debris.
+    /// </remarks>
+    public bool Remove(string section, string key)
+    {
+        var removed = _lines.RemoveAll(line =>
+            line.Kind == IniLineKind.Entry
+            && line.Section.Equals(section, StringComparison.OrdinalIgnoreCase)
+            && line.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+
+        if (removed > 0)
+        {
+            Renumber();
+        }
+
+        return removed > 0;
+    }
+
     /// <summary>Appends a comment line to a section, or to the end of the file.</summary>
     public void Comment(string section, string text)
     {
