@@ -4,6 +4,10 @@ using Baudacious.App.Config;
 using Baudacious.Core.Baud;
 using Baudacious.Render;
 
+// Before anything touches Console: the streams bind on first use, and a diagnostic that
+// prints into a console we had not attached to yet prints into nothing.
+ParentConsole.Attach();
+
 // The window is the product; everything else is a diagnostic left over from building it.
 return args.Length > 0 && !args[0].StartsWith('-')
     ? args[0].ToLowerInvariant() switch

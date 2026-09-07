@@ -129,5 +129,5 @@ indicator (7.9).
 - [x] 7.9 Implement the backlog indicator, resolving Open Question 4: a count and a time, no progress bar — a bar needs a denominator, and this one grows while it drains
 - [x] 7.10 Implement window geometry persistence and fullscreen toggling with grid recalculation. The opening size is clamped to the screen: a geometry saved on a larger display otherwise puts the status bar behind the taskbar
 - [x] 7.11 Resolve Open Question 1 and record the font attribution in the about text, on the `about` local command
-- [ ] 7.12 Package as a self-contained single-file Windows executable and verify a clean-machine launch
-- [ ] 7.13 Write the README with the baud-rate story, the key bindings, and the config file reference
+- [x] 7.12 Package as a self-contained Windows executable and verify it launches. **Two files, not one:** `IncludeNativeLibrariesForSelfExtract` produces a single exe that does not run, because Silk.NET looks for `glfw3.dll` next to the assembly and a single-file app has no assembly location — the platform reports itself "not applicable" and `Window.Create` throws. So the managed side is bundled (39 MB compressed) and `glfw3.dll` travels beside it. Verified by running the published pair from an empty directory; a genuinely clean machine was not available, but self-contained means the shared runtime cannot be the thing it finds
+- [x] 7.13 Write the README with the baud-rate story, the key bindings, and the config file reference

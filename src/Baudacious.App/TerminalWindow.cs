@@ -180,13 +180,12 @@ internal sealed class TerminalWindow : IDisposable
         var width = _config.Window.Columns * 8 * scale;
         var height = (_config.Window.Rows + 1) * 16 * scale;
 
-        var screen = Silk.NET.Windowing.Monitor.GetMainMonitor(null).Bounds.Size;
-        if (screen.X > 0 && screen.Y > 0)
+        if (Desktop.WorkArea() is { } work)
         {
-            // Room left for the title bar and the taskbar, neither of which is ours to
-            // measure.
-            width = Math.Min(width, (int)(screen.X * 0.98));
-            height = Math.Min(height, (int)(screen.Y * 0.88));
+            // The work area already excludes the taskbar; the chrome allowance is for the
+            // title bar, which a client size does not include.
+            width = Math.Min(width, work.Width);
+            height = Math.Min(height, Math.Max(16 * scale * 6, work.Height - Desktop.Chrome));
         }
 
         return new Vector2D<int>(width, height);

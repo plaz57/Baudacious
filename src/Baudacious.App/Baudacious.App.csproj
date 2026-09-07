@@ -1,8 +1,45 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <!-- Windowed, so no console flashes up when it is launched from Explorer. The
+         command line still works: ParentConsole attaches to the terminal that started it,
+         when there was one. -->
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>baudacious</AssemblyName>
+    <RootNamespace>Baudacious.App</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- Windows only, and honestly so: ConPTY is the whole hosting story. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Version>1.0.0</Version>
+    <Product>Baudacious</Product>
+    <Description>A terminal with a baud rate.</Description>
+    <Copyright>Copyright (c) 2026 Patrick Plaisted</Copyright>
+  </PropertyGroup>
+
+  <!-- Publishing settings only. Self-contained is the point: someone trying a toy terminal
+       should not have to install a runtime first. These stay out of the ordinary build,
+       which is faster and produces the shape everything is debugged against. -->
+  <PropertyGroup Condition="'$(PublishSingleFile)' == 'true'">
+    <SelfContained>true</SelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+
+    <!-- Two files, not one, and deliberately.
+
+         IncludeNativeLibrariesForSelfExtract does produce a single exe, and that exe does
+         not run: Silk.NET's GLFW loader looks for glfw3.dll next to the assembly, and a
+         single-file app has no assembly location to look next to, so the platform reports
+         itself "not applicable" and Window.Create throws PlatformNotSupportedException.
+         Extraction to a temp directory does not help, because that is not where it looks.
+
+         So the managed side is bundled and glfw3.dll travels beside the exe. Ship both. -->
+    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+
+    <!-- Not trimmed. Silk.NET resolves its bindings reflectively, and a build that starts
+         and then cannot find a GL entry point is a worse trade than thirty megabytes.
+         Revisit with a trim analysis, not by turning it on and hoping. -->
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 
   <ItemGroup>
