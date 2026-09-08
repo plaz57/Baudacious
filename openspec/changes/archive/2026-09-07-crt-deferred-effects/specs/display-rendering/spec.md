@@ -34,6 +34,8 @@ without affecting the others.
 - **THEN** every glyph in the CP437 set remains individually distinguishable,
   including the ones that differ only in fine detail
 
+## ADDED Requirements
+
 ### Requirement: Screen curvature
 
 The system SHALL be able to render the text as though it were on the curved face
