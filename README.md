@@ -27,6 +27,9 @@ install — and `glfw3.dll` has to travel beside it:
 dotnet publish src/Baudacious.App -c Release -p:PublishSingleFile=true -o dist
 ```
 
+`Baudacious.sln` opens the four libraries, both test projects and the ConPTY
+spike in one go, with the settings files and the specs as solution items.
+
 Three shells: `--shell pwsh` (default), `cmd`, or `wsl`. Name a distribution with
 `--shell wsl:Ubuntu`, or leave it off and WSL picks its own default. More can be
 added in the settings file.
