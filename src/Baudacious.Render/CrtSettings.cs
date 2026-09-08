@@ -17,7 +17,11 @@ public sealed record CrtSettings
     public bool Enabled { get; init; } = true;
 
     /// <summary>Phosphor bleed around lit pixels. 0 is none.</summary>
-    public double Bloom { get; init; } = 0.55;
+    /// <remarks>
+    /// Additive rather than a scale, so values above 1 keep having an effect instead of
+    /// saturating; see <c>CrtEffect.BloomCeiling</c> for how far up it is worth going.
+    /// </remarks>
+    public double Bloom { get; init; } = 0.90;
 
     /// <summary>
     /// Depth of the dark gap between raster lines.
@@ -30,7 +34,7 @@ public sealed record CrtSettings
     public double Scanline { get; init; } = 0.50;
 
     /// <summary>Darkening towards the corners.</summary>
-    public double Vignette { get; init; } = 0.35;
+    public double Vignette { get; init; } = 0.70;
 
     /// <summary>
     /// How much the screen bulges toward the viewer. 0 is flat glass.
@@ -39,14 +43,20 @@ public sealed record CrtSettings
     /// Applied to the text area only. The status bar is chrome rather than screen content,
     /// and bending the one line that has to stay legible would be a poor trade.
     /// <para>
-    /// The default was chosen by looking at 0.18, 0.40 and 1.00 over the glyph-check screen
-    /// at 80x25 and 100x30. At 0.18 the bow has to be hunted for, and an effect nobody
-    /// notices is not worth a shader branch. At 0.40 it is obvious at a glance and costs
-    /// nothing in legibility — no glyph is deformed and nothing falls off the glass. At 1.00
-    /// it reads as a fisheye and the corners go dark.
+    /// <b>Off by default, on the evidence of use rather than of looking.</b> This shipped at
+    /// 0.40, picked by eye against 0.18 and 1.00 over the glyph-check screen: at 0.18 the
+    /// bow has to be hunted for, at 0.40 it is obvious at a glance and deforms no glyph, at
+    /// 1.00 it reads as a fisheye and the corners go dark. All still true. But a day of
+    /// actually working in the terminal settled on 0.00, and a preference that survives use
+    /// beats one that survives a screenshot — a bowed row of text is charming for a minute
+    /// and then it is a bowed row of text you are trying to read.
+    /// </para>
+    /// <para>
+    /// 0.40 remains the value to try first for anyone who wants the tube to look like a
+    /// tube, and the arithmetic behind it is unchanged.
     /// </para>
     /// </remarks>
-    public double Curvature { get; init; } = 0.40;
+    public double Curvature { get; init; }
 
     /// <summary>
     /// Aperture-grille stripes: how strongly output pixels are weighted into repeating
@@ -102,14 +112,15 @@ public sealed record CrtSettings
     /// bug however it is spelled.
     /// </para>
     /// <para>
-    /// The default gives a tail of about four frames — 65 ms at 60 Hz. Measured by
-    /// presenting blank frames through the pass and reading the mean luminance back: the
-    /// tail is gone by frame 4 at this setting, by frame 8 at 0.6, and by frame 32 at 1.0.
-    /// At 300 baud a character arrives every other frame, so four frames of tail is three or
-    /// four characters of trail behind the cursor — which is the whole point of it.
+    /// The default is a long tail, and deliberately so: measured by presenting blank frames
+    /// through the pass and reading the mean luminance back, the tail is gone by frame 4 at
+    /// 0.45, by frame 8 at 0.6, and by frame 32 at 1.0 — so 0.90 is a fade of roughly
+    /// twenty frames, a third of a second. It shipped at 0.45 and a day of use moved it up
+    /// here, which is the right direction of travel for the one effect that renders
+    /// something a real tube did and a modern screen cannot.
     /// </para>
     /// </remarks>
-    public double Persistence { get; init; } = 0.45;
+    public double Persistence { get; init; } = 0.90;
 
     /// <summary>A tube in a lit room is never quite black.</summary>
     public double AmbientGlow { get; init; } = 0.02;

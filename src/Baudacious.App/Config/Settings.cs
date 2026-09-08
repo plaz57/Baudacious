@@ -44,7 +44,17 @@ public sealed record Settings
     /// <summary>What Baudacious does with no configuration at all.</summary>
     public static Settings Defaults { get; } = new();
 
-    public LineRate Rate { get; init; } = LineRate.Of(1200);
+    /// <summary>
+    /// The rate a new installation starts at.
+    /// </summary>
+    /// <remarks>
+    /// 4800 is fast enough to work in and slow enough to watch — text arrives at 480
+    /// characters a second, which reads as quick typing rather than as an instant paint.
+    /// It also sits exactly at <c>ShellProfiles.FastEchoThresholdBaud</c>, so a fresh pwsh
+    /// keeps its own line editor: the threshold is "below 4800", and this is not below it.
+    /// Anyone who wants the crawl has <c>--baud 300</c> and Alt+B.
+    /// </remarks>
+    public LineRate Rate { get; init; } = LineRate.Of(4800);
 
     /// <summary>The shell profile a new window starts with.</summary>
     public string Profile { get; init; } = "pwsh";
