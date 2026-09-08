@@ -100,7 +100,7 @@ indicator (7.9).
 - [x] 5.16 Mouse reporting passthrough for modes 1000/1002/1003 in both the legacy and SGR encodings, with shift+drag taking the mouse back for local selection
 - [x] 5.17 Scrollback by wheel and shift+pgup/pgdn/home/end; the view stays put as output arrives, and the status bar shows how far back it is
 - [x] 5.18 Implement multiple sessions with Alt+N and Alt+S
-- [ ] 5.19 Manual acceptance: a full working session at 2400 baud using only the keyboard
+- [x] 5.19 Manual acceptance: a full working session at 2400 baud using only the keyboard. Signed off by Patrick on 2026-09-07 against the win-x64 build, after the six-effect CRT pass landed
 
 ## 6. Phase 5 — The CRT pass
 
