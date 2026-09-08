@@ -337,6 +337,14 @@ wide has no room to make good decisions and comes out mushy — and because a fa
 for this cell draws box-drawing characters that actually join. Provenance, licences and the
 BDF conversion are in [assets/README.md](assets/README.md).
 
+## Security
+
+Baudacious launches the shell you name, reads and writes two INI files under
+`%APPDATA%\Baudacious`, and touches the clipboard when you copy or paste. That is the whole
+list; there is no network access and nothing phones home. A full review of the source,
+including the terminal-specific attack surface and the hardening items still open, is in
+[SECURITY-REVIEW.md](SECURITY-REVIEW.md).
+
 ## Licence
 
 [MIT](LICENSE). Do what you like with it.
