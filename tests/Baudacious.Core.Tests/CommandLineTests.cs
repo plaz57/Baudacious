@@ -191,6 +191,26 @@ public class CommandCompleterTests
     }
 
     [Fact]
+    public void CrtOffersItsEffectsAsWellAsOnAndOff()
+    {
+        // Tab is how the six effect names are discoverable, since the one-line help
+        // cannot list them all.
+        var completion = CommandCompleter.Complete("crt ", 4, Vocabulary);
+
+        Assert.Contains("on", completion.Candidates);
+        Assert.Contains("curvature", completion.Candidates);
+        Assert.Contains("persistence", completion.Candidates);
+        Assert.Contains("mask", completion.Candidates);
+    }
+
+    [Fact]
+    public void AnEffectNameCompletesUniquely()
+    {
+        Assert.Equal("crt persistence ", Complete("crt pers").Line);
+        Assert.Equal("crt curvature ", Complete("crt cu").Line);
+    }
+
+    [Fact]
     public void RatesComeFromTheStandardList()
     {
         Assert.Equal("baud unlimited ", Complete("baud u").Line);

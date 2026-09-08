@@ -69,6 +69,7 @@ any unambiguous abbreviation works, so `b 2400` is `baud 2400`.
 | `font <name>` | `unscii`, `terminus`, `spleen` |
 | `fontsize <1-8>` | magnification of the 8x16 cell |
 | `crt [on\|off]` | the CRT pass; bare toggles |
+| `crt <effect> <0-1>` | one effect: `bloom` `scanline` `vignette` `curvature` `mask` `persistence`. Tab lists them. Naming one turns the pass on |
 | `fastecho [on\|off]` | swap PowerShell's line editor for the console's |
 | `session new <profile>` | another shell |
 | `about` | version, licence, and whose typefaces these are |
@@ -241,15 +242,17 @@ pass entirely.
 
 | Setting | Default | What it does |
 |---|---|---|
-| `bloom` | `0.55` | Phosphor bleed. **Additive and unbounded**, so values above 1 keep going. Its effect is almost entirely on the black around glyphs — the glyph cores are already near maximum. At 2.5 the halo spreads far enough to roughly triple how much of the screen reads as lit. |
+| `bloom` | `0.55` | Phosphor bleed. **Additive**, so values above 1 keep going rather than saturating; capped at 4. Its effect is almost entirely on the black around glyphs — the glyph cores are already near maximum. At 2.5 the halo spreads far enough to roughly triple how much of the screen reads as lit. |
 | `scanline` | `0.50` | Darkens the second half of every source pixel row, so the light removed averages `scanline x 0.5`. At 1.0 the gaps go fully black. Follows the curvature, because raster lines were on the phosphor rather than over it. |
 | `vignette` | `0.35` | Corner falloff. Untouched through the middle 60% of the width; darkening starts in the outer 20% each side and the outer 15% top and bottom. At the extreme corner the darkening is about `vignette x 0.82`. |
 | `curvature` | `0.40` | The glass bulges toward you, so straight rows of text bow outward in the middle. Past the edge of the glass the pixels are unlit phosphor, not a smear of the nearest one. At 1.0 it reads as a fisheye and the corners go dark. **The status bar is never curved** — it is chrome, and the one line that has to stay legible. |
 | `persistence` | `0.45` | How long light lingers after the pixel that made it has gone. The default is a four-frame tail, 65 ms at 60 Hz. |
 | `mask` | `0` | Aperture-grille stripes: output pixels weighted into repeating red, green and blue columns, phase fixed to the output pixel so the pattern cannot swim when the grid resizes. |
 
-`scanline`, `vignette`, `curvature`, `persistence` and `mask` all run 0–1. Bloom does not —
-it adds light, and washes out somewhere past 2.
+`scanline`, `vignette`, `curvature`, `persistence` and `mask` all run 0–1 — they scale
+something that already exists and are meaningless past it. Bloom runs 0–4, because it adds
+light rather than scaling it; it washes the screen out somewhere past 2. Values outside a
+range are refused with the range named, not clamped.
 
 **Persistence acts on light going away**, not on light arriving. What it renders is the
 fading of everything that went dark: a cleared screen, a scrolled one, the blinking cursor,

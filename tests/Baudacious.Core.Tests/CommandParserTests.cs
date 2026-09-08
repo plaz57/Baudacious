@@ -125,6 +125,115 @@ public class CommandParserTests
     }
 
     [Fact]
+    public void CrtNamesAnEffectAndAnIntensity()
+    {
+        var command = Assert.IsType<LocalCommand.SetCrtLevel>(CommandParser.Parse("crt curvature 0.5"));
+
+        Assert.Equal("curvature", command.Effect);
+        Assert.Equal(0.5, command.Value);
+    }
+
+    [Theory]
+    [InlineData("bloom")]
+    [InlineData("scanline")]
+    [InlineData("vignette")]
+    [InlineData("curvature")]
+    [InlineData("mask")]
+    [InlineData("persistence")]
+    public void EveryEffectIsReachable(string effect)
+    {
+        var command = Assert.IsType<LocalCommand.SetCrtLevel>(CommandParser.Parse($"crt {effect} 0.25"));
+
+        Assert.Equal(effect, command.Effect);
+        Assert.Equal(0.25, command.Value);
+    }
+
+    [Fact]
+    public void EffectNamesAreCaseInsensitiveAndComeBackCanonical()
+    {
+        Assert.Equal(
+            "persistence",
+            Assert.IsType<LocalCommand.SetCrtLevel>(CommandParser.Parse("crt PERSISTENCE 1")).Effect);
+    }
+
+    [Fact]
+    public void AnIntensityOutsideItsRangeIsRefusedRatherThanClamped()
+    {
+        var failure = Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("crt curvature 3"));
+
+        Assert.Contains("0-1", failure.Message, StringComparison.Ordinal);
+        Assert.Contains("3", failure.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BloomIsAllowedPastOneBecauseItAddsLight()
+    {
+        // The other five scale something that already exists and saturate at 1. Bloom is
+        // additive, so 2.5 is a real setting — and the three paths that validate these
+        // used to disagree about exactly this.
+        Assert.Equal(
+            2.5,
+            Assert.IsType<LocalCommand.SetCrtLevel>(CommandParser.Parse("crt bloom 2.5")).Value);
+
+        Assert.Contains(
+            "0-4",
+            Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("crt bloom 9")).Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheCeilingIsOneTableRatherThanThree()
+    {
+        Assert.Equal(CrtEffect.BloomCeiling, CrtEffect.CeilingOf("bloom"));
+        Assert.Equal(CrtEffect.BloomCeiling, CrtEffect.CeilingOf("BLOOM"));
+
+        foreach (var effect in CrtEffect.Names.Where(n => n != "bloom"))
+        {
+            Assert.Equal(1.0, CrtEffect.CeilingOf(effect));
+        }
+    }
+
+    [Fact]
+    public void EveryEffectNameIsRecognisedAndAnythingElseIsNot()
+    {
+        foreach (var effect in CrtEffect.Names)
+        {
+            Assert.Equal(effect, CrtEffect.Canonical(effect.ToUpperInvariant()));
+        }
+
+        Assert.Null(CrtEffect.Canonical("sparkle"));
+        Assert.Null(CrtEffect.Canonical(null));
+    }
+
+    [Fact]
+    public void AnEffectWithoutAValueSaysWhatItWants()
+    {
+        Assert.Contains(
+            "crt mask <0-1>",
+            Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("crt mask")).Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnEffectValueThatIsNotANumberIsRefused()
+    {
+        Assert.Contains(
+            "not a number",
+            Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("crt bloom lots")).Message,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void CrtStillTogglesAndSwitches()
+    {
+        // Adding the effect form must not cost the form that was there first.
+        Assert.Null(Assert.IsType<LocalCommand.SetCrt>(CommandParser.Parse("crt")).On);
+        Assert.True(Assert.IsType<LocalCommand.SetCrt>(CommandParser.Parse("crt on")).On);
+        Assert.False(Assert.IsType<LocalCommand.SetCrt>(CommandParser.Parse("crt off")).On);
+        Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("crt sideways"));
+    }
+
+    [Fact]
     public void FastEchoIsASwitchLikeCrt()
     {
         Assert.Null(Assert.IsType<LocalCommand.SetFastEcho>(CommandParser.Parse("fastecho")).On);

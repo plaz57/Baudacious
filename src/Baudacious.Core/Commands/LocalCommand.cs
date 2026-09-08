@@ -36,6 +36,16 @@ public abstract record LocalCommand
     /// <summary>Null means toggle, which is what a bare <c>crt</c> asks for.</summary>
     public sealed record SetCrt(bool? On) : LocalCommand;
 
+    /// <summary>
+    /// One effect's intensity, as <c>crt curvature 0.5</c>.
+    /// </summary>
+    /// <remarks>
+    /// Grouped under <c>crt</c> rather than given six verbs of its own: they are all the
+    /// same kind of thing, they all live in the same section of the configuration file, and
+    /// six more top-level verbs would crowd out the ones that are not about the tube.
+    /// </remarks>
+    public sealed record SetCrtLevel(string Effect, double Value) : LocalCommand;
+
     /// <summary>Null means toggle, as with <see cref="SetCrt"/>.</summary>
     public sealed record SetFastEcho(bool? On) : LocalCommand;
 

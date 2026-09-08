@@ -185,8 +185,39 @@ public static class CommandParser
             : new LocalCommand.Failed($"fontsize is 1 to {MaxFontScale}; {scale} is outside it");
     }
 
+    /// <summary>
+    /// The whole pass, or one effect's intensity.
+    /// </summary>
+    /// <remarks>
+    /// <c>crt</c> toggles, <c>crt on|off</c> sets, and <c>crt bloom 0.3</c> names an
+    /// effect. The effect names are checked here rather than in the window so a typo is
+    /// refused before anything changes, which is the same reason every other value is
+    /// parsed before it is applied.
+    /// </remarks>
     private static LocalCommand ParseCrt(List<string> arguments, string verb)
     {
+        if (arguments.Count > 0 && CrtEffect.Canonical(arguments[0]) is { } effect)
+        {
+            var ceiling = CrtEffect.CeilingOf(effect);
+            var range = string.Create(CultureInfo.InvariantCulture, $"0-{ceiling:0.##}");
+
+            if (arguments.Count != 2)
+            {
+                return new LocalCommand.Failed($"crt {effect} <{range}>");
+            }
+
+            if (!double.TryParse(arguments[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            {
+                return new LocalCommand.Failed($"'{arguments[1]}' is not a number");
+            }
+
+            // Refused rather than clamped, as everywhere else a range is stated. Bloom's
+            // ceiling is higher than the rest because it adds light instead of scaling it.
+            return value >= 0 && value <= ceiling
+                ? new LocalCommand.SetCrtLevel(effect, value)
+                : new LocalCommand.Failed($"{effect} is {range}; {arguments[1]} is outside it");
+        }
+
         var (on, failure) = ParseSwitch(arguments, verb);
         return failure ?? new LocalCommand.SetCrt(on);
     }

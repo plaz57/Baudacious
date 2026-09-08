@@ -1888,6 +1888,20 @@ internal sealed class TerminalWindow : IDisposable
                 Finish(on ? "CRT on" : "CRT off");
                 return;
 
+            case LocalCommand.SetCrtLevel level:
+                _settings = _settings with { Crt = WithEffect(_settings.Crt, level.Effect, level.Value) };
+
+                // Turning an effect up while the pass is off would appear to do nothing,
+                // so asking for one is taken as asking to see it.
+                if (!_settings.Crt.Enabled && level.Value > 0)
+                {
+                    _settings = _settings with { Crt = _settings.Crt with { Enabled = true } };
+                }
+
+                Finish(string.Create(
+                    CultureInfo.InvariantCulture, $"{level.Effect} {level.Value:0.##}"));
+                return;
+
             case LocalCommand.NewSession fresh:
                 var columns = Current.Screen.Columns;
                 var rows = Current.Screen.RowCount;
@@ -1897,6 +1911,25 @@ internal sealed class TerminalWindow : IDisposable
                 return;
         }
     }
+
+    /// <summary>
+    /// One effect set by name.
+    /// </summary>
+    /// <remarks>
+    /// A switch rather than reflection: six cases are cheaper to read than a property
+    /// lookup, and the compiler notices if an effect is ever renamed. The parser has
+    /// already checked that the name is one of these.
+    /// </remarks>
+    private static CrtSettings WithEffect(CrtSettings crt, string effect, double value) =>
+        effect switch
+        {
+            "bloom" => crt with { Bloom = value },
+            "scanline" => crt with { Scanline = value },
+            "vignette" => crt with { Vignette = value },
+            "curvature" => crt with { Curvature = value },
+            "mask" => crt with { Mask = value },
+            _ => crt with { Persistence = value },
+        };
 
     /// <summary>Done: the prompt goes away and the bar reports it.</summary>
     private void Finish(string message)

@@ -2,6 +2,7 @@ using System.Globalization;
 using Baudacious.App;
 using Baudacious.App.Config;
 using Baudacious.Core.Baud;
+using Baudacious.Core.Commands;
 using Baudacious.Render;
 
 // Before anything touches Console: the streams bind on first use, and a diagnostic that
@@ -90,32 +91,32 @@ static int RunWindow(string[] args)
                 break;
 
             case "--bloom" when i + 1 < args.Length:
-                var bloom = Number(args[++i]);
+                var bloom = Number(args[++i], "bloom");
                 options = Crt(options, c => c with { Bloom = bloom });
                 break;
 
             case "--scanline" when i + 1 < args.Length:
-                var scanline = Number(args[++i]);
+                var scanline = Number(args[++i], "scanline");
                 options = Crt(options, c => c with { Scanline = scanline });
                 break;
 
             case "--vignette" when i + 1 < args.Length:
-                var vignette = Number(args[++i]);
+                var vignette = Number(args[++i], "vignette");
                 options = Crt(options, c => c with { Vignette = vignette });
                 break;
 
             case "--curvature" when i + 1 < args.Length:
-                var curvature = Number(args[++i]);
+                var curvature = Number(args[++i], "curvature");
                 options = Crt(options, c => c with { Curvature = curvature });
                 break;
 
             case "--mask" when i + 1 < args.Length:
-                var mask = Number(args[++i]);
+                var mask = Number(args[++i], "mask");
                 options = Crt(options, c => c with { Mask = mask });
                 break;
 
             case "--persistence" when i + 1 < args.Length:
-                var persistence = Number(args[++i]);
+                var persistence = Number(args[++i], "persistence");
                 options = Crt(options, c => c with { Persistence = persistence });
                 break;
 
@@ -135,8 +136,14 @@ static int RunWindow(string[] args)
 static Settings Crt(Settings settings, Func<CrtSettings, CrtSettings> change) =>
     settings with { Display = settings.Display with { Crt = change(settings.Display.Crt) } };
 
-static double Number(string text) =>
-    double.TryParse(text, CultureInfo.InvariantCulture, out var value) ? Math.Clamp(value, 0, 4) : 0;
+// Per effect, from the one table that knows: 0 to 1 for the five that scale something,
+// 0 to 4 for bloom, which adds light instead. This used to clamp everything to 0-4, which
+// let --curvature 3 through; clamping everything to 0-1 instead, as I first "fixed" it,
+// silently broke the documented --bloom 2.5. Neither single number was right.
+static double Number(string text, string effect) =>
+    double.TryParse(text, CultureInfo.InvariantCulture, out var value)
+        ? Math.Clamp(value, 0, CrtEffect.CeilingOf(effect))
+        : 0;
 
 static int Unknown(string command)
 {

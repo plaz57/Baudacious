@@ -27,7 +27,7 @@ public sealed record CommandVocabulary
         "phosphor <name>         screen palette",
         "font <name>             bitmap typeface",
         "fontsize <1-8>          magnification of the 8x16 cell",
-        "crt [on|off]            the CRT pass; bare toggles",
+        "crt [on|off|<eff> 0-1]  the pass, or one effect; tab lists",
         "fastecho [on|off]       cheap line editing; bare toggles",
         "session new <profile>   a second shell",
         "about                   version, licence, typeface",

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Baudacious.Core.Baud;
 using Baudacious.Core.Config;
+using Baudacious.Core.Commands;
 using Baudacious.Render;
 
 namespace Baudacious.App.Config;
@@ -252,7 +253,7 @@ public static class SettingsReader
                 Crt = current.Crt with
                 {
                     Enabled = Flag("crt", "enabled", current.Crt.Enabled),
-                    Bloom = Fraction("crt", "bloom", current.Crt.Bloom),
+                    Bloom = Fraction("crt", "bloom", current.Crt.Bloom, CrtEffect.BloomCeiling),
                     Scanline = Fraction("crt", "scanline", current.Crt.Scanline),
                     Vignette = Fraction("crt", "vignette", current.Crt.Vignette),
                     Curvature = Fraction("crt", "curvature", current.Crt.Curvature),
@@ -367,8 +368,15 @@ public static class SettingsReader
             return parsed;
         }
 
-        /// <summary>An intensity, which is always 0 to 1.</summary>
-        public double Fraction(string section, string key, double current)
+        /// <summary>
+        /// An intensity, 0 to 1 unless the effect says otherwise.
+        /// </summary>
+        /// <remarks>
+        /// Bloom is the one that says otherwise: it adds light rather than scaling it, so
+        /// values above 1 keep having an effect. See <see cref="CrtEffect"/>, which is
+        /// where all three of the paths that used to disagree about this now ask.
+        /// </remarks>
+        public double Fraction(string section, string key, double current, double max = 1.0)
         {
             if (ini.Get(section, key) is not { Length: > 0 } value)
             {
@@ -385,9 +393,13 @@ public static class SettingsReader
                 return current;
             }
 
-            if (parsed is < 0 or > 1)
+            if (parsed < 0 || parsed > max)
             {
-                Complain(section, key, value, "outside 0 to 1");
+                Complain(
+                    section,
+                    key,
+                    value,
+                    string.Create(CultureInfo.InvariantCulture, $"outside 0 to {max:0.##}"));
                 return current;
             }
 
