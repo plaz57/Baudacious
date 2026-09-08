@@ -1142,8 +1142,13 @@ internal sealed class TerminalWindow : IDisposable
             return;
         }
 
-        // Normalise to CR, which is what a terminal sends for Enter.
-        text = text.ReplaceLineEndings("\r");
+        // Line endings become CR, which is what a terminal sends for Enter, and every other
+        // control character goes. A paste is delivered as keystrokes, and the closing
+        // bracketed-paste marker in particular must not be something the clipboard can
+        // supply — see PasteText.
+        var raw = text.Length;
+        text = PasteText.Sanitize(text);
+        var dropped = raw - text.Length;
 
         // Bracketed paste tells the shell this arrived as a paste rather than as typing, so
         // a multi-line paste is not run line by line as it lands.
@@ -1159,8 +1164,11 @@ internal sealed class TerminalWindow : IDisposable
         }
 
         // Never metered: input travels at full speed, and it is the echo coming back that
-        // the governor slows down.
-        Notify($"pasted {text.Length} characters");
+        // the governor slows down. Said when something was removed, because a paste that
+        // silently differs from the clipboard is the kind of thing that costs an hour.
+        Notify(dropped > 0
+            ? $"pasted {text.Length} characters, {dropped} control characters dropped"
+            : $"pasted {text.Length} characters");
     }
 
     private string BuildTitle()
@@ -1738,8 +1746,10 @@ internal sealed class TerminalWindow : IDisposable
         }
 
         // One line only: the prompt is one line, and a pasted block would otherwise arrive
-        // as a single run-together command.
-        var end = text.AsSpan().IndexOfAny('\r', '\n');
+        // as a single run-together command. Sanitised first, so the line ending is CR
+        // wherever it came from and no control character lands in the command.
+        text = PasteText.Sanitize(text);
+        var end = text.IndexOf('\r', StringComparison.Ordinal);
         _commandLine.Insert(end < 0 ? text : text[..end]);
         _promptMessage = null;
         _needsPresent = true;

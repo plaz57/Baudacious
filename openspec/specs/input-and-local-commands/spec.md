@@ -213,7 +213,11 @@ with double-click selecting a word, triple-click selecting a logical line, and
 Shift+drag extending an existing selection. Copy SHALL place the selection on
 the clipboard as plain text with trailing whitespace on each line removed.
 Paste SHALL send the clipboard's text to the shell, using bracketed paste
-markers when the emulator has that mode enabled.
+markers when the emulator has that mode enabled. Before sending, the system
+SHALL normalise line endings to CR and remove every other control character
+(C0 except TAB, DEL, and C1), whether or not bracketed paste is on: the
+clipboard must not be able to supply the closing marker, or any escape
+sequence, that the shell would then act on as typed input.
 
 #### Scenario: Copying wrapped text
 
@@ -226,6 +230,13 @@ markers when the emulator has that mode enabled.
 - **WHEN** bracketed paste mode is enabled and the user pastes multi-line text
 - **THEN** the text is sent framed by the bracketed paste markers, and the shell
   treats it as pasted rather than typed
+
+#### Scenario: Paste cannot close its own bracket
+
+- **WHEN** bracketed paste mode is enabled and the clipboard holds text
+  containing `ESC [ 201 ~` followed by a command
+- **THEN** the escape is removed before sending, the frame stays intact around
+  the whole paste, and the shell receives the command as inert pasted text
 
 #### Scenario: Paste is not metered
 
