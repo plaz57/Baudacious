@@ -5,7 +5,8 @@ namespace Baudacious.App;
 /// Twenty-one lines and about fifty columns, which is what fits inside a default 80x25
 /// window once the overlay's border is allowed for. The overlay clips rather than scrolls,
 /// so a twenty-second line is read by nobody — every addition here has to displace
-/// something.
+/// something. <see cref="HelpFitsTests"/> holds the count to the budget, because the line
+/// that gets clipped is the last one, and the last one is how to close the overlay.
 /// </remarks>
 public static class Help
 {
@@ -35,8 +36,7 @@ public static class Help
         "  shift+drag extend, or select in a mouse-aware program",
         "  wheel scrolls history, or the program if it tracks",
         "  shift+pgup/pgdn page   shift+home/end oldest/live",
-        "  B, G and P open a menu; the chord again steps it on.",
-        "  Any other alt chord goes to the shell as ESC + key.",
+        "  B/G/P open a menu; any other alt chord reaches the shell.",
         "",
         "  settings: " + Paths.Shorten(directory, 42),
         "  alt+Z or escape to close",
