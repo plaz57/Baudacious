@@ -96,18 +96,44 @@ internal static class ShellProfiles
         // cmd already echoes one byte per keystroke; there is nothing to tame.
         (new PtyStartInfo { Executable = Path.Combine(Environment.SystemDirectory, "cmd.exe") }, []);
 
+    /// <summary>
+    /// PowerShell, with its line editor tamed and its own prompt left alone.
+    /// </summary>
+    /// <remarks>
+    /// Fast echo: removing PSReadLine drops pwsh from 96.9 bytes per keystroke to 1.0,
+    /// matching cmd, because PowerShell then falls back to the console's cooked line input.
+    /// The cost is syntax color, prediction and history search — not tab completion, which
+    /// the console host provides itself and which was measured still working with the module
+    /// gone. A mode, then, rather than a fate.
+    /// <para>
+    /// The setup runs through <c>-Command</c> with <c>-NoExit</c> rather than being typed at
+    /// the prompt. Typed setup is echoed by the shell like anything else typed, so the first
+    /// thing a new window showed was two lines of Baudacious's own configuration. Passing it
+    /// as an argument runs it before the first prompt is drawn, which also removes the
+    /// wait-for-first-output race that typing it needed.
+    /// </para>
+    /// <para>
+    /// <b>What is deliberately no longer done:</b> replacing the prompt with <c>PS&gt;</c>.
+    /// That was here from Phase 3 and it bought 0.9 bytes per keystroke — 29.4 down to 28.5,
+    /// about 3% — in exchange for silently throwing away the working directory, which is the
+    /// most useful thing a shell prompt tells you. A 3% saving is not worth a visible change
+    /// to somebody else's shell. Anyone who wants a terse prompt at 300 baud can set one in
+    /// their own profile.
+    /// </para>
+    /// </remarks>
     private static (PtyStartInfo, string[]) BuildPwsh(bool fastEcho)
     {
-        var start = new PtyStartInfo { Executable = ResolvePwsh(), Arguments = "-NoLogo -NoProfile" };
+        var tame = fastEcho
+            ? "Remove-Module PSReadLine -ErrorAction SilentlyContinue"
+            : "Set-PSReadLineOption -PredictionSource None";
 
-        // Fast echo: removing PSReadLine drops pwsh from 96.9 bytes per keystroke to 1.0,
-        // matching cmd, because PowerShell then falls back to the console's cooked line
-        // input. The cost is syntax color, prediction and history search — not tab
-        // completion, which the console host provides itself and which was measured
-        // still working with the module gone. A mode, then, rather than a fate.
-        return fastEcho
-            ? (start, ["Remove-Module PSReadLine -ErrorAction SilentlyContinue", "function prompt { 'PS> ' }"])
-            : (start, ["Set-PSReadLineOption -PredictionSource None", "function prompt { 'PS> ' }"]);
+        return (
+            new PtyStartInfo
+            {
+                Executable = ResolvePwsh(),
+                Arguments = $"-NoLogo -NoProfile -NoExit -Command \"{tame}\"",
+            },
+            []);
     }
 
     /// <summary>
