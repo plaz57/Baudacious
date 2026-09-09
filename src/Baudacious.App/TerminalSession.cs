@@ -72,6 +72,16 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     /// <summary>Whatever the shell last set by OSC, or empty.</summary>
     public string Title { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// The shells that exist, kept because changing the line discipline later needs to know
+    /// whether this profile has an editor worth replacing.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to the built-ins so a detached session — one with a grid and no shell — is
+    /// still safe to ask.
+    /// </remarks>
+    private ShellProfiles _profiles = ShellProfiles.Builtin;
+
     /// <summary>Local, and therefore the window's to set but the session's to keep.</summary>
     public Selection? Selection { get; set; }
 
@@ -79,12 +89,25 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     public int? ExitCode { get; set; }
 
     /// <summary>
+    /// Why there is no shell here, when there is no shell here.
+    /// </summary>
+    /// <remarks>
+    /// Kept on the session rather than announced once, because a window with no shell in it
+    /// needs to keep saying so. A notice that lapses after a few seconds leaves a blank
+    /// screen and no explanation, which is what happened when an unknown profile stopped
+    /// silently launching PowerShell and started correctly launching nothing.
+    /// </remarks>
+    public string? Failure { get; private set; }
+
+    /// <summary>
     /// Starts a shell for a profile. Throws if the profile names something that is not
-    /// installed, which the caller is expected to report rather than swallow.
+    /// installed, or nothing at all, which the caller is expected to report rather than
+    /// swallow.
     /// </summary>
     public static TerminalSession Start(
         int number,
         string profile,
+        ShellProfiles profiles,
         bool fastEcho,
         LineRate rate,
         int columns,
@@ -92,10 +115,13 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         int scrollback,
         Action invalidate)
     {
-        var (start, setup) = ShellProfiles.Build(profile, fastEcho);
+        ArgumentNullException.ThrowIfNull(profiles);
+
+        var (start, setup) = profiles.Build(profile, fastEcho);
         var session = new TerminalSession(number, profile, rate, columns, rows, scrollback, invalidate)
         {
-            FastEcho = fastEcho && ShellProfiles.SupportsFastEcho(profile),
+            _profiles = profiles,
+            FastEcho = fastEcho && profiles.SupportsFastEcho(profile),
         };
 
         session._pty = PtySession.Start(
@@ -116,8 +142,9 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         int columns,
         int rows,
         int scrollback,
-        Action invalidate) =>
-        new(number, profile, rate, columns, rows, scrollback, invalidate);
+        Action invalidate,
+        string? failure = null) =>
+        new(number, profile, rate, columns, rows, scrollback, invalidate) { Failure = failure };
 
     public void Write(ReadOnlySpan<byte> bytes) => _pty?.Write(bytes);
 
@@ -127,7 +154,7 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     /// </summary>
     public bool SetFastEcho(bool on)
     {
-        if (!ShellProfiles.SupportsFastEcho(Profile))
+        if (!_profiles.SupportsFastEcho(Profile))
         {
             return false;
         }

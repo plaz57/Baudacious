@@ -1,13 +1,20 @@
 using System.Diagnostics;
 using System.Text;
+using Baudacious.App.Config;
 using Baudacious.Pty;
 
 namespace Baudacious.App;
 
 /// <summary>
-/// The shell profiles Baudacious ships with, and how each is launched.
+/// The shells Baudacious can host: the three it ships with, and any the user has described
+/// in the configuration file.
 /// </summary>
-internal static class ShellProfiles
+/// <remarks>
+/// An instance because the set is not fixed. The measured constants and the executable
+/// resolvers stay static — they do not depend on what anyone configured — but which names
+/// exist, how each is launched, and which of them have a line editor worth taming all do.
+/// </remarks>
+public sealed class ShellProfiles
 {
     /// <summary>
     /// Below this rate a rich line editor stops being an annoyance and starts being
@@ -16,8 +23,44 @@ internal static class ShellProfiles
     /// </summary>
     public const int FastEchoThresholdBaud = 4800;
 
-    /// <summary>Profile names accepted on the command line.</summary>
-    public static readonly string[] Names = ["pwsh", "cmd", "wsl"];
+    /// <summary>The value of <c>like</c> that borrows PowerShell's handling.</summary>
+    public const string LikePwsh = "pwsh";
+
+    /// <summary>The three that need no configuration.</summary>
+    public static readonly string[] BuiltinNames = ["pwsh", "cmd", "wsl"];
+
+    private readonly IReadOnlyList<ShellProfileConfig> _configured;
+
+    public ShellProfiles(IReadOnlyList<ShellProfileConfig>? configured = null) =>
+        _configured = configured ?? [];
+
+    /// <summary>The three built-ins and nothing else. For paths that read no settings.</summary>
+    public static ShellProfiles Builtin { get; } = new();
+
+    /// <summary>
+    /// Every name that can be launched, built-ins first.
+    /// </summary>
+    /// <remarks>
+    /// A configured profile may take a built-in's name, which is how someone points
+    /// <c>pwsh</c> at a different PowerShell; it is listed once either way.
+    /// </remarks>
+    public IReadOnlyList<string> Names
+    {
+        get
+        {
+            var names = new List<string>(BuiltinNames);
+
+            foreach (var profile in _configured)
+            {
+                if (!names.Contains(profile.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    names.Add(profile.Name);
+                }
+            }
+
+            return names;
+        }
+    }
 
     /// <summary>Echo traffic a tamed pwsh generates per keystroke. Measured, not guessed.</summary>
     public const double RichEchoBytesPerKeystroke = 28.5;
@@ -38,18 +81,41 @@ internal static class ShellProfiles
     /// costs 28.5 bytes per keystroke, which is comfortable from 9600 baud and progressively
     /// worse below it.
     /// </remarks>
-    public static int UsableFloorBaud(string profile, bool fastEcho) =>
+    public int UsableFloorBaud(string profile, bool fastEcho) =>
         !fastEcho && SupportsFastEcho(profile) ? 9600 : 0;
 
     /// <summary>
     /// Whether swapping the line editor for the console's cooked input means anything here.
     /// </summary>
     /// <remarks>
-    /// Only pwsh has an editor expensive enough to be worth removing. cmd and bash already
-    /// echo one byte per keystroke, so there is nothing to trade away and nothing to gain.
+    /// Only PowerShell has an editor expensive enough to be worth removing. cmd and bash
+    /// already echo one byte per keystroke, so there is nothing to trade away and nothing to
+    /// gain. A configured profile opts in with <c>like = pwsh</c>, which is what that setting
+    /// is for: pointing at a different PowerShell and getting the same treatment.
     /// </remarks>
-    public static bool SupportsFastEcho(string profile) =>
-        profile.StartsWith("pwsh", StringComparison.OrdinalIgnoreCase);
+    public bool SupportsFastEcho(string profile)
+    {
+        if (Find(profile) is { } configured)
+        {
+            return LikePwsh.Equals(configured.Like, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return Split(profile).Name.StartsWith("pwsh", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The configured profile of that exact name, or null.</summary>
+    private ShellProfileConfig? Find(string profile)
+    {
+        foreach (var candidate in _configured)
+        {
+            if (candidate.Name.Equals(profile, StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// What to send a running shell to change its line discipline, without restarting it
@@ -70,18 +136,59 @@ internal static class ShellProfiles
     /// Builds a launch for a profile name. <c>wsl</c> may name a distribution after a
     /// colon, as in <c>wsl:Ubuntu</c>; without one, WSL picks its default.
     /// </summary>
-    public static (PtyStartInfo Start, string[] Setup) Build(string profile, bool fastEcho)
+    /// <remarks>
+    /// A configured profile is matched on its exact name and wins over a built-in of the
+    /// same name. An unrecognised name <b>throws</b>, listing what does exist. It used to
+    /// fall through to pwsh, which meant a typo — or a <c>[profile.gitbash]</c> section back
+    /// when nothing consumed those — silently started the wrong shell. A shell that is not
+    /// the one asked for is worse than a message saying so.
+    /// </remarks>
+    public (PtyStartInfo Start, string[] Setup) Build(string profile, bool fastEcho)
     {
         ArgumentNullException.ThrowIfNull(profile);
+
+        if (Find(profile) is { } configured)
+        {
+            return BuildConfigured(configured, fastEcho);
+        }
 
         var (name, argument) = Split(profile);
 
         return name switch
         {
+            "pwsh" => BuildPwsh(fastEcho),
             "cmd" => BuildCmd(),
             "wsl" => BuildWsl(argument),
-            _ => BuildPwsh(fastEcho),
+            _ => throw new InvalidOperationException(
+                $"no shell profile named '{profile}'. Known: {string.Join(", ", Names)}. "
+                + "Add one with a [profile.<name>] section in baudacious.ini."),
         };
+    }
+
+    /// <summary>
+    /// A shell described in the configuration file.
+    /// </summary>
+    /// <remarks>
+    /// The command is passed through as written, so a bare name is found on PATH the way
+    /// any other program is, and a full path with spaces works without quoting rules of its
+    /// own. <c>like = pwsh</c> appends the taming after the user's own arguments rather
+    /// than replacing them, since they may have switches of their own that matter.
+    /// </remarks>
+    private static (PtyStartInfo, string[]) BuildConfigured(
+        ShellProfileConfig profile, bool fastEcho)
+    {
+        var arguments = profile.Arguments;
+
+        if (LikePwsh.Equals(profile.Like, StringComparison.OrdinalIgnoreCase))
+        {
+            var tame = fastEcho
+                ? "Remove-Module PSReadLine -ErrorAction SilentlyContinue"
+                : "Set-PSReadLineOption -PredictionSource None";
+
+            arguments = $"{arguments} -NoExit -Command \"{tame}\"".TrimStart();
+        }
+
+        return (new PtyStartInfo { Executable = profile.Command, Arguments = arguments }, []);
     }
 
     private static (string Name, string? Argument) Split(string profile)

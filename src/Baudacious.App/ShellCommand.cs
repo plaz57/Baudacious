@@ -414,7 +414,7 @@ internal sealed class ShellCommand : IPtyOutputSink, ITerminalHost
     // ---- Profiles -------------------------------------------------------------
 
     private static (PtyStartInfo Start, string[] Setup) BuildProfile(string profile, bool fastEcho) =>
-        ShellProfiles.Build(profile, fastEcho);
+        ShellProfiles.Builtin.Build(profile, fastEcho);
 
     private static void Usage() =>
         Console.Error.WriteLine("""

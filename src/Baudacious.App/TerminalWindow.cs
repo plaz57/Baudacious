@@ -96,6 +96,13 @@ internal sealed class TerminalWindow : IDisposable
     /// <summary>Kept for the life of the window so its history outlives one visit.</summary>
     private readonly CommandLine _commandLine = new();
     private CommandVocabulary _vocabulary = CommandVocabulary.Empty;
+
+    /// <summary>
+    /// The shells that exist: the three built in, plus every [profile.name] in the
+    /// settings. Built once, because the configuration file is read before the window
+    /// opens and a profile appearing mid-session would have nothing to launch it from.
+    /// </summary>
+    private ShellProfiles _profiles = ShellProfiles.Builtin;
     private bool _promptOpen;
     private IReadOnlyList<string>? _promptMessage;
     private bool _repeatToPrompt;
@@ -198,10 +205,12 @@ internal sealed class TerminalWindow : IDisposable
 
         // The prompt cannot invent these: palettes belong to the renderer and profiles to
         // the application, so it is told about both rather than keeping a second copy.
+        _profiles = new ShellProfiles(_config.Profiles);
+
         _vocabulary = new CommandVocabulary
         {
             Phosphors = [.. Enum.GetNames<Phosphor>().Select(n => n.ToLowerInvariant())],
-            Profiles = ShellProfiles.Names,
+            Profiles = _profiles.Names,
             Fonts = [.. FontCatalog.Names],
         };
 
@@ -404,8 +413,8 @@ internal sealed class TerminalWindow : IDisposable
         try
         {
             session = TerminalSession.Start(
-                _nextNumber, profile, FastEchoFor(profile, rate), rate, columns, rows,
-                _config.Scrollback, Invalidate);
+                _nextNumber, profile, _profiles, FastEchoFor(profile, rate), rate, columns,
+                rows, _config.Scrollback, Invalidate);
         }
         catch (Exception ex) when (ex is FileNotFoundException or InvalidOperationException)
         {
@@ -417,8 +426,13 @@ internal sealed class TerminalWindow : IDisposable
             }
 
             session = TerminalSession.Detached(
-                _nextNumber, profile, rate, columns, rows, _config.Scrollback, Invalidate);
-            Notify(ex.Message);
+                _nextNumber, profile, rate, columns, rows, _config.Scrollback, Invalidate,
+                ex.Message);
+
+            // The bar keeps saying it for as long as the window has no shell; the panel
+            // carries the whole message, which for an unknown profile lists the real ones
+            // and is longer than a bar.
+            ShowPanel(WrapPanel(ex.Message), 30);
         }
 
         _nextNumber++;
@@ -511,7 +525,7 @@ internal sealed class TerminalWindow : IDisposable
     /// </remarks>
     private bool FastEchoFor(string profile, LineRate rate) =>
         _config.FastEcho
-        ?? (ShellProfiles.SupportsFastEcho(profile)
+        ?? (_profiles.SupportsFastEcho(profile)
             && !rate.IsUnlimited
             && rate.Baud < ShellProfiles.FastEchoThresholdBaud);
 
@@ -527,7 +541,7 @@ internal sealed class TerminalWindow : IDisposable
     private void WarnIfBelowFloor()
     {
         var rate = Current.Governor.Rate;
-        var floor = ShellProfiles.UsableFloorBaud(Current.Profile, Current.FastEcho);
+        var floor = _profiles.UsableFloorBaud(Current.Profile, Current.FastEcho);
 
         if (_floorWarned || floor == 0 || rate.IsUnlimited || rate.Baud >= floor)
         {
@@ -863,6 +877,13 @@ internal sealed class TerminalWindow : IDisposable
 
         // specs/terminal-emulation: while scrolled back, say so, and say that the live view
         // has moved on — otherwise a static screen looks like a hung shell.
+        if (Current.Failure is { Length: > 0 })
+        {
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $" {Current.Governor.Rate}  no shell - alt+Z says where the settings live");
+        }
+
         if (Current.IsFinished)
         {
             return string.Create(
@@ -1760,6 +1781,38 @@ internal sealed class TerminalWindow : IDisposable
         var completion = _commandLine.Complete(_vocabulary);
         _promptMessage = completion.Candidates.Count == 0 ? null : Columns(completion.Candidates);
         _needsPresent = true;
+    }
+
+    /// <summary>Breaks a sentence into panel-width lines on word boundaries.</summary>
+    private static string[] WrapPanel(string text)
+    {
+        const int Width = 52;
+
+        var lines = new List<string>();
+        var line = new StringBuilder();
+
+        foreach (var word in text.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (line.Length > 0 && line.Length + 1 + word.Length > Width)
+            {
+                lines.Add(line.ToString());
+                line.Clear();
+            }
+
+            if (line.Length > 0)
+            {
+                line.Append(' ');
+            }
+
+            line.Append(word);
+        }
+
+        if (line.Length > 0)
+        {
+            lines.Add(line.ToString());
+        }
+
+        return [.. lines];
     }
 
     /// <summary>Lays candidates out across the panel rather than one to a line.</summary>
