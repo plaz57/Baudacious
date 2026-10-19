@@ -53,6 +53,13 @@ public static class SettingsTemplate
         Line($"; auto lets the rate decide, turning it on below {ShellProfiles.FastEchoThresholdBaud} baud.");
         Line("fast-echo = auto");
         Line();
+        Line("; Whether PowerShell runs your own profile script, and so whether your");
+        Line("; aliases, functions and prompt exist in here. On, because a terminal that");
+        Line("; skips it is not your shell. Turn it off if your profile prints a banner");
+        Line("; or builds a themed prompt: at 300 baud that is seconds of crawl before");
+        Line("; every new session.");
+        Line($"powershell-profile = {Bool(d.PowerShellProfile)}");
+        Line();
 
         Line("[display]");
         Line($"; {string.Join(", ", SettingsReader.PhosphorNames)}. 'color' means no transform at all.");

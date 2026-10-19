@@ -165,4 +165,38 @@ public class ShellProfileTests
         Assert.Contains("baudacious.ini", ex.Message, StringComparison.Ordinal);
         Assert.Contains("[profile.", ex.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void PowerShellLoadsTheUsersProfileByDefault()
+    {
+        // Without this an alias defined in $PROFILE does not exist in the window, which
+        // is how a terminal stops being your shell.
+        var arguments = ShellProfiles.Builtin.Build("pwsh", fastEcho: false).Start.Arguments;
+
+        Assert.DoesNotContain("-NoProfile", arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheProfileCanBeSkippedForTheSakeOfTheWire()
+    {
+        // A profile that prints a banner is seconds of crawl at 300 baud, which is a
+        // reason to skip it here that an ordinary terminal would never have.
+        var profiles = new ShellProfiles(configured: null, powerShellProfile: false);
+        var arguments = profiles.Build("pwsh", fastEcho: false).Start.Arguments;
+
+        Assert.Contains("-NoProfile", arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TheTamingRunsAfterTheProfileRatherThanInsteadOfIt()
+    {
+        // Order is what makes it taming: the user sets their shell up, then Baudacious
+        // quiets the one part that costs wire time. -Command runs last.
+        var arguments = ShellProfiles.Builtin.Build("pwsh", fastEcho: true).Start.Arguments;
+
+        Assert.EndsWith(
+            "-Command \"Remove-Module PSReadLine -ErrorAction SilentlyContinue\"",
+            arguments,
+            StringComparison.Ordinal);
+    }
 }

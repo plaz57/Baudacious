@@ -44,7 +44,7 @@ public static class SettingsReader
     private static readonly (string Section, string[] Keys)[] Schema =
     [
         ("line", ["baud", "framing"]),
-        ("shell", ["default", "fast-echo"]),
+        ("shell", ["default", "fast-echo", "powershell-profile"]),
         ("display", ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"]),
         ("crt",
             [
@@ -78,6 +78,7 @@ public static class SettingsReader
             Rate = reader.Rate("line", "baud", "framing", settings.Rate),
             Profile = reader.Text("shell", "default", settings.Profile),
             FastEcho = reader.FastEcho("shell", "fast-echo", settings.FastEcho),
+            PowerShellProfile = reader.Flag("shell", "powershell-profile", settings.PowerShellProfile),
             Font = reader.Face("display", "font", settings.Font),
             Scrollback = reader.Integer("display", "scrollback", 100, 1_000_000, settings.Scrollback),
             Display = reader.Display(settings.Display),

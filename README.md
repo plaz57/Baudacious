@@ -103,6 +103,7 @@ Baudacious comes back the way it was closed. Baudacious writes only that file;
 | | `framing` | Bits per character: `8N1`, `7E1` (ten bits), `8N2`, `8E1` (eleven) |
 | `[shell]` | `default` | `pwsh`, `cmd`, `wsl`, `wsl:<distribution>`, or a profile below |
 | | `fast-echo` | `auto`, `on`, `off` — see below |
+| | `powershell-profile` | Whether pwsh runs your own `$PROFILE`, and so whether your aliases and functions exist. On. Off saves the wire time a banner or themed prompt costs at low rates |
 | `[display]` | `phosphor` | `green`, `amber`, `white`, `color` |
 | | `font` | `unscii`, `terminus`, `spleen` |
 | | `font-scale` | 1 to 8, whole numbers only |

@@ -205,7 +205,7 @@ internal sealed class TerminalWindow : IDisposable
 
         // The prompt cannot invent these: palettes belong to the renderer and profiles to
         // the application, so it is told about both rather than keeping a second copy.
-        _profiles = new ShellProfiles(_config.Profiles);
+        _profiles = new ShellProfiles(_config.Profiles, _config.PowerShellProfile);
 
         _vocabulary = new CommandVocabulary
         {

@@ -62,6 +62,22 @@ public sealed record Settings
     /// <summary>Null lets the rate decide; see the line-discipline notes on the window.</summary>
     public bool? FastEcho { get; init; }
 
+    /// <summary>
+    /// Whether PowerShell loads the user's own profile script on startup.
+    /// </summary>
+    /// <remarks>
+    /// On, because a terminal that does not run your profile is not your shell: no aliases,
+    /// no functions, no prompt, none of the things you put there. It was off from Phase 3,
+    /// which is why an alias defined in <c>$PROFILE</c> did not exist in a Baudacious
+    /// window.
+    /// <para>
+    /// Worth being able to turn off here, though, in a way it would not be in an ordinary
+    /// terminal: a profile that prints a banner or sets up a themed prompt can be hundreds
+    /// of bytes, and at 300 baud those are seconds of crawl before every new session.
+    /// </para>
+    /// </remarks>
+    public bool PowerShellProfile { get; init; } = true;
+
     /// <summary>Palette, magnification, cursor and the CRT pass.</summary>
     public DisplaySettings Display { get; init; } = new();
 

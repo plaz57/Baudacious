@@ -432,7 +432,7 @@ public class SettingsTemplateTests
         Assert.Equal(["line", "shell", "display", "crt", "window", "keys"], ini.Sections());
 
         Assert.Equal(["baud", "framing"], ini.Keys("line"));
-        Assert.Equal(["default", "fast-echo"], ini.Keys("shell"));
+        Assert.Equal(["default", "fast-echo", "powershell-profile"], ini.Keys("shell"));
         Assert.Equal(
             ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"],
             ini.Keys("display"));

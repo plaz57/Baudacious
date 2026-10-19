@@ -30,9 +30,18 @@ public sealed class ShellProfiles
     public static readonly string[] BuiltinNames = ["pwsh", "cmd", "wsl"];
 
     private readonly IReadOnlyList<ShellProfileConfig> _configured;
+    private readonly bool _powerShellProfile;
 
-    public ShellProfiles(IReadOnlyList<ShellProfileConfig>? configured = null) =>
+    /// <param name="powerShellProfile">
+    /// Whether PowerShell loads the user's own profile script. On by default, because the
+    /// alternative is a shell that is not theirs.
+    /// </param>
+    public ShellProfiles(
+        IReadOnlyList<ShellProfileConfig>? configured = null, bool powerShellProfile = true)
+    {
         _configured = configured ?? [];
+        _powerShellProfile = powerShellProfile;
+    }
 
     /// <summary>The three built-ins and nothing else. For paths that read no settings.</summary>
     public static ShellProfiles Builtin { get; } = new();
@@ -228,17 +237,22 @@ public sealed class ShellProfiles
     /// their own profile.
     /// </para>
     /// </remarks>
-    private static (PtyStartInfo, string[]) BuildPwsh(bool fastEcho)
+    private (PtyStartInfo, string[]) BuildPwsh(bool fastEcho)
     {
         var tame = fastEcho
             ? "Remove-Module PSReadLine -ErrorAction SilentlyContinue"
             : "Set-PSReadLineOption -PredictionSource None";
 
+        // The taming runs after the profile, which is the order that makes it taming: the
+        // user sets up their shell, then Baudacious quiets the one part of it that costs
+        // wire time.
+        var profile = _powerShellProfile ? string.Empty : " -NoProfile";
+
         return (
             new PtyStartInfo
             {
                 Executable = ResolvePwsh(),
-                Arguments = $"-NoLogo -NoProfile -NoExit -Command \"{tame}\"",
+                Arguments = $"-NoLogo{profile} -NoExit -Command \"{tame}\"",
             },
             []);
     }

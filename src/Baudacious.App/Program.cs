@@ -86,6 +86,10 @@ static int RunWindow(string[] args)
                 options = options with { FastEcho = true };
                 break;
 
+            case "--no-profile":
+                options = options with { PowerShellProfile = false };
+                break;
+
             case "--no-crt":
                 options = options with { Display = options.Display with { Crt = CrtSettings.Off } };
                 break;
@@ -166,7 +170,9 @@ static int Help()
             -p, --phosphor <name>           green, amber, white, color
                 --scale <n>                 whole-number magnification of the 8x16 cell
                 --rich-editor               keep PSReadLine; ~29 bytes per keypress
-                --fast-echo                 drop PSReadLine whatever the rate; 1 byte
+                --fast-echo                 drop PSReadLine whatever the rate
+                --no-profile                skip PowerShell's own profile script;
+                                            it costs wire time at low rates; 1 byte
                                             per keypress, no coloring or prediction
                 --no-crt                    skip the CRT pass entirely
                 --bloom <n>                 phosphor bleed, 0 to switch off
