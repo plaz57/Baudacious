@@ -11,3 +11,6 @@ spike/captures/
 
 # Local render dumps from the shot/atlas diagnostics.
 scratch/
+
+# Publish output (CI and `dotnet publish -o dist`)
+dist/

@@ -11,10 +11,37 @@ the unit, not the line.
 Baudacious meters its output onto the screen at a real, user-selected line rate,
 accurately enough that a stopwatch agrees with it.
 
-## Try it
+## Install
 
-Needs Windows 10 1809 or later and a GPU with OpenGL 3.3. From source, needs
-.NET 10 as well:
+Needs Windows 10 1809 or later and a GPU with OpenGL 3.3.
+
+Download the zip from [Releases](https://github.com/plaz57/Baudacious/releases), unzip it
+anywhere, and run `baudacious.exe`. There is no runtime to install, nothing is written
+outside `%APPDATA%\Baudacious`, and it never needs administrator rights. **Keep
+`glfw3.dll` beside the exe** — the exe will not start without it.
+
+### About the SmartScreen warning
+
+Windows will warn you the first time you run it, because Baudacious is not code-signed.
+That is deliberate rather than an oversight: a certificate costs money a free project does
+not have, and a self-signed one would be worse than none — it chains to no root anyone
+trusts, so Windows reports a *broken* signature instead of a missing one.
+
+What you get instead is provenance. Every release is built by GitHub Actions from this
+repository and carries a signed attestation tying the archive to the exact commit and
+workflow run that produced it:
+
+```
+gh attestation verify baudacious-v1.0.0-win-x64.zip --repo plaz57/Baudacious
+```
+
+Each release also lists the SHA256 of its archive. That is a weaker check — whoever can
+alter the download can usually alter the hash beside it — but it costs nothing and catches
+a corrupted or mirrored copy.
+
+## Build it
+
+From source, needs the .NET 10 SDK as well:
 
 ```
 dotnet run -c Release --project src/Baudacious.App -- --baud 1200 --shell cmd

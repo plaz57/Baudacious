@@ -1,0 +1,124 @@
+name: release
+
+# Tag a commit and this builds, attests and publishes it.
+#
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# Baudacious is not code-signed and will not be: a self-signed certificate chains to no
+# root anyone trusts, so Windows treats the binary as unsigned *and* as carrying a broken
+# signature, which is worse than nothing. What this does instead is publish build
+# provenance — a signed statement, from GitHub's own signing infrastructure, tying the
+# artifact to this repository, this commit and this workflow run. Anyone can check it:
+#
+#   gh attestation verify baudacious-<tag>-win-x64.zip --repo <owner>/<repo>
+#
+# That is a verifiable claim about where the binary came from. A self-signed certificate
+# makes no claim at all.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build, for a dry run'
+        required: true
+
+permissions:
+  contents: write       # create the release
+  id-token: write       # request the signing certificate
+  attestations: write   # record the provenance
+
+jobs:
+  release:
+    name: build, attest and publish
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Name the release
+        id: name
+        shell: pwsh
+        run: |
+          $tag = if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            '${{ inputs.tag }}'
+          } else {
+            '${{ github.ref_name }}'
+          }
+
+          "tag=$tag"                            >> $env:GITHUB_OUTPUT
+          "zip=baudacious-$tag-win-x64.zip"     >> $env:GITHUB_OUTPUT
+
+      - name: Test
+        run: dotnet test Baudacious.sln -c Release
+
+      - name: Publish
+        run: dotnet publish src/Baudacious.App -c Release -p:PublishSingleFile=true -o dist
+
+      # Ship both files or ship nothing. A single-file build has no assembly location for
+      # Silk.NET's loader to look beside, so glfw3.dll travels separately and an archive
+      # missing it is an archive that throws on startup.
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          foreach ($name in 'baudacious.exe', 'glfw3.dll') {
+            if (-not (Test-Path (Join-Path dist $name))) {
+              throw "$name is missing from the publish output"
+            }
+          }
+
+          Copy-Item LICENSE, THIRD-PARTY-NOTICES.md, README.md dist/
+          Compress-Archive -Path dist/* -DestinationPath '${{ steps.name.outputs.zip }}' -Force
+
+          $hash = (Get-FileHash '${{ steps.name.outputs.zip }}' -Algorithm SHA256).Hash.ToLower()
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
+          "SHA256: $hash"
+
+      - name: Attest provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.name.outputs.zip }}
+
+      - name: Release
+        if: github.event_name == 'push'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @"
+          ## Install
+
+          Unzip anywhere and run ``baudacious.exe``. No runtime to install, nothing written
+          outside ``%APPDATA%\Baudacious``, and no administrator rights needed. **Keep
+          ``glfw3.dll`` beside the exe** — the exe will not start without it.
+
+          ## Verifying this download
+
+          Baudacious is not code-signed, so Windows will warn you the first time you run it.
+          That is expected, and a self-signed certificate would not change it. What you can
+          check is where the binary came from:
+
+          ``````
+          gh attestation verify ${{ steps.name.outputs.zip }} --repo ${{ github.repository }}
+          ``````
+
+          That confirms GitHub built this archive from this repository at
+          ``${{ github.sha }}``. Or compare the hash by hand:
+
+          ``````
+          SHA256  ${{ steps.package.outputs.sha256 }}
+          ``````
+          "@
+
+          $notes | Out-File notes.md -Encoding utf8
+
+          gh release create '${{ steps.name.outputs.tag }}' `
+            '${{ steps.name.outputs.zip }}' `
+            --title 'Baudacious ${{ steps.name.outputs.tag }}' `
+            --notes-file notes.md `
+            --generate-notes

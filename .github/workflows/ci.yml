@@ -1,0 +1,54 @@
+name: build
+
+# Windows only, and honestly so: ConPTY is the whole hosting story, so there is no other
+# platform to build for. The tests are safe on a headless runner — nothing here opens a
+# GL context or establishes a pseudoconsole; the PTY tests check record defaults, argument
+# guards and the error from a missing executable.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build and test
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore Baudacious.sln
+
+      - name: Build
+        run: dotnet build Baudacious.sln -c Release --no-restore
+
+      # Warnings are errors tree-wide (Directory.Build.props), so a build that gets this
+      # far is already clean.
+      - name: Test
+        run: dotnet test Baudacious.sln -c Release --no-build
+
+      # The published shape differs from the build output — self-contained, single-file,
+      # with glfw3.dll beside it — and has broken on its own before. Proving it still
+      # produces both files costs a minute and is the thing users actually download.
+      - name: Publish
+        run: dotnet publish src/Baudacious.App -c Release -p:PublishSingleFile=true -o dist
+
+      - name: Check the published pair
+        shell: pwsh
+        run: |
+          foreach ($name in 'baudacious.exe', 'glfw3.dll') {
+            $path = Join-Path dist $name
+            if (-not (Test-Path $path)) {
+              throw "$name is missing from the publish output"
+            }
+            '{0,-16} {1,10:N0} bytes' -f $name, (Get-Item $path).Length
+          }

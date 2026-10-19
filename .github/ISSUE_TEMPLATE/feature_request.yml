@@ -1,0 +1,41 @@
+name: Feature request
+description: Something it should do and does not
+labels: [enhancement]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Baudacious has a deliberately narrow idea of itself: a terminal whose defining
+        feature is that output arrives at a chosen baud rate. Things that serve that — or
+        that make the tube more convincing — fit easily. Things that would make it a
+        general-purpose terminal competing with Windows Terminal mostly do not.
+
+        That is not a brush-off; it is so you know what you are arguing against.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What you want
+      description: Describe the behaviour, not the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: What you are trying to do
+      description: >
+        The underlying task. Often there is a better answer than the feature as described,
+        and it only turns up if the goal is on the table.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: >
+        Baudacious has a settings file, a local command prompt on Ctrl+], configurable key
+        bindings and custom shell profiles. If one of those nearly does it, saying where it
+        falls short is the most useful thing in this form.

@@ -1,0 +1,58 @@
+name: Bug report
+description: Something behaves differently from how it reads
+labels: [bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Most of what Baudacious does is visible on a screen, so a screenshot is often
+        worth more than a description. Attach one if the problem is something you can see.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: And what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce it
+      description: >
+        The shell, the line rate, and what you typed. If it only happens at a particular
+        baud rate or font scale, that is usually the most important detail.
+      placeholder: |
+        1. baudacious --shell pwsh --baud 300
+        2. Type `dir` and press Enter
+        3. ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release you downloaded, or the commit you built.
+    validations:
+      required: true
+
+  - type: textarea
+    id: settings
+    attributes:
+      label: Your settings
+      description: >
+        `baudacious.ini` and `state.ini` from `%APPDATA%\Baudacious`, if the problem might
+        be configuration. Alt+Z shows the path. Skip this for an obvious bug.
+      render: ini
+
+  - type: textarea
+    id: system
+    attributes:
+      label: Windows and GPU
+      description: >
+        Windows version and graphics card. Worth filling in for anything about rendering,
+        the CRT effects, or a window that will not open — those failures have landed inside
+        the graphics driver before.

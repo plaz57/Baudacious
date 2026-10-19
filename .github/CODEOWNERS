@@ -1,0 +1,4 @@
+# Everything needs the maintainer's review. GitHub requests it automatically on every
+# pull request; the branch ruleset on main is what makes the approval required rather
+# than advisory.
+*       @plaz57
