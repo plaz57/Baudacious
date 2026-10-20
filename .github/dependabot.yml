@@ -1,0 +1,40 @@
+# Keeping the two things that go stale without anyone noticing: the actions the
+# workflows pin, and the NuGet packages the app ships inside a self-contained build.
+#
+# The actions half is here because of a concrete failure. The workflows were written
+# pinning actions/checkout@v4, actions/setup-dotnet@v4 and attest-build-provenance@v2,
+# which were three, two and two majors behind by the time they first ran — the release
+# warned that all of them still target Node 20. Nothing about a pinned version announces
+# that it has aged.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    # One pull request for the lot rather than three. These move together and reviewing
+    # them separately is three times the work for the same decision.
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: deps
+    groups:
+      silk:
+        patterns: ['Silk.NET*']
+      testing:
+        patterns: ['xunit*', 'Microsoft.NET.Test.Sdk', 'coverlet*']
+    # Silk.NET is the renderer and the window; a major version there is a porting job
+    # rather than a dependency bump, and should be opened deliberately instead of
+    # arriving on a schedule.
+    ignore:
+      - dependency-name: Silk.NET*
+        update-types: [version-update:semver-major]
