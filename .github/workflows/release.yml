@@ -50,14 +50,42 @@ jobs:
             '${{ github.ref_name }}'
           }
 
+          # The tag is the version. Without this the binary reports whatever is in the
+          # csproj no matter what it was tagged, so a release named v1.1.0 would contain
+          # an exe whose About panel and file properties both still said 1.0.0.
+          $version = $tag -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+') {
+            throw "tag '$tag' is not v<major>.<minor>.<patch>, so there is no version to build with"
+          }
+
           "tag=$tag"                            >> $env:GITHUB_OUTPUT
+          "version=$version"                    >> $env:GITHUB_OUTPUT
           "zip=baudacious-$tag-win-x64.zip"     >> $env:GITHUB_OUTPUT
 
       - name: Test
         run: dotnet test Baudacious.sln -c Release
 
       - name: Publish
-        run: dotnet publish src/Baudacious.App -c Release -p:PublishSingleFile=true -o dist
+        run: >
+          dotnet publish src/Baudacious.App -c Release
+          -p:PublishSingleFile=true
+          -p:Version=${{ steps.name.outputs.version }}
+          -o dist
+
+      # The About panel reads the assembly version, so if these disagree the binary is
+      # lying about which release it is.
+      - name: Check the binary agrees with the tag
+        shell: pwsh
+        run: |
+          $exe = (Get-Item dist/baudacious.exe).VersionInfo
+          $want = '${{ steps.name.outputs.version }}'
+
+          "file version:    $($exe.FileVersion)"
+          "product version: $($exe.ProductVersion)"
+
+          if ($exe.ProductVersion -notlike "$want*") {
+            throw "the exe reports $($exe.ProductVersion) but the tag says $want"
+          }
 
       # Ship both files or ship nothing. A single-file build has no assembly location for
       # Silk.NET's loader to look beside, so glfw3.dll travels separately and an archive

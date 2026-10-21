@@ -11,6 +11,8 @@
 
     <!-- Windows only, and honestly so: ConPTY is the whole hosting story. -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- What a local build reports. Releases override it from the tag, which is the
+         single source of truth: see .github/workflows/release.yml. -->
     <Version>1.0.0</Version>
     <Product>Baudacious</Product>
     <Description>A terminal with a baud rate.</Description>
