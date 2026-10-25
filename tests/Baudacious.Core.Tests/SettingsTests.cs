@@ -434,7 +434,10 @@ public class SettingsTemplateTests
         Assert.Equal(["baud", "framing"], ini.Keys("line"));
         Assert.Equal(["default", "fast-echo", "powershell-profile"], ini.Keys("shell"));
         Assert.Equal(
-            ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"],
+            [
+                "phosphor", "font", "font-scale", "cursor", "cursor-blink", "smooth-scroll",
+                "scrollback",
+            ],
             ini.Keys("display"));
         Assert.Equal(
             [

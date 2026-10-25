@@ -62,8 +62,9 @@ Three shells: `--shell pwsh` (default), `cmd`, or `wsl`. Name a distribution wit
 added in the settings file.
 
 Out of the box: **4800 baud 8N1**, green phosphor, unscii at 2x in a 100x30
-window, and the CRT pass on with a strong bloom, deep corners and a long
-phosphor tail. Curvature and the aperture grille are off. Every one of those is
+window, the CRT pass on with a strong bloom, deep corners and a long phosphor
+tail, and the screen scrolling smoothly at 20 lines a second. Curvature and the
+aperture grille are off. Every one of those is
 a `--flag`, a line in the settings file, and a key or a prompt command — and
 whatever you leave it set to is what it opens with next time.
 
@@ -107,6 +108,7 @@ any unambiguous abbreviation works, so `b 2400` is `baud 2400`.
 | `crt [on\|off]` | the CRT pass; bare toggles |
 | `crt <effect> <0-1>` | one effect: `bloom` `scanline` `vignette` `curvature` `mask` `persistence`. Tab lists them. Naming one turns the pass on |
 | `fastecho [on\|off]` | swap PowerShell's line editor for the console's |
+| `scroll <0-120\|off>` | smooth scroll speed in lines per second; `off` and `0` jump |
 | `session new <profile>` | another shell |
 | `about` | version, licence, and whose typefaces these are |
 | `help` | the list above |
@@ -136,6 +138,7 @@ Baudacious comes back the way it was closed. Baudacious writes only that file;
 | | `font-scale` | 1 to 8, whole numbers only |
 | | `cursor` | `block`, `underline`, `bar` |
 | | `cursor-blink` | Milliseconds; `0` for a steady cursor |
+| | `smooth-scroll` | Lines per second a scroll slides at; `0` jumps — see [smooth scrolling](#smooth-scrolling) |
 | | `scrollback` | Lines kept per session |
 | `[crt]` | `enabled` | The whole pass |
 | | `bloom` `scanline` `vignette` `curvature` `mask` `persistence` `ambient-glow` | Intensities: 0 to 1, except `bloom`, which is additive and runs to 4 — see [the CRT pass](#the-crt-pass) |
@@ -333,14 +336,58 @@ All six together cost **0.09 ms a frame** — 1.06 ms against a 16.67 ms budget 
 grid, magnified twice.
 
 Render stills without starting a session, which is how these numbers were measured.
-`--fade` presents blank frames through the same pass afterwards, which is the only way to
-see an effect that exists across frames rather than within one:
+`--fade` presents blank frames through the same pass afterwards, and `--mid-scroll` stops a
+smooth scroll part-way through a cell. Both exist for the same reason: they are the only way
+to see an effect that lives between frames rather than within one.
 
 ```
 baudacious shot --curvature 0.7 --mask 0.6 --magnify 3 --status --out frame.png
 baudacious shot --persistence 0.8 --fade 6 --out tail.png
+baudacious shot --mid-scroll 0.5 --status --out scrolling.png
 baudacious shot --bench --size 200x60 --magnify 2
 ```
+
+## Smooth scrolling
+
+A VT100 or VT220 could be told to scroll smoothly, DECSCLM, and instead of the screen
+jumping up a whole character cell when a line arrived, the raster slid up a couple of scan
+lines per refresh until it got there.
+
+It was also too slow. That worked out at about **six lines a second**, which is fine for
+watching one line arrive and infuriating for anything longer, and is why people turned it
+off. So it ships here faster and adjustable:
+
+```
+scroll 20        # the default, lines per second
+scroll 6         # what DEC actually shipped
+scroll off       # jump scroll, the same as 0
+```
+
+Also `--smooth-scroll <n>` and `[display] smooth-scroll` in the settings file. The range is
+0 to 120; past about two cells a frame there is nothing left to see.
+
+**Why 20.** Not a taste judgement: at the default 4800 baud the wire delivers about six
+lines a second, so at 20 the animation is never what you are waiting for, and it is three
+frames a line at 60 Hz, which is enough to read as motion. Raise the line rate far enough
+and the scroll stops being able to keep up — see below.
+
+**What happens when output outruns it.** A real terminal could smooth scroll honestly
+because it stopped accepting data while it scrolled. Baudacious will not do that: the baud
+rate is the whole point of the program, and a second thing throttling the same stream would
+make the number on the status bar a lie. So the animation is capped at one line behind, and
+past that the scroll snaps rather than falling further back. Nothing is delayed, dropped or
+reordered to let it keep up. The line rate is the promise; this is decoration over it.
+
+The status bar does not scroll, for the same reason it is not curved: it is chrome, and the
+one line that has to stay legible. Neither does the scrollback — paging back through history
+is navigation rather than a scroll, and animating it would just add lag to a key repeat.
+
+A program that asks for jump scroll by name, `CSI ? 4 l`, gets it whatever the setting says.
+Almost nothing asks, which is why the setting is where the real decision is made.
+
+It pairs with `persistence`: a smooth scroll moves every lit pixel on the screen every
+frame, which is exactly what phosphor persistence renders. Turning both up is the most
+tube-like this gets, and also the easiest way to decide they are both too high.
 
 ## Font scale
 

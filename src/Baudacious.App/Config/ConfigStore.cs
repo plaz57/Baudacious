@@ -37,6 +37,7 @@ public sealed class ConfigStore
         ("display", "phosphor"),
         ("display", "font"),
         ("display", "font-scale"),
+        ("display", "smooth-scroll"),
         ("crt", "enabled"),
         ("crt", "bloom"),
         ("crt", "scanline"),
@@ -172,6 +173,7 @@ public sealed class ConfigStore
             ini.Set("display", "phosphor", display.Phosphor.ToString().ToLowerInvariant());
             ini.Set("display", "font", settings.Font);
             ini.Set("display", "font-scale", display.FontScale.ToString(CultureInfo.InvariantCulture));
+            ini.Set("display", "smooth-scroll", Fraction(display.SmoothScroll));
             ini.Set("crt", "enabled", Bool(crt.Enabled));
             ini.Set("crt", "bloom", Fraction(crt.Bloom));
             ini.Set("crt", "scanline", Fraction(crt.Scanline));

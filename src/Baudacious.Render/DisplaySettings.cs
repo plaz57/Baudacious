@@ -1,3 +1,4 @@
+using Baudacious.Core.Commands;
 using Baudacious.Core.Terminal;
 
 namespace Baudacious.Render;
@@ -38,6 +39,12 @@ public sealed record DisplaySettings
     public TimeSpan CursorBlinkInterval { get; init; } = TimeSpan.FromMilliseconds(500);
 
     public TimeSpan TextBlinkInterval { get; init; } = TimeSpan.FromMilliseconds(750);
+
+    /// <summary>
+    /// Lines per second a scroll slides at, in the manner of DECSCLM. Zero is the jump
+    /// scroll, and renders identically to this feature not existing.
+    /// </summary>
+    public double SmoothScroll { get; init; } = SmoothScrollRate.Default;
 
     public CrtSettings Crt { get; init; } = new();
 }

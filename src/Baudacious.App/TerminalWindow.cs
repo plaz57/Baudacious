@@ -669,6 +669,53 @@ internal sealed class TerminalWindow : IDisposable
         _needsPresent = true;
     }
 
+    /// <summary>
+    /// Moves every session's scroll animation on by one frame.
+    /// </summary>
+    /// <remarks>
+    /// Every session, not only the visible one, for the same reason they all tick: a
+    /// background session goes on scrolling, and one that came back carrying a debt it
+    /// never drained would lurch on the frame it was switched to.
+    /// <para>
+    /// Nothing here can delay, drop or reorder output. The animation reads how far the
+    /// screen has scrolled and draws accordingly; if it cannot keep up, it gives up and
+    /// catches up, because the line rate is the promise and this is decoration over it.
+    /// </para>
+    /// </remarks>
+    private void AdvanceSmoothScroll(double delta)
+    {
+        var rate = _settings.SmoothScroll;
+        var cellHeight = _atlas.CellHeight;
+        var step = TimeSpan.FromSeconds(delta);
+
+        foreach (var session in _sessions)
+        {
+            var scrolled = session.Screen.ScrolledLines;
+            var lines = scrolled - session.ScrollWatermark;
+            session.ScrollWatermark = scrolled;
+
+            // Reading back through scrollback is navigation rather than a scroll, and a
+            // program that asked for jump scroll by name gets it whatever the rate says.
+            if (lines > 0
+                && rate > 0
+                && session.Emulator.SmoothScrollMode
+                && !session.Screen.IsScrolledBack)
+            {
+                session.Scroll.Scrolled(lines, cellHeight);
+            }
+
+            session.Scroll.Advance(step, rate, cellHeight);
+        }
+
+        // A scroll part-way through is a reason to draw the next frame, and a reason not
+        // to let the idle throttle sleep through the rest of it.
+        if (Current.Scroll.IsAnimating)
+        {
+            _needsPresent = true;
+            _idleSeconds = 0;
+        }
+    }
+
     private (int Columns, int Rows) GridFor(Vector2D<int> framebuffer)
     {
         var scale = Math.Max(1, _settings.FontScale);
@@ -711,6 +758,7 @@ internal sealed class TerminalWindow : IDisposable
         }
 
         ReapFinishedSessions();
+        AdvanceSmoothScroll(delta);
 
         // A blinking cursor is a reason to repaint even when nothing arrived.
         if (_settings.CursorBlink && Current.Screen.CursorVisible)
@@ -727,7 +775,8 @@ internal sealed class TerminalWindow : IDisposable
         {
             var (status, caret) = StatusView();
             _renderer.RenderToTarget(
-                Current.Screen, _settings, _clock.Elapsed, status, Current.Selection, Overlay(), caret);
+                Current.Screen, _settings, _clock.Elapsed, status, Current.Selection, Overlay(), caret,
+                Current.Scroll.Offset);
             _renderer.Present(_window.FramebufferSize.X, _window.FramebufferSize.Y, _settings);
             _window.Title = BuildTitle();
             _needsPresent = false;
@@ -1963,6 +2012,24 @@ internal sealed class TerminalWindow : IDisposable
 
                 Finish(string.Create(
                     CultureInfo.InvariantCulture, $"{level.Effect} {level.Value:0.##}"));
+                return;
+
+            case LocalCommand.SetSmoothScroll scroll:
+                _settings = _settings with { SmoothScroll = scroll.LinesPerSecond };
+
+                // Whatever was part-way through belongs to the old rate. At zero there is
+                // nothing left to animate, and at a new rate the remaining distance would
+                // be covered at a speed nobody asked for.
+                foreach (var session in _sessions)
+                {
+                    session.Scroll.Reset();
+                }
+
+                Finish(scroll.LinesPerSecond <= 0
+                    ? "jump scroll"
+                    : string.Create(
+                        CultureInfo.InvariantCulture,
+                        $"smooth scroll, {scroll.LinesPerSecond:0.##} lines/sec"));
                 return;
 
             case LocalCommand.NewSession fresh:

@@ -28,6 +28,18 @@ public sealed class TerminalEmulator : IVtHandler
     /// <summary>Set by mode 2004. Paste is framed in markers when on.</summary>
     public bool BracketedPaste { get; private set; }
 
+    /// <summary>
+    /// DECSCLM: whether the program has asked for smooth scrolling rather than jump
+    /// scrolling.
+    /// </summary>
+    /// <remarks>
+    /// On by default, which is the opposite of the hardware, because here the opt-in is
+    /// the user's configured rate rather than the mode. The mode is a veto: a program that
+    /// explicitly asks for jump scroll with <c>CSI ? 4 l</c> gets it whatever the rate is,
+    /// and anything else leaves the choice where the user made it.
+    /// </remarks>
+    public bool SmoothScrollMode { get; private set; } = true;
+
     /// <summary>Which mouse events, if any, the program wants reported.</summary>
     public MouseTracking MouseTracking { get; private set; }
 
@@ -104,6 +116,7 @@ public sealed class TerminalEmulator : IVtHandler
 
             case 'c':
                 Screen.HardReset();
+                SmoothScrollMode = true;
                 break;
 
             default:
@@ -275,6 +288,12 @@ public sealed class TerminalEmulator : IVtHandler
                     Screen.AutoWrap = enabled;
                     break;
 
+                // DECSCLM. Not to be confused with the SGR 4 that means underline: that
+                // one arrives without the private marker and is handled elsewhere.
+                case 4:
+                    SmoothScrollMode = enabled;
+                    break;
+
                 case 25:
                     Screen.CursorVisible = enabled;
                     break;
@@ -372,6 +391,7 @@ public sealed class TerminalEmulator : IVtHandler
         Screen.Pen = Cell.Blank(Palette.DefaultForeground, Palette.DefaultBackground);
         ApplicationCursorKeys = false;
         BracketedPaste = false;
+        SmoothScrollMode = true;
         MouseTracking = MouseTracking.Off;
         MouseEncoding = MouseEncoding.Legacy;
     }

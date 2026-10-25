@@ -86,6 +86,9 @@ public sealed class TextRenderer : IDisposable
         CursorBlock = 1 << 2,
         CursorUnderline = 1 << 3,
         CursorBar = 1 << 4,
+
+        /// <summary>Chrome: drawn where it belongs even while the grid is sliding past.</summary>
+        Fixed = 1 << 5,
     }
 
     // ---- Setup ---------------------------------------------------------------
@@ -101,6 +104,7 @@ public sealed class TextRenderer : IDisposable
         uniform vec2 uGridSize;      // columns, rows
         uniform vec2 uCellSize;      // glyph width, height in texels
         uniform vec2 uAtlasSize;     // atlas texture size in texels
+        uniform float uScrollLift;   // texels the grid is lifted by, mid-scroll
 
         out vec2 vAtlasUv;
         out vec2 vCellUv;
@@ -122,6 +126,14 @@ public sealed class TextRenderer : IDisposable
 
             // Cell space to clip space, with y running downwards as the grid does.
             vec2 pixel = (vec2(cellX, cellY) + aCorner) * uCellSize;
+
+            // A smooth scroll lifts the whole grid by a fraction of a cell. The status bar
+            // and any overlay are flagged fixed and stay where they are, which is also what
+            // hides the row sliding up out of the bar's band.
+            if ((aGlyphAndFlags & 32u) == 0u) {
+                pixel.y -= uScrollLift;
+            }
+
             vec2 ndc = (pixel / (uGridSize * uCellSize)) * 2.0 - 1.0;
             gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
 
@@ -430,15 +442,24 @@ public sealed class TextRenderer : IDisposable
         string? status = null,
         Selection? selection = null,
         IReadOnlyList<string>? overlay = null,
-        int statusCaret = -1)
+        int statusCaret = -1,
+        double scrollOffset = 0)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
 
+        // Only ever one row behind: that is all the overscan there is to draw with.
+        scrollOffset = Math.Clamp(scrollOffset, 0, _atlas.CellHeight);
+
         var totalRows = screen.RowCount + (status is null ? 0 : 1);
         _statusRowHeight = status is null ? 0 : _atlas.CellHeight;
         ResizeTarget(screen.Columns, totalRows);
-        BuildInstances(screen, settings, elapsed, status, selection, overlay, statusCaret);
+
+        // BuildInstances has the last word: without the row that left the top there is
+        // nothing to fill the space a scroll opens, and sliding a blank band down the
+        // screen is worse than not animating at all.
+        var lift = BuildInstances(
+            screen, settings, elapsed, status, selection, overlay, statusCaret, scrollOffset);
 
         _gl.BindFramebuffer(FramebufferTarget.Framebuffer, _framebuffer);
         _gl.Viewport(0, 0, (uint)_targetWidth, (uint)_targetHeight);
@@ -472,6 +493,7 @@ public sealed class TextRenderer : IDisposable
         _gl.Uniform2(_gl.GetUniformLocation(_program, "uGridSize"), (float)screen.Columns, (float)totalRows);
         _gl.Uniform2(_gl.GetUniformLocation(_program, "uCellSize"), (float)_atlas.CellWidth, (float)_atlas.CellHeight);
         _gl.Uniform2(_gl.GetUniformLocation(_program, "uAtlasSize"), (float)_atlas.Width, (float)_atlas.Height);
+        _gl.Uniform1(_gl.GetUniformLocation(_program, "uScrollLift"), (float)lift);
 
         _gl.DrawArraysInstanced(PrimitiveType.Triangles, 0, 6, (uint)_instanceCount);
 
@@ -558,16 +580,28 @@ public sealed class TextRenderer : IDisposable
         return ((float)(r * 0.02), (float)(g * 0.02), (float)(b * 0.02));
     }
 
-    private void BuildInstances(
+    /// <param name="behind">
+    /// How far behind the screen the image should be drawn, in pixels, at most one cell.
+    /// A full cell is the instant the line arrived and zero is settled.
+    /// </param>
+    /// <returns>
+    /// Pixels to lift the grid by, which is the complement of what was asked for: the rows
+    /// are emitted one place lower, so the lift is what cancels that as the scroll lands.
+    /// Zero when there is no scroll to draw, leaving the grid exactly where it always was.
+    /// </returns>
+    private double BuildInstances(
         Screen screen,
         DisplaySettings settings,
         TimeSpan elapsed,
         string? status,
         Selection? selection,
         IReadOnlyList<string>? overlay,
-        int statusCaret)
+        int statusCaret,
+        double behind)
     {
-        var needed = (screen.Columns * (screen.RowCount + 1)) + (screen.Columns * screen.RowCount);
+        // The grid, plus the overscan row a scroll needs, plus the status row, plus an
+        // overlay that can cover the grid entirely.
+        var needed = (screen.Columns * (screen.RowCount + 2)) + (screen.Columns * screen.RowCount);
         if (_instances.Length < needed)
         {
             _instances = new Instance[needed];
@@ -582,6 +616,22 @@ public sealed class TextRenderer : IDisposable
                 || (long)(elapsed.TotalMilliseconds / settings.CursorBlinkInterval.TotalMilliseconds) % 2 == 0);
 
         var count = 0;
+
+        // Mid-scroll the grid is drawn one row lower and lifted by a fraction of a cell by
+        // the shader, with the row that just left the top filling the space that opens
+        // above. The bottom row lands in the status bar's band and the bar covers it.
+        var shift = 0u;
+        var lift = 0.0;
+
+        if (behind > 0
+            && screen.TryGetAbsoluteRow(screen.AbsoluteRowOf(0) - 1, out var departing))
+        {
+            count = AppendRow(departing, screen.Columns, 0, settings, count);
+            shift = 1;
+
+            lift = SmoothScroll.LiftFor(behind, _atlas.CellHeight);
+        }
+
         for (var row = 0; row < screen.RowCount; row++)
         {
             for (var column = 0; column < screen.Columns; column++)
@@ -625,7 +675,7 @@ public sealed class TextRenderer : IDisposable
 
                 _instances[count++] = new Instance
                 {
-                    Position = ((uint)column << 16) | (uint)row,
+                    Position = ((uint)column << 16) | ((uint)row + shift),
                     Foreground = foreground,
                     Background = background,
                     GlyphAndFlags = ((uint)glyph << 16) | (uint)flags,
@@ -645,6 +695,51 @@ public sealed class TextRenderer : IDisposable
         }
 
         _instanceCount = count;
+        return lift;
+    }
+
+    /// <summary>
+    /// Emits one row of a <see cref="Row"/> at a given cell row, with no cursor and no
+    /// selection.
+    /// </summary>
+    /// <remarks>
+    /// Only the row sliding off the top during a smooth scroll uses this. It has already
+    /// left the viewport, so nothing that belongs to the live screen applies to it: the
+    /// cursor is not on it, and a selection drawn across it would move while it slid.
+    /// </remarks>
+    private int AppendRow(
+        Row source, int columns, int cellRow, DisplaySettings settings, int count)
+    {
+        // A short row simply stops. The target was cleared to the background already, so
+        // the remaining columns are the screen colour rather than a run of NUL glyphs.
+        var width = Math.Min(columns, source.Cells.Length);
+
+        for (var column = 0; column < width && count < _instances.Length; column++)
+        {
+            var cell = source.Cells[column];
+            var (foreground, background) = PhosphorMap.Resolve(cell, settings.Phosphor);
+
+            var flags = DrawFlags.None;
+            if (cell.Flags.HasFlag(CellFlags.Underline))
+            {
+                flags |= DrawFlags.Underline;
+            }
+
+            if (cell.Flags.HasFlag(CellFlags.Strikethrough))
+            {
+                flags |= DrawFlags.Strikethrough;
+            }
+
+            _instances[count++] = new Instance
+            {
+                Position = ((uint)column << 16) | (uint)cellRow,
+                Foreground = foreground,
+                Background = background,
+                GlyphAndFlags = ((uint)Cp437.IndexOf(cell.Rune) << 16) | (uint)flags,
+            };
+        }
+
+        return count;
     }
 
     /// <summary>
@@ -687,7 +782,7 @@ public sealed class TextRenderer : IDisposable
                     Position = ((uint)(left + column) << 16) | (uint)(top + row),
                     Foreground = edge ? Dim(lit.Foreground, 0.55) : lit.Foreground,
                     Background = ground,
-                    GlyphAndFlags = (uint)Cp437.IndexOf(character) << 16,
+                    GlyphAndFlags = ((uint)Cp437.IndexOf(character) << 16) | (uint)DrawFlags.Fixed,
                 };
             }
         }
@@ -733,7 +828,7 @@ public sealed class TextRenderer : IDisposable
                 Position = ((uint)column << 16) | (uint)row,
                 Foreground = onCaret ? background : foreground,
                 Background = onCaret ? foreground : background,
-                GlyphAndFlags = (uint)Cp437.IndexOf(character) << 16,
+                GlyphAndFlags = ((uint)Cp437.IndexOf(character) << 16) | (uint)DrawFlags.Fixed,
             };
         }
 

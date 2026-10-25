@@ -124,6 +124,13 @@ static int RunWindow(string[] args)
                 options = Crt(options, c => c with { Persistence = persistence });
                 break;
 
+            case "--smooth-scroll" when i + 1 < args.Length:
+                var scroll = double.TryParse(args[++i], CultureInfo.InvariantCulture, out var lines)
+                    ? SmoothScrollRate.Clamp(lines)
+                    : SmoothScrollRate.Off;
+                options = options with { Display = options.Display with { SmoothScroll = scroll } };
+                break;
+
             case "-h" or "--help":
                 return Help();
 
@@ -182,6 +189,7 @@ static int Help()
                 --curvature <n>             screen bulge; 0 is flat glass
                 --mask <n>                  aperture-grille stripes; 0 is none
                 --persistence <n>           how long light lingers; 0 is none
+                --smooth-scroll <n>         scroll speed in lines/sec; 0 jumps
                 --settings <directory>      read baudacious.ini and state.ini from here
                                             instead of %APPDATA%\Baudacious
 

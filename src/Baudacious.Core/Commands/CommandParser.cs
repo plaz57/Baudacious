@@ -40,6 +40,7 @@ public static class CommandParser
             "fontsize" => ParseFontSize(arguments),
             "crt" => ParseCrt(arguments, "crt"),
             "fastecho" => ParseFastEcho(arguments),
+            "scroll" => ParseScroll(arguments),
             "session" => ParseSession(arguments, vocabulary),
             "about" => NoArguments(arguments, verb) ?? new LocalCommand.ShowAbout(),
             "help" => NoArguments(arguments, verb) ?? new LocalCommand.ShowHelp(),
@@ -220,6 +221,41 @@ public static class CommandParser
 
         var (on, failure) = ParseSwitch(arguments, verb);
         return failure ?? new LocalCommand.SetCrt(on);
+    }
+
+    /// <summary>
+    /// The smooth scroll rate, in lines per second.
+    /// </summary>
+    /// <remarks>
+    /// Bare <c>scroll</c> is not a toggle. Off and on are not symmetric here: switching it
+    /// off is one value and switching it back on needs a rate, and a toggle that guessed
+    /// which rate you meant would be wrong as often as not. <c>off</c> is spelt out, and
+    /// is the same thing as 0.
+    /// </remarks>
+    private static LocalCommand ParseScroll(List<string> arguments)
+    {
+        var range = string.Create(
+            CultureInfo.InvariantCulture, $"0-{SmoothScrollRate.Ceiling:0.##}");
+
+        if (arguments.Count != 1)
+        {
+            return new LocalCommand.Failed($"scroll <{range}|off>");
+        }
+
+        if ("off".Equals(arguments[0], StringComparison.OrdinalIgnoreCase))
+        {
+            return new LocalCommand.SetSmoothScroll(SmoothScrollRate.Off);
+        }
+
+        if (!double.TryParse(arguments[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var rate))
+        {
+            return new LocalCommand.Failed($"'{arguments[0]}' is not a number");
+        }
+
+        // Refused rather than clamped, as everywhere else a range is stated.
+        return rate >= SmoothScrollRate.Off && rate <= SmoothScrollRate.Ceiling
+            ? new LocalCommand.SetSmoothScroll(rate)
+            : new LocalCommand.Failed($"scroll is {range}; {arguments[0]} is outside it");
     }
 
     private static LocalCommand ParseFastEcho(List<string> arguments)

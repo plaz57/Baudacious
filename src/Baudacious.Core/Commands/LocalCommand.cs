@@ -49,6 +49,11 @@ public abstract record LocalCommand
     /// <summary>Null means toggle, as with <see cref="SetCrt"/>.</summary>
     public sealed record SetFastEcho(bool? On) : LocalCommand;
 
+    /// <summary>
+    /// How fast a scroll slides, in lines per second. Zero is the jump scroll.
+    /// </summary>
+    public sealed record SetSmoothScroll(double LinesPerSecond) : LocalCommand;
+
     public sealed record NewSession(string Profile) : LocalCommand;
 
     public sealed record ShowHelp : LocalCommand;

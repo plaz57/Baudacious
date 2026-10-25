@@ -19,6 +19,10 @@ public static class CommandCompleter
     private static readonly string[] Framings = ["8N1", "7E1", "8N2", "8E1"];
     private static readonly string[] OnOff = ["on", "off"];
 
+    // Not every rate, just the ones worth reaching for: off, what DEC shipped, the
+    // default, and fast enough to be nearly a jump.
+    private static readonly string[] ScrollRates = ["off", "6", "12", "20", "40", "80"];
+
     public static Completion Complete(string line, int caret, CommandVocabulary vocabulary)
     {
         ArgumentNullException.ThrowIfNull(line);
@@ -89,6 +93,7 @@ public static class CommandCompleter
                 "font" => vocabulary.Fonts,
                 "crt" => [.. OnOff, .. CrtEffect.Names],
                 "fastecho" => OnOff,
+                "scroll" => ScrollRates,
                 "fontsize" => FontSizes(),
                 "session" => ["new"],
                 _ => [],

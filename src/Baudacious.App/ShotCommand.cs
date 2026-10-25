@@ -28,6 +28,7 @@ internal static class ShotCommand
         double? bloom = null, scanline = null, vignette = null, curvature = null, mask = null;
         double? persistence = null;
         var fade = 0;
+        var midScroll = 0.0;
         var status = false;
 
         for (var i = 0; i < args.Length; i++)
@@ -48,6 +49,17 @@ internal static class ShotCommand
 
                 case "--bench":
                     bench = true;
+                    break;
+
+                case "--mid-scroll" when i + 1 < args.Length:
+                    if (!double.TryParse(args[++i], CultureInfo.InvariantCulture, out midScroll)
+                        || midScroll < 0 || midScroll > 1)
+                    {
+                        Console.Error.WriteLine(
+                            $"--mid-scroll wants a fraction of a cell from 0 to 1, not '{args[i]}'");
+                        return 1;
+                    }
+
                     break;
 
                 case "--fade" when i + 1 < args.Length:
@@ -179,7 +191,8 @@ internal static class ShotCommand
                 ? " 1200 8N1  [idle]  alt+B rate  alt+F flush  ctrl+] commands"
                 : null,
             overlay: overlay ? Help.For(ConfigStore.DefaultDirectory()) : null,
-            fadeFrames: fade);
+            fadeFrames: fade,
+            scrollFraction: midScroll);
 
         Console.Error.WriteLine(string.Create(
             CultureInfo.InvariantCulture,

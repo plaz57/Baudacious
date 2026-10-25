@@ -14,7 +14,7 @@ public sealed record CommandVocabulary
     public static readonly string[] Verbs =
     [
         "baud", "framing", "flush", "phosphor", "font", "fontsize", "crt", "fastecho",
-        "session",
+        "scroll", "session",
         "about", "help", "quit",
     ];
 
@@ -29,6 +29,7 @@ public sealed record CommandVocabulary
         "fontsize <1-8>          magnification of the 8x16 cell",
         "crt [on|off|<eff> 0-1]  the pass, or one effect; tab lists",
         "fastecho [on|off]       cheap line editing; bare toggles",
+        "scroll <0-120>          smooth scroll, lines/sec; 0 jumps",
         "session new <profile>   a second shell",
         "about                   version, licence, typeface",
         "help                    this list",

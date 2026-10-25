@@ -213,6 +213,32 @@ public sealed class ConfigStoreTests : IDisposable
     }
 
     [Fact]
+    public void TheSmoothScrollRateSurvivesARestart()
+    {
+        var store = ConfigStore.Load(_directory);
+        store.SaveState(store.Settings with
+        {
+            Display = store.Settings.Display with { SmoothScroll = 7.5 },
+        });
+
+        Assert.Equal(7.5, ConfigStore.Load(_directory).Settings.Display.SmoothScroll);
+    }
+
+    [Fact]
+    public void JumpScrollIsSavedAsAChoiceRatherThanAnAbsence()
+    {
+        // Zero is a setting, not a default. If it round-tripped as "nothing written" the
+        // state would quietly hand the feature back on the next run.
+        var store = ConfigStore.Load(_directory);
+        store.SaveState(store.Settings with
+        {
+            Display = store.Settings.Display with { SmoothScroll = 0 },
+        });
+
+        Assert.Equal(0, ConfigStore.Load(_directory).Settings.Display.SmoothScroll);
+    }
+
+    [Fact]
     public void AFirstReadIsNotMistakenForAnEdit()
     {
         // Every setting in the file differs from "nothing read yet"; counting that as an

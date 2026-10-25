@@ -311,6 +311,46 @@ public class CommandParserTests
     }
 
     [Fact]
+    public void ScrollTakesARateOrTheWordOff()
+    {
+        Assert.Equal(
+            20,
+            Assert.IsType<LocalCommand.SetSmoothScroll>(
+                CommandParser.Parse("scroll 20", Vocabulary)).LinesPerSecond);
+
+        Assert.Equal(
+            SmoothScrollRate.Off,
+            Assert.IsType<LocalCommand.SetSmoothScroll>(
+                CommandParser.Parse("scroll off", Vocabulary)).LinesPerSecond);
+
+        Assert.Equal(
+            SmoothScrollRate.Off,
+            Assert.IsType<LocalCommand.SetSmoothScroll>(
+                CommandParser.Parse("scroll 0", Vocabulary)).LinesPerSecond);
+    }
+
+    [Fact]
+    public void ScrollRefusesRatherThanClamps()
+    {
+        // Stated range, refused value: the same bargain every other setting makes, so a
+        // typo is told about instead of quietly becoming the nearest legal thing.
+        var failure = Assert.IsType<LocalCommand.Failed>(
+            CommandParser.Parse("scroll 10000", Vocabulary));
+        Assert.Contains("outside", failure.Message, StringComparison.Ordinal);
+
+        Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("scroll -1", Vocabulary));
+        Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("scroll briskly", Vocabulary));
+    }
+
+    [Fact]
+    public void BareScrollAsksForARate()
+    {
+        // Deliberately not a toggle: switching it back on needs a number, and guessing
+        // which one would be wrong about as often as not.
+        Assert.IsType<LocalCommand.Failed>(CommandParser.Parse("scroll", Vocabulary));
+    }
+
+    [Fact]
     public void EveryVerbHasExactlyOneLineOfHelp()
     {
         Assert.Equal(CommandVocabulary.Verbs.Length, CommandVocabulary.Usage.Length);

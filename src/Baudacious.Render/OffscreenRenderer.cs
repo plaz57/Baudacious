@@ -29,7 +29,8 @@ public static class OffscreenRenderer
         int magnify = 1,
         string? status = null,
         IReadOnlyList<string>? overlay = null,
-        int fadeFrames = 0)
+        int fadeFrames = 0,
+        double scrollFraction = 0)
     {
         ArgumentNullException.ThrowIfNull(screen);
         ArgumentNullException.ThrowIfNull(settings);
@@ -53,7 +54,15 @@ public static class OffscreenRenderer
         var atlas = GlyphAtlas.Build();
 
         using var renderer = new TextRenderer(gl, atlas);
-        renderer.RenderToTarget(screen, settings, TimeSpan.Zero, status, selection: null, overlay: overlay);
+
+        // A smooth scroll only exists between two frames, so a still can only show it by
+        // being told where in the slide to stop. The fraction is of a cell, which is why
+        // it is converted here rather than asked for in pixels: the caller has no business
+        // knowing how tall the atlas is.
+        renderer.RenderToTarget(
+            screen, settings, TimeSpan.Zero, status, selection: null, overlay: overlay,
+            statusCaret: -1,
+            scrollOffset: Math.Clamp(scrollFraction, 0, 1) * atlas.CellHeight);
 
         // Capture what would reach the screen, not the text target: the CRT pass runs at
         // output resolution, so a frame read back before it would show none of it.

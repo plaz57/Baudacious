@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Baudacious.Core.Commands;
 using Baudacious.Render;
 
 namespace Baudacious.App.Config;
@@ -80,6 +81,13 @@ public static class SettingsTemplate
         Line();
         Line("; Milliseconds between cursor blinks; 0 for a steady cursor.");
         Line(Number("cursor-blink", (int)d.Display.CursorBlinkInterval.TotalMilliseconds));
+        Line();
+        Line("; Lines per second a scroll slides at, the way DECSCLM did on a VT220;");
+        Line("; 0 jumps a whole line at once, the way everything since has. The hardware");
+        Line($"; managed about {SmoothScrollRate.Period:0}, which was authentic and which everybody switched");
+        Line("; off. The default is set so the scroll is never what you are waiting for at");
+        Line("; the default line rate.");
+        Line(Number("smooth-scroll", (int)d.Display.SmoothScroll));
         Line();
         Line("; Lines of history kept per session.");
         Line(Number("scrollback", d.Scrollback));

@@ -4,6 +4,7 @@ using Baudacious.Core.Baud;
 using Baudacious.Core.Terminal;
 using Baudacious.Core.Timing;
 using Baudacious.Pty;
+using Baudacious.Render;
 
 namespace Baudacious.App;
 
@@ -68,6 +69,15 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
     public VtParser Parser { get; }
 
     public BaudGovernor Governor { get; }
+
+    /// <summary>How far behind the screen this session's image is, mid smooth scroll.</summary>
+    public SmoothScroll Scroll { get; } = new();
+
+    /// <summary>
+    /// The value of <see cref="Screen.ScrolledLines"/> the animator has already accounted
+    /// for. The difference each frame is how many lines there are to slide.
+    /// </summary>
+    public long ScrollWatermark { get; set; }
 
     /// <summary>Whatever the shell last set by OSC, or empty.</summary>
     public string Title { get; private set; } = string.Empty;
@@ -174,6 +184,12 @@ internal sealed class TerminalSession : IPtyOutputSink, ITerminalHost, IDisposab
         // reordered by either step.
         Screen.Resize(columns, rows);
         _pty?.Resize((short)columns, (short)rows);
+
+        // A scroll offset is measured in the pixels of the grid it started in, and reflow
+        // can push rows into scrollback on its own. Both make the animation in progress
+        // and the line it was counting from meaningless, so start again from here.
+        Scroll.Reset();
+        ScrollWatermark = Screen.ScrolledLines;
     }
 
     /// <summary>Releases whatever the rate allows and parses it. Returns the bytes released.</summary>

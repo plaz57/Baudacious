@@ -32,10 +32,11 @@ erase in display and line (ED, EL), insert and delete lines and characters
 (IL, DL, ICH, DCH, ECH), scroll region definition (DECSTBM), scroll up and down
 (SU, SD), index and reverse index (IND, RI, NEL), SGR attributes including the
 16 base colors, the bright set, 256-color indexed and 24-bit truecolor forms,
-autowrap mode (DECAWM), cursor visibility (DECTCEM), the alternate screen
-buffer (private modes 1047, 1048, 1049), bracketed paste mode (2004), tab set
-and clear (HTS, TBC) with cursor forward tabulation, device status and identity
-reports (DSR, DA), soft and hard reset (DECSTR, RIS), and OSC 0/2 window title.
+autowrap mode (DECAWM), smooth scroll mode (DECSCLM), cursor visibility
+(DECTCEM), the alternate screen buffer (private modes 1047, 1048, 1049),
+bracketed paste mode (2004), tab set and clear (HTS, TBC) with cursor forward
+tabulation, device status and identity reports (DSR, DA), soft and hard reset
+(DECSTR, RIS), and OSC 0/2 window title.
 
 #### Scenario: Absolute cursor addressing
 
@@ -57,6 +58,18 @@ reports (DSR, DA), soft and hard reset (DECSTR, RIS), and OSC 0/2 window title.
 
 - **WHEN** a scroll region of rows 5 through 10 is set and text scrolls at row 10
 - **THEN** only rows 5 through 10 shift and rows outside the region are untouched
+
+#### Scenario: Smooth scroll mode
+
+- **WHEN** a program sends `ESC [ ? 4 l` and later `ESC [ ? 4 h`
+- **THEN** the emulator first records that jump scrolling was demanded and then
+  that the demand was withdrawn, and a soft or hard reset withdraws it too
+
+#### Scenario: The mode is not the SGR attribute
+
+- **WHEN** the sequence `ESC [ 4 m` is interpreted
+- **THEN** subsequent cells are underlined and the smooth scroll mode is
+  unchanged
 
 ### Requirement: Unrecognised sequences are consumed silently
 

@@ -45,7 +45,8 @@ public static class SettingsReader
     [
         ("line", ["baud", "framing"]),
         ("shell", ["default", "fast-echo", "powershell-profile"]),
-        ("display", ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "scrollback"]),
+        ("display",
+            ["phosphor", "font", "font-scale", "cursor", "cursor-blink", "smooth-scroll", "scrollback"]),
         ("crt",
             [
                 "enabled", "bloom", "scanline", "vignette", "curvature", "mask",
@@ -250,6 +251,9 @@ public static class SettingsReader
                 // means turning blink back on restores the rate it had.
                 CursorBlink = blink > 0,
                 CursorBlinkInterval = blink > 0 ? TimeSpan.FromMilliseconds(blink) : current.CursorBlinkInterval,
+
+                SmoothScroll = Fraction(
+                    "display", "smooth-scroll", current.SmoothScroll, SmoothScrollRate.Ceiling),
 
                 Crt = current.Crt with
                 {
